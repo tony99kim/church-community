@@ -244,7 +244,10 @@ export default function PostDetailPage() {
 
           {/* 본문 */}
           <div className="px-6 py-6">
-            <div className="text-gray-800 leading-loose whitespace-pre-wrap text-sm min-h-[120px]">{post.content}</div>
+            <div
+              className="text-gray-800 leading-loose text-sm min-h-[120px] prose prose-sm max-w-none prose-img:rounded-xl prose-img:my-3"
+              dangerouslySetInnerHTML={{ __html: post.content ?? '' }}
+            />
           </div>
 
           {/* 좋아요 */}

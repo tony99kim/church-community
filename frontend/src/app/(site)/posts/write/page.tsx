@@ -1,23 +1,26 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
+import { uploadImage } from '@/lib/supabase';
 
-interface Category {
-  id: number;
-  name: string;
-}
+const RichEditor = dynamic(() => import('@/components/RichEditor'), { ssr: false });
+
+interface Category { id: number; name: string; }
 
 export default function WritePostPage() {
   const router = useRouter();
   const { isLoggedIn, hydrated } = useAuthStore();
   const [categories, setCategories] = useState<Category[]>([]);
-  const [form, setForm] = useState({ title: '', content: '', categoryId: '' });
+  const [form, setForm] = useState({ title: '', content: '', categoryId: '', thumbnailUrl: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [thumbUploading, setThumbUploading] = useState(false);
+  const thumbRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!hydrated) return;
@@ -27,6 +30,21 @@ export default function WritePostPage() {
       if (res.data.data.length > 0) setForm((f) => ({ ...f, categoryId: String(res.data.data[0].id) }));
     });
   }, [hydrated, isLoggedIn]);
+
+  const handleThumb = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setThumbUploading(true);
+    try {
+      const url = await uploadImage(file);
+      setForm((f) => ({ ...f, thumbnailUrl: url }));
+    } catch {
+      alert('썸네일 업로드에 실패했습니다.');
+    } finally {
+      setThumbUploading(false);
+      e.target.value = '';
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,7 +73,6 @@ export default function WritePostPage() {
 
         <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
           <form onSubmit={handleSubmit}>
-            {/* 카테고리 + 제목 */}
             <div className="px-6 pt-6 pb-4 border-b border-gray-100 space-y-4">
               <div className="flex items-center gap-3">
                 <label className="text-sm font-semibold text-gray-700 w-16 shrink-0">카테고리</label>
@@ -79,36 +96,49 @@ export default function WritePostPage() {
                   required
                 />
               </div>
+
+              {/* 썸네일 */}
+              <div className="flex items-start gap-3">
+                <label className="text-sm font-semibold text-gray-700 w-16 shrink-0 pt-1">썸네일</label>
+                <div className="flex items-center gap-3">
+                  {form.thumbnailUrl && (
+                    <div className="relative w-20 h-14 rounded-lg overflow-hidden border border-gray-200">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={form.thumbnailUrl} alt="썸네일" className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => setForm((f) => ({ ...f, thumbnailUrl: '' }))}
+                        className="absolute top-0.5 right-0.5 w-4 h-4 bg-black/50 text-white rounded-full text-[10px] flex items-center justify-center"
+                      >×</button>
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => thumbRef.current?.click()}
+                    disabled={thumbUploading}
+                    className="text-xs text-gray-500 border border-dashed border-gray-300 rounded-lg px-3 py-2 hover:border-[#003478] hover:text-[#003478] transition disabled:opacity-50"
+                  >
+                    {thumbUploading ? '업로드 중...' : '+ 이미지 선택'}
+                  </button>
+                  <input ref={thumbRef} type="file" accept="image/*" className="hidden" onChange={handleThumb} />
+                </div>
+              </div>
             </div>
 
-            {/* 본문 */}
-            <div className="px-6 py-4">
-              <textarea
-                value={form.content}
-                onChange={(e) => setForm({ ...form, content: e.target.value })}
-                placeholder="내용을 입력하세요..."
-                rows={18}
-                className="w-full border-0 text-sm text-gray-800 leading-loose focus:outline-none resize-none placeholder-gray-300"
-                required
-              />
-            </div>
+            {/* 본문 에디터 */}
+            <RichEditor
+              content={form.content}
+              onChange={(html) => setForm((f) => ({ ...f, content: html }))}
+              placeholder="내용을 입력하세요..."
+            />
 
-            {/* 하단 버튼 */}
             <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex items-center justify-between">
               {error && <p className="text-sm text-red-500">{error}</p>}
               <div className="flex gap-2 ml-auto">
-                <button
-                  type="button"
-                  onClick={() => router.back()}
-                  className="px-5 py-2.5 text-sm text-gray-600 border border-gray-300 rounded-xl hover:bg-gray-100 transition"
-                >
+                <button type="button" onClick={() => router.back()} className="px-5 py-2.5 text-sm text-gray-600 border border-gray-300 rounded-xl hover:bg-gray-100 transition">
                   취소
                 </button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="px-6 py-2.5 text-sm bg-[#003478] text-white rounded-xl font-semibold hover:bg-blue-900 disabled:opacity-50 transition"
-                >
+                <button type="submit" disabled={loading} className="px-6 py-2.5 text-sm bg-[#003478] text-white rounded-xl font-semibold hover:bg-blue-900 disabled:opacity-50 transition">
                   {loading ? '등록 중...' : '등록하기'}
                 </button>
               </div>

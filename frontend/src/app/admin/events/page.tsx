@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import api from '@/lib/api';
 import type { Event } from '@/types';
+import { uploadImage } from '@/lib/supabase';
 
 const STATUS_LABEL: Record<string, string> = {
   UPCOMING: '예정', ONGOING: '진행 중', ENDED: '종료', CANCELLED: '취소',
@@ -20,6 +21,8 @@ export default function AdminEventsPage() {
   const [form, setForm] = useState({ ...EMPTY_FORM });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [thumbUploading, setThumbUploading] = useState(false);
+  const thumbRef = useRef<HTMLInputElement>(null);
 
   const fetchEvents = () =>
     api.get('/events', { params: { page: 0, size: 50 } })
@@ -27,6 +30,21 @@ export default function AdminEventsPage() {
       .finally(() => setLoading(false));
 
   useEffect(() => { fetchEvents(); }, []);
+
+  const handleThumb = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setThumbUploading(true);
+    try {
+      const url = await uploadImage(file);
+      setForm((f) => ({ ...f, thumbnailUrl: url }));
+    } catch {
+      alert('썸네일 업로드에 실패했습니다.');
+    } finally {
+      setThumbUploading(false);
+      e.target.value = '';
+    }
+  };
 
   const openCreate = () => { setEditId(null); setForm({ ...EMPTY_FORM }); setShowForm(true); };
   const openEdit = (e: Event) => {
@@ -103,6 +121,33 @@ export default function AdminEventsPage() {
                   />
                 </div>
               ))}
+              {/* 썸네일 */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">썸네일 이미지</label>
+                <div className="flex items-center gap-3">
+                  {form.thumbnailUrl && (
+                    <div className="relative w-20 h-14 rounded-lg overflow-hidden border border-gray-200">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={form.thumbnailUrl} alt="썸네일" className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => setForm((f) => ({ ...f, thumbnailUrl: '' }))}
+                        className="absolute top-0.5 right-0.5 w-4 h-4 bg-black/50 text-white rounded-full text-[10px] flex items-center justify-center"
+                      >×</button>
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => thumbRef.current?.click()}
+                    disabled={thumbUploading}
+                    className="text-xs text-gray-500 border border-dashed border-gray-300 rounded-lg px-3 py-2 hover:border-[#003478] hover:text-[#003478] transition disabled:opacity-50"
+                  >
+                    {thumbUploading ? '업로드 중...' : '+ 이미지 선택'}
+                  </button>
+                  <input ref={thumbRef} type="file" accept="image/*" className="hidden" onChange={handleThumb} />
+                </div>
+              </div>
+
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">내용</label>
                 <textarea
