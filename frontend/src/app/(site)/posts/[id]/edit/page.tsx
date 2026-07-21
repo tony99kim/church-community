@@ -11,7 +11,7 @@ interface Category { id: number; name: string; }
 export default function EditPostPage() {
   const { id } = useParams();
   const router = useRouter();
-  const { isLoggedIn } = useAuthStore();
+  const { isLoggedIn, hydrated } = useAuthStore();
   const [categories, setCategories] = useState<Category[]>([]);
   const [form, setForm] = useState({ title: '', content: '', categoryId: '' });
   const [loading, setLoading] = useState(true);
@@ -19,6 +19,7 @@ export default function EditPostPage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
+    if (!hydrated) return;
     if (!isLoggedIn) { router.replace('/login'); return; }
     Promise.all([
       api.get(`/posts/${id}`),
@@ -33,7 +34,7 @@ export default function EditPostPage() {
         categoryId: matched ? String(matched.id) : String(catRes.data.data[0]?.id ?? ''),
       });
     }).finally(() => setLoading(false));
-  }, [isLoggedIn, id]);
+  }, [hydrated, isLoggedIn, id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

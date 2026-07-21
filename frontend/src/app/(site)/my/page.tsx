@@ -19,7 +19,7 @@ type Tab = 'info' | 'posts' | 'password';
 
 export default function MyPage() {
   const router = useRouter();
-  const { user, isLoggedIn, setUser } = useAuthStore();
+  const { user, isLoggedIn, hydrated, setUser } = useAuthStore();
   const [tab, setTab] = useState<Tab>('info');
   const [posts, setPosts] = useState<Post[]>([]);
   const [postsLoading, setPostsLoading] = useState(false);
@@ -35,9 +35,10 @@ export default function MyPage() {
   const [pwLoading, setPwLoading] = useState(false);
 
   useEffect(() => {
+    if (!hydrated) return;
     if (!isLoggedIn) { router.replace('/login'); return; }
     setNickname(user?.nickname || '');
-  }, [isLoggedIn, user]);
+  }, [hydrated, isLoggedIn, user]);
 
   useEffect(() => {
     if (tab === 'posts' && user) {
@@ -217,7 +218,7 @@ export default function MyPage() {
                   type="password"
                   value={pwForm.newPassword}
                   onChange={(e) => setPwForm({ ...pwForm, newPassword: e.target.value })}
-                  placeholder="8자 이상, 영문·숫자·특수문자 포함"
+                  placeholder="8자 이상, 대소문자·숫자·특수문자(@$!%*?&) 포함"
                   className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]"
                   required
                 />

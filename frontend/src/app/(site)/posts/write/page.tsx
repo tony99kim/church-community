@@ -13,19 +13,20 @@ interface Category {
 
 export default function WritePostPage() {
   const router = useRouter();
-  const { isLoggedIn } = useAuthStore();
+  const { isLoggedIn, hydrated } = useAuthStore();
   const [categories, setCategories] = useState<Category[]>([]);
   const [form, setForm] = useState({ title: '', content: '', categoryId: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
+    if (!hydrated) return;
     if (!isLoggedIn) { router.push('/login'); return; }
     api.get('/categories').then((res) => {
       setCategories(res.data.data);
       if (res.data.data.length > 0) setForm((f) => ({ ...f, categoryId: String(res.data.data[0].id) }));
     });
-  }, [isLoggedIn]);
+  }, [hydrated, isLoggedIn]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

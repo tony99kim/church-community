@@ -70,7 +70,7 @@ export default function RegisterPage() {
                 className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478] focus:border-transparent transition"
                 required
               />
-              <p className="text-xs text-gray-400 mt-1">8자 이상, 영문·숫자·특수문자를 포함해주세요</p>
+              <p className="text-xs text-gray-400 mt-1">8자 이상, 대소문자·숫자·특수문자(@$!%*?&amp;) 포함</p>
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1.5">닉네임 <span className="text-red-500">*</span></label>
