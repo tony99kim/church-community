@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import api from '@/lib/api';
 
 interface Dashboard {
@@ -69,7 +70,7 @@ export default function AdminDashboardPage() {
               { href: '/admin/posts', label: '게시글 관리', icon: '📝', desc: '게시글 목록 조회 및 삭제' },
               { href: '/', label: '사이트 바로가기', icon: '🌐', desc: '커뮤니티 사이트 확인' },
             ].map((item) => (
-              <a
+              <Link
                 key={item.href}
                 href={item.href}
                 className="flex flex-col p-4 bg-gray-50 rounded-xl hover:bg-blue-50 hover:border-blue-100 border border-transparent transition"
@@ -77,7 +78,7 @@ export default function AdminDashboardPage() {
                 <span className="text-2xl mb-2">{item.icon}</span>
                 <span className="text-sm font-semibold text-gray-900">{item.label}</span>
                 <span className="text-xs text-gray-400 mt-0.5">{item.desc}</span>
-              </a>
+              </Link>
             ))}
           </div>
         </div>
