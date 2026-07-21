@@ -56,6 +56,16 @@ export default function AdminUsersPage() {
     }
   };
 
+  const handleDelete = async (u: User) => {
+    if (!confirm(`⚠️ ${u.nickname}님을 완전히 삭제하시겠어요?\n\n개인정보가 익명화되며 복구할 수 없습니다.\n(게시글·댓글은 "탈퇴회원" 이름으로 유지됩니다)`)) return;
+    try {
+      await api.delete(`/admin/users/${u.id}`);
+      fetchUsers(page);
+    } catch {
+      alert('삭제에 실패했습니다.');
+    }
+  };
+
   const handleRoleChange = async (u: User, newRole: string) => {
     if (!confirm(`${u.nickname}님의 권한을 ${ROLE_LABELS[newRole]}(으)로 변경하시겠어요?`)) return;
     try {
@@ -76,7 +86,7 @@ export default function AdminUsersPage() {
       </div>
 
       <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-        <div className="grid grid-cols-[1fr_1.2fr_80px_80px_120px] gap-4 px-6 py-3 bg-gray-50 border-b border-gray-100 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+        <div className="grid grid-cols-[1fr_1.2fr_80px_80px_180px] gap-4 px-6 py-3 bg-gray-50 border-b border-gray-100 text-xs font-semibold text-gray-500 uppercase tracking-wide">
           <span>닉네임</span>
           <span>이메일</span>
           <span className="text-center">권한</span>
@@ -100,7 +110,7 @@ export default function AdminUsersPage() {
             {users.map((u) => {
               const statusInfo = STATUS_LABELS[u.status] ?? { label: u.status, color: 'bg-gray-100 text-gray-500' };
               return (
-                <li key={u.id} className="grid grid-cols-[1fr_1.2fr_80px_80px_120px] gap-4 px-6 py-4 items-center hover:bg-gray-50 transition">
+                <li key={u.id} className="grid grid-cols-[1fr_1.2fr_80px_80px_180px] gap-4 px-6 py-4 items-center hover:bg-gray-50 transition">
                   <div>
                     <div className="text-sm font-medium text-gray-900">{u.nickname}</div>
                     <div className="text-xs text-gray-400 mt-0.5">{new Date(u.createdAt).toLocaleDateString('ko-KR')} 가입</div>
@@ -126,11 +136,11 @@ export default function AdminUsersPage() {
                       {statusInfo.label}
                     </span>
                   </div>
-                  <div className="flex items-center justify-center">
+                  <div className="flex items-center justify-center gap-1.5">
                     {u.id !== me?.id && u.status !== 'WITHDRAWN' ? (
                       <button
                         onClick={() => handleStatusToggle(u)}
-                        className={`text-xs border px-3 py-1.5 rounded-lg transition ${
+                        className={`text-xs border px-2.5 py-1.5 rounded-lg transition ${
                           u.status === 'ACTIVE'
                             ? 'text-red-500 border-red-200 hover:bg-red-50'
                             : 'text-green-600 border-green-200 hover:bg-green-50'
@@ -138,9 +148,16 @@ export default function AdminUsersPage() {
                       >
                         {u.status === 'ACTIVE' ? '정지' : '활성화'}
                       </button>
-                    ) : (
-                      <span className="text-xs text-gray-300">–</span>
+                    ) : null}
+                    {isSuperAdmin && u.id !== me?.id && (
+                      <button
+                        onClick={() => handleDelete(u)}
+                        className="text-xs border border-gray-200 text-gray-400 hover:border-red-300 hover:text-red-500 hover:bg-red-50 px-2.5 py-1.5 rounded-lg transition"
+                      >
+                        삭제
+                      </button>
                     )}
+                    {u.id === me?.id && <span className="text-xs text-gray-300">–</span>}
                   </div>
                 </li>
               );

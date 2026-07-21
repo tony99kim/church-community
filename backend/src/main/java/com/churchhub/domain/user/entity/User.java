@@ -81,4 +81,13 @@ public class User {
     public boolean isAdmin() {
         return this.role == UserRole.ADMIN || this.role == UserRole.SUPER_ADMIN;
     }
+
+    public void anonymize() {
+        this.email = "deleted_" + this.id + "@deleted.invalid";
+        this.nickname = "탈퇴회원_" + this.id;
+        this.phone = null;
+        this.profileImageUrl = null;
+        this.password = "";
+        this.status = UserStatus.WITHDRAWN;
+    }
 }

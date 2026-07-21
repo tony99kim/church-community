@@ -57,6 +57,14 @@ public class AdminController {
         return ResponseEntity.ok(ApiResponse.success(adminService.updateUserStatus(userId, request)));
     }
 
+    @Operation(summary = "회원 삭제 (개인정보 익명화)")
+    @DeleteMapping("/users/{userId}")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable Long userId) {
+        adminService.deleteUser(userId);
+        return ResponseEntity.ok(ApiResponse.success("회원이 삭제되었습니다.", null));
+    }
+
     @Operation(summary = "회원 권한 변경")
     @PutMapping("/users/{userId}/role")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
