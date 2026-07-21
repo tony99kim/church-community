@@ -242,6 +242,18 @@ export default function PostDetailPage() {
             </div>
           </div>
 
+          {/* 썸네일 */}
+          {post.thumbnailUrl && (
+            <div className="px-6 pt-6">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={post.thumbnailUrl}
+                alt="썸네일"
+                className="w-full max-h-80 object-cover rounded-xl border border-gray-100"
+              />
+            </div>
+          )}
+
           {/* 본문 */}
           <div className="px-6 py-6">
             <div

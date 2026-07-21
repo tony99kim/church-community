@@ -11,6 +11,7 @@ export interface Post {
   commentCount: number;
   liked?: boolean;
   notice?: boolean;
+  thumbnailUrl?: string | null;
   createdAt: string;
 }
 

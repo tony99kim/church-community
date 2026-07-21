@@ -116,7 +116,7 @@ function PostsContent() {
               {posts.map((post) => (
                 <li key={post.id}>
                   <Link href={`/posts/${post.id}`} className="flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition group">
-                    <div className="flex-1 min-w-0 mr-4">
+                    <div className="flex-1 min-w-0 mr-3">
                       <div className="flex items-center gap-1.5 mb-1">
                         <span className="shrink-0 text-xs bg-blue-50 text-[#003478] border border-blue-100 px-2 py-0.5 rounded font-medium">
                           {post.categoryName}
@@ -142,6 +142,10 @@ function PostsContent() {
                         )}
                       </div>
                     </div>
+                    {post.thumbnailUrl && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={post.thumbnailUrl} alt="" className="w-16 h-12 object-cover rounded-lg shrink-0 border border-gray-100" />
+                    )}
                   </Link>
                 </li>
               ))}
