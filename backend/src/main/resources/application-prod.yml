@@ -6,6 +6,10 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: false
+  data:
+    redis:
+      ssl:
+        enabled: true
 
 logging:
   level:
