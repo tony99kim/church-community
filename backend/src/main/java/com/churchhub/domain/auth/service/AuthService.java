@@ -63,7 +63,7 @@ public class AuthService {
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .tokenType("Bearer")
-                .expiresIn(jwtTokenProvider.getRefreshExpiry() / 1000)
+                .expiresIn(jwtTokenProvider.getAccessExpiry() / 1000)
                 .build();
     }
 
