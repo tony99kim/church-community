@@ -7,6 +7,9 @@ import com.churchhub.domain.category.dto.CategoryDto;
 import com.churchhub.domain.category.service.CategoryService;
 import com.churchhub.domain.event.dto.EventDto;
 import com.churchhub.domain.event.service.EventService;
+import com.churchhub.domain.report.dto.ReportDto;
+import com.churchhub.domain.report.entity.ReportStatus;
+import com.churchhub.domain.report.service.ReportService;
 import com.churchhub.domain.user.dto.UserDto;
 import com.churchhub.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,6 +35,7 @@ public class AdminController {
     private final AdminService adminService;
     private final CategoryService categoryService;
     private final EventService eventService;
+    private final ReportService reportService;
 
     @Operation(summary = "대시보드 통계")
     @GetMapping("/dashboard")
@@ -121,5 +125,31 @@ public class AdminController {
     public ResponseEntity<ApiResponse<Void>> deleteEvent(@PathVariable Long eventId) {
         eventService.deleteEvent(eventId);
         return ResponseEntity.ok(ApiResponse.success("행사가 삭제되었습니다.", null));
+    }
+
+    @Operation(summary = "신고 목록 조회")
+    @GetMapping("/reports")
+    public ResponseEntity<ApiResponse<Page<ReportDto.Response>>> getReports(
+            @RequestParam(required = false) ReportStatus status,
+            Pageable pageable) {
+        return ResponseEntity.ok(ApiResponse.success(reportService.getReports(status, pageable)));
+    }
+
+    @Operation(summary = "신고 처리 - 해결")
+    @PutMapping("/reports/{reportId}/resolve")
+    public ResponseEntity<ApiResponse<Void>> resolveReport(
+            @PathVariable Long reportId,
+            @RequestBody ReportDto.HandleRequest request) {
+        reportService.resolve(reportId, request.getAdminNote());
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    @Operation(summary = "신고 처리 - 기각")
+    @PutMapping("/reports/{reportId}/reject")
+    public ResponseEntity<ApiResponse<Void>> rejectReport(
+            @PathVariable Long reportId,
+            @RequestBody ReportDto.HandleRequest request) {
+        reportService.reject(reportId, request.getAdminNote());
+        return ResponseEntity.ok(ApiResponse.success(null));
     }
 }
