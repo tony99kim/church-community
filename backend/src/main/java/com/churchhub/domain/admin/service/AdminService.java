@@ -14,6 +14,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -23,11 +26,12 @@ public class AdminService {
     private final PostRepository postRepository;
 
     public AdminDto.DashboardResponse getDashboard() {
+        LocalDateTime startOfToday = LocalDate.now().atStartOfDay();
         return AdminDto.DashboardResponse.builder()
                 .totalUsers(userRepository.count())
-                .totalPosts(postRepository.count())
-                .newUsersToday(0L)
-                .newPostsToday(0L)
+                .totalPosts(postRepository.countByStatus(PostStatus.ACTIVE))
+                .newUsersToday(userRepository.countByCreatedAtAfter(startOfToday))
+                .newPostsToday(postRepository.countByStatusAndCreatedAtAfter(PostStatus.ACTIVE, startOfToday))
                 .build();
     }
 

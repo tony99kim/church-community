@@ -10,8 +10,8 @@ import java.util.List;
 
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
-    @Query("SELECT c FROM Comment c LEFT JOIN FETCH c.author WHERE c.post.id = :postId AND c.parent IS NULL ORDER BY c.createdAt ASC")
-    List<Comment> findTopLevelCommentsByPostId(@Param("postId") Long postId);
+    @Query("SELECT c FROM Comment c LEFT JOIN FETCH c.author WHERE c.post.id = :postId AND c.parent IS NULL AND c.status = :status ORDER BY c.createdAt ASC")
+    List<Comment> findTopLevelCommentsByPostId(@Param("postId") Long postId, @Param("status") CommentStatus status);
 
     @Query("SELECT c FROM Comment c LEFT JOIN FETCH c.author WHERE c.parent.id = :parentId AND c.status = :status ORDER BY c.createdAt ASC")
     List<Comment> findRepliesByParentId(@Param("parentId") Long parentId, @Param("status") CommentStatus status);

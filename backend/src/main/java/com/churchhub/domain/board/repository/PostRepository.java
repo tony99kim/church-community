@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
+
 public interface PostRepository extends JpaRepository<Post, Long> {
 
     Page<Post> findAllByStatusAndCategoryId(PostStatus status, Long categoryId, Pageable pageable);
@@ -20,5 +22,9 @@ public interface PostRepository extends JpaRepository<Post, Long> {
                                @Param("keyword") String keyword,
                                Pageable pageable);
 
-    Page<Post> findAllByAuthorId(Long authorId, Pageable pageable);
+    Page<Post> findAllByAuthorIdAndStatus(Long authorId, PostStatus status, Pageable pageable);
+
+    long countByStatus(PostStatus status);
+
+    long countByStatusAndCreatedAtAfter(PostStatus status, LocalDateTime dateTime);
 }
