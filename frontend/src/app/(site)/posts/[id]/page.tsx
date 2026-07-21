@@ -35,7 +35,7 @@ function formatDate(dateStr: string) {
   return d.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
-function CommentItem({ comment, onReply }: { comment: Comment; onReply: (id: number) => void }) {
+function CommentItem({ comment, onReply }: { comment: Comment; onReply: (id: number, nickname: string) => void }) {
   return (
     <div className={`${comment.parentId ? 'ml-8 bg-gray-50 rounded-xl px-4 py-3' : 'py-4 border-b border-gray-50'}`}>
       <div className="flex items-center gap-2 mb-1.5">
@@ -47,7 +47,7 @@ function CommentItem({ comment, onReply }: { comment: Comment; onReply: (id: num
       </div>
       <p className="text-sm text-gray-700 leading-relaxed ml-9 mb-1.5">{comment.content}</p>
       <button
-        onClick={() => onReply(comment.id)}
+        onClick={() => onReply(comment.id, comment.authorNickname)}
         className="ml-9 text-xs text-gray-400 hover:text-[#003478] transition font-medium"
       >
         답글 달기
@@ -110,11 +110,6 @@ export default function PostDetailPage() {
     router.push('/posts');
   };
 
-  const handleReply = (commentId: number, nickname?: string) => {
-    setReplyTo(commentId);
-    if (nickname) setReplyNickname(nickname);
-  };
-
   if (loading) return (
     <div className="max-w-3xl mx-auto px-4 py-12 text-center">
       <div className="animate-pulse space-y-4">
@@ -129,14 +124,11 @@ export default function PostDetailPage() {
   return (
     <div className="bg-[#f4f6f8] min-h-screen">
       <div className="max-w-3xl mx-auto px-4 py-6">
-        {/* 뒤로가기 */}
         <Link href="/posts" className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-[#003478] transition mb-4">
           ← 목록으로
         </Link>
 
-        {/* 게시글 본문 */}
         <article className="bg-white rounded-2xl border border-gray-200 overflow-hidden mb-4">
-          {/* 헤더 */}
           <div className="px-6 pt-6 pb-4 border-b border-gray-100">
             <div className="flex items-center gap-2 mb-3">
               <span className="text-xs bg-blue-50 text-blue-600 border border-blue-100 px-2.5 py-1 rounded-full font-medium">{post.categoryName}</span>
@@ -164,12 +156,10 @@ export default function PostDetailPage() {
             </div>
           </div>
 
-          {/* 본문 */}
           <div className="px-6 py-6">
             <div className="text-gray-800 leading-loose whitespace-pre-wrap text-sm min-h-[120px]">{post.content}</div>
           </div>
 
-          {/* 좋아요 */}
           <div className="px-6 pb-6 flex justify-center">
             <button
               onClick={handleLike}
@@ -180,29 +170,25 @@ export default function PostDetailPage() {
           </div>
         </article>
 
-        {/* 댓글 */}
         <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+          <div className="px-6 py-4 border-b border-gray-100">
             <h2 className="font-bold text-gray-900">댓글 <span className="text-[#003478]">{comments.length}</span></h2>
           </div>
 
           <div className="divide-y divide-gray-50 px-6">
             {comments.length === 0 ? (
-              <div className="py-10 text-center text-gray-400 text-sm">
-                첫 댓글을 작성해보세요 ✨
-              </div>
+              <div className="py-10 text-center text-gray-400 text-sm">첫 댓글을 작성해보세요 ✨</div>
             ) : (
               comments.map((comment) => (
                 <CommentItem
                   key={comment.id}
                   comment={comment}
-                  onReply={(cid) => handleReply(cid, comment.authorNickname)}
+                  onReply={(cid, nickname) => { setReplyTo(cid); setReplyNickname(nickname); }}
                 />
               ))
             )}
           </div>
 
-          {/* 댓글 작성 */}
           <div className="px-6 py-4 border-t border-gray-100 bg-gray-50">
             {isLoggedIn ? (
               <form onSubmit={handleComment}>
@@ -221,19 +207,13 @@ export default function PostDetailPage() {
                     className="flex-1 border border-gray-300 bg-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478] resize-none"
                     required
                   />
-                  <button
-                    type="submit"
-                    className="bg-[#003478] text-white px-5 rounded-xl text-sm font-semibold hover:bg-blue-900 transition self-end py-2.5"
-                  >
+                  <button type="submit" className="bg-[#003478] text-white px-5 rounded-xl text-sm font-semibold hover:bg-blue-900 transition self-end py-2.5">
                     등록
                   </button>
                 </div>
               </form>
             ) : (
-              <Link
-                href="/login"
-                className="flex items-center justify-center gap-2 py-3 text-sm text-gray-500 hover:text-[#003478] border border-dashed border-gray-300 rounded-xl transition"
-              >
+              <Link href="/login" className="flex items-center justify-center gap-2 py-3 text-sm text-gray-500 hover:text-[#003478] border border-dashed border-gray-300 rounded-xl transition">
                 🔐 로그인 후 댓글을 작성할 수 있어요
               </Link>
             )}
