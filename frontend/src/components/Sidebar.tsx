@@ -1,15 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import api from '@/lib/api';
+import { useEffect } from 'react';
 import { useAuthStore } from '@/store/authStore';
-
-interface Category {
-  id: number;
-  name: string;
-  type: string;
-}
+import { useCategoryStore } from '@/store/categoryStore';
 
 const TYPE_ICON: Record<string, string> = {
   NOTICE: '📢',
@@ -19,12 +13,10 @@ const TYPE_ICON: Record<string, string> = {
 };
 
 export default function Sidebar({ activeCategoryId }: { activeCategoryId?: string | null }) {
-  const [categories, setCategories] = useState<Category[]>([]);
   const { isLoggedIn } = useAuthStore();
+  const { categories, load } = useCategoryStore();
 
-  useEffect(() => {
-    api.get('/categories').then((r) => setCategories(r.data.data)).catch(() => {});
-  }, []);
+  useEffect(() => { load(); }, [load]);
 
   return (
     <aside className="w-64 shrink-0 hidden lg:block">

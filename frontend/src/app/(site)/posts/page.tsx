@@ -1,20 +1,20 @@
-'use client';
+﻿'use client';
 
 import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import api from '@/lib/api';
 import Sidebar from '@/components/Sidebar';
+import { useCategoryStore } from '@/store/categoryStore';
 import { formatDate } from '@/lib/utils';
-import type { Post, Category } from '@/types';
+import type { Post } from '@/types';
 
 function PostsContent() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const categoryId = searchParams.get('categoryId');
 
+  const { categories, load } = useCategoryStore();
   const [posts, setPosts] = useState<Post[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
   const [searchInput, setSearchInput] = useState('');
   const [keyword, setKeyword] = useState('');
   const [page, setPage] = useState(0);
@@ -22,9 +22,7 @@ function PostsContent() {
   const [totalElements, setTotalElements] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    api.get('/categories').then((r) => setCategories(r.data.data)).catch(() => {});
-  }, []);
+  useEffect(() => { load(); }, [load]);
 
   useEffect(() => {
     setPage(0);
@@ -59,7 +57,6 @@ function PostsContent() {
       <Sidebar activeCategoryId={categoryId} />
 
       <div className="flex-1 min-w-0">
-        {/* 헤더 */}
         <div className="flex items-center justify-between mb-3">
           <div>
             <h1 className="text-lg font-bold text-gray-900">
@@ -69,7 +66,6 @@ function PostsContent() {
           </div>
         </div>
 
-        {/* 검색바 */}
         <form onSubmit={handleSearch} className="flex gap-2 mb-4">
           <div className="relative flex-1">
             <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -87,9 +83,7 @@ function PostsContent() {
           </button>
         </form>
 
-        {/* 게시글 목록 */}
         <div className="bg-white border border-[#EDEFF1] rounded-xl overflow-hidden mb-4">
-          {/* 테이블 헤더 - 데스크탑 */}
           <div className="hidden md:grid grid-cols-[1fr_auto] gap-4 px-4 py-2.5 border-b border-[#EDEFF1] bg-gray-50">
             <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">제목</span>
             <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">정보</span>
@@ -153,7 +147,6 @@ function PostsContent() {
           )}
         </div>
 
-        {/* 페이지네이션 */}
         {totalPages > 1 && (
           <div className="flex justify-center gap-1">
             <button
