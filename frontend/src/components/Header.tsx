@@ -1,20 +1,75 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
+import api from '@/lib/api';
+import type { Notification } from '@/types';
+import { formatDate } from '@/lib/utils';
+
+const RELATED_PATH: Record<string, (id: number) => string> = {
+  POST: (id) => `/posts/${id}`,
+  COMMENT: (id) => `/posts/${id}`,
+  EVENT: (id) => `/events/${id}`,
+};
 
 export default function Header() {
   const { user, isLoggedIn, logout } = useAuthStore();
+  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [notiOpen, setNotiOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const notiRef = useRef<HTMLDivElement>(null);
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
+
+  const fetchUnread = useCallback(() => {
+    if (!isLoggedIn) return;
+    api.get('/notifications/unread-count').then((r) => setUnreadCount(r.data.data.count));
+  }, [isLoggedIn]);
+
+  useEffect(() => {
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 60000);
+    return () => clearInterval(interval);
+  }, [fetchUnread]);
+
+  const openNoti = () => {
+    if (!notiOpen) {
+      api.get('/notifications').then((r) => setNotifications(r.data.data));
+    }
+    setNotiOpen(!notiOpen);
+    setUserMenuOpen(false);
+  };
+
+  const markAllRead = async () => {
+    await api.put('/notifications/read-all');
+    setUnreadCount(0);
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  };
+
+  const handleNotiClick = async (n: Notification) => {
+    if (!n.read) {
+      await api.put(`/notifications/${n.id}/read`);
+      setUnreadCount((c) => Math.max(0, c - 1));
+      setNotifications((prev) => prev.map((x) => x.id === n.id ? { ...x, read: true } : x));
+    }
+    setNotiOpen(false);
+    if (n.relatedId && n.relatedType) {
+      router.push(RELATED_PATH[n.relatedType](n.relatedId));
+    }
+  };
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
         setUserMenuOpen(false);
+      }
+      if (notiRef.current && !notiRef.current.contains(e.target as Node)) {
+        setNotiOpen(false);
       }
     };
     document.addEventListener('mousedown', handler);
@@ -56,6 +111,50 @@ export default function Header() {
             >
               + 글쓰기
             </Link>
+
+            {/* 알림 벨 */}
+            <div className="relative" ref={notiRef}>
+              <button onClick={openNoti} className="relative p-1.5 text-gray-500 hover:text-[#003478] transition">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+                {unreadCount > 0 && (
+                  <span className="absolute top-0.5 right-0.5 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </button>
+
+              {notiOpen && (
+                <div className="absolute right-0 top-9 w-80 bg-white border border-[#EDEFF1] rounded-xl shadow-lg z-50 overflow-hidden">
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-[#EDEFF1]">
+                    <span className="text-sm font-bold text-gray-900">알림</span>
+                    {unreadCount > 0 && (
+                      <button onClick={markAllRead} className="text-xs text-[#003478] hover:underline">
+                        모두 읽음
+                      </button>
+                    )}
+                  </div>
+                  <div className="max-h-80 overflow-y-auto">
+                    {notifications.length === 0 ? (
+                      <div className="py-8 text-center text-xs text-gray-400">알림이 없습니다</div>
+                    ) : (
+                      notifications.map((n) => (
+                        <button
+                          key={n.id}
+                          onClick={() => handleNotiClick(n)}
+                          className={`w-full text-left px-4 py-3 border-b border-[#EDEFF1] hover:bg-gray-50 transition ${!n.read ? 'bg-blue-50/50' : ''}`}
+                        >
+                          <p className="text-xs text-gray-800 leading-relaxed">{n.content}</p>
+                          <p className="text-[10px] text-gray-400 mt-1">{formatDate(n.createdAt)}</p>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
             <div className="relative" ref={userMenuRef}>
               <button
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
