@@ -1,4 +1,4 @@
-﻿app = "churchhub-backend"
+app = "churchhub-backend"
 primary_region = "nrt"
 
 [build]
