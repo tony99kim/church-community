@@ -54,6 +54,7 @@ export interface Notification {
   id: number;
   type: 'COMMENT' | 'LIKE' | 'EVENT' | 'NOTICE';
   content: string;
+  senderNickname: string | null;
   relatedId: number;
   relatedType: 'POST' | 'COMMENT' | 'EVENT';
   read: boolean;

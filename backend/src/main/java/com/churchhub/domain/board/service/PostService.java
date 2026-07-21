@@ -8,6 +8,9 @@ import com.churchhub.domain.board.repository.PostLikeRepository;
 import com.churchhub.domain.board.repository.PostRepository;
 import com.churchhub.domain.category.entity.Category;
 import com.churchhub.domain.category.repository.CategoryRepository;
+import com.churchhub.domain.notification.entity.NotificationType;
+import com.churchhub.domain.notification.entity.RelatedType;
+import com.churchhub.domain.notification.service.NotificationService;
 import com.churchhub.domain.user.entity.User;
 import com.churchhub.domain.user.repository.UserRepository;
 import com.churchhub.exception.BusinessException;
@@ -29,6 +32,7 @@ public class PostService {
     private final PostLikeRepository postLikeRepository;
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     public Page<PostDto.Summary> getPosts(Long categoryId, String keyword, Pageable pageable) {
         Page<Post> posts;
@@ -116,12 +120,14 @@ public class PostService {
         } else {
             postLikeRepository.save(PostLike.builder().post(post).user(user).build());
             post.incrementLikeCount();
+            notificationService.send(post.getAuthor().getId(), userId, NotificationType.LIKE,
+                    user.getNickname() + "님이 회원님의 게시글에 좋아요를 눌렀습니다.", postId, RelatedType.POST);
             return true;
         }
     }
 
     public Page<PostDto.Summary> getUserPosts(Long authorId, Pageable pageable) {
-        return postRepository.findAllByAuthorId(authorId, pageable).map(PostDto.Summary::from);
+        return postRepository.findAllByAuthorIdAndStatus(authorId, PostStatus.ACTIVE, pageable).map(PostDto.Summary::from);
     }
 
     private Post getActivePost(Long postId) {

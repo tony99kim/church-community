@@ -6,6 +6,9 @@ import com.churchhub.domain.comment.dto.CommentDto;
 import com.churchhub.domain.comment.entity.Comment;
 import com.churchhub.domain.comment.entity.CommentStatus;
 import com.churchhub.domain.comment.repository.CommentRepository;
+import com.churchhub.domain.notification.entity.NotificationType;
+import com.churchhub.domain.notification.entity.RelatedType;
+import com.churchhub.domain.notification.service.NotificationService;
 import com.churchhub.domain.user.entity.User;
 import com.churchhub.domain.user.repository.UserRepository;
 import com.churchhub.exception.BusinessException;
@@ -24,9 +27,10 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     public List<CommentDto.Response> getComments(Long postId) {
-        List<Comment> topLevel = commentRepository.findTopLevelCommentsByPostId(postId);
+        List<Comment> topLevel = commentRepository.findTopLevelCommentsByPostId(postId, CommentStatus.ACTIVE);
         return topLevel.stream().map(c -> {
             List<CommentDto.Response> replies = commentRepository
                     .findRepliesByParentId(c.getId(), CommentStatus.ACTIVE)
@@ -58,7 +62,15 @@ public class CommentService {
                 .build();
 
         post.incrementCommentCount();
-        return CommentDto.Response.from(commentRepository.save(comment), List.of());
+        CommentDto.Response saved = CommentDto.Response.from(commentRepository.save(comment), List.of());
+
+        // 댓글 알림: 게시글 작성자에게 (대댓글이면 부모 댓글 작성자에게도)
+        String content = user.getNickname() + "님이 댓글을 달았습니다: " + request.getContent();
+        notificationService.send(post.getAuthor().getId(), userId, NotificationType.COMMENT, content, post.getId(), RelatedType.POST);
+        if (parent != null && !parent.getAuthor().getId().equals(post.getAuthor().getId())) {
+            notificationService.send(parent.getAuthor().getId(), userId, NotificationType.COMMENT, content, post.getId(), RelatedType.POST);
+        }
+        return saved;
     }
 
     @Transactional
