@@ -1,7 +1,9 @@
 import axios from 'axios';
 
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://churchhub-backend.fly.dev/api/v1';
+
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  baseURL: BASE_URL,
   headers: { 'Content-Type': 'application/json' },
 });
 
@@ -23,7 +25,7 @@ api.interceptors.response.use(
       if (refreshToken) {
         try {
           const res = await axios.post(
-            `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
+            `${BASE_URL}/auth/refresh`,
             { refreshToken }
           );
           const { accessToken, refreshToken: newRefresh } = res.data.data;
