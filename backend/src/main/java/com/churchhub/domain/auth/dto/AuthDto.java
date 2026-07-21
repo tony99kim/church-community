@@ -46,6 +46,12 @@ public class AuthDto {
         private String refreshToken;
         private String tokenType;
         private long expiresIn;
+        // 유저 정보 (로그인 후 /users/me 추가 호출 제거)
+        private Long userId;
+        private String email;
+        private String nickname;
+        private String role;
+        private String profileImageUrl;
     }
 
     @Getter

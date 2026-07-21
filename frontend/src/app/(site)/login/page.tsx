@@ -25,11 +25,10 @@ function LoginForm() {
     setError('');
     try {
       const res = await api.post('/auth/login', form);
-      const { accessToken, refreshToken } = res.data.data;
+      const { accessToken, refreshToken, userId, email, nickname, role, profileImageUrl } = res.data.data;
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
-      const me = await api.get('/users/me');
-      setUser(me.data.data);
+      setUser({ id: userId, email, nickname, role, profileImageUrl });
       router.push('/');
     } catch {
       setError('이메일 또는 비밀번호가 올바르지 않습니다.');

@@ -64,6 +64,11 @@ public class AuthService {
                 .refreshToken(refreshToken)
                 .tokenType("Bearer")
                 .expiresIn(jwtTokenProvider.getAccessExpiry() / 1000)
+                .userId(user.getId())
+                .email(user.getEmail())
+                .nickname(user.getNickname())
+                .role(user.getRole().name())
+                .profileImageUrl(user.getProfileImageUrl())
                 .build();
     }
 
