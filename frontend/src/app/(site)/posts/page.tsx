@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useSearchParams, useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
 
@@ -34,18 +35,30 @@ function formatDate(dateStr: string) {
 
 function PostsContent() {
   const { isLoggedIn } = useAuthStore();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
   const [posts, setPosts] = useState<Post[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
-  const [keyword, setKeyword] = useState('');
   const [searchInput, setSearchInput] = useState('');
+  const [keyword, setKeyword] = useState('');
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
   const [loading, setLoading] = useState(true);
 
+  // URL 파라미터로 초기 카테고리 설정
   useEffect(() => {
-    api.get('/categories').then((res) => setCategories(res.data.data)).catch(() => {});
+    api.get('/categories').then((res) => {
+      const cats: Category[] = res.data.data;
+      setCategories(cats);
+
+      const catIdParam = searchParams.get('categoryId');
+      if (catIdParam) {
+        setSelectedCategory(Number(catIdParam));
+      }
+    }).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -62,25 +75,34 @@ function PostsContent() {
       .finally(() => setLoading(false));
   }, [selectedCategory, page, keyword]);
 
+  const handleCategoryChange = (id: number | null) => {
+    setSelectedCategory(id);
+    setPage(0);
+    // URL도 업데이트
+    if (id) {
+      router.replace(`/posts?categoryId=${id}`, { scroll: false });
+    } else {
+      router.replace('/posts', { scroll: false });
+    }
+  };
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setKeyword(searchInput);
     setPage(0);
   };
 
-  const handleCategoryChange = (id: number | null) => {
-    setSelectedCategory(id);
-    setPage(0);
-  };
+  const selectedCategoryName = categories.find((c) => c.id === selectedCategory)?.name;
 
   return (
     <div className="bg-[#f4f6f8] min-h-screen">
-      {/* 게시판 헤더 */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-5xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-xl font-bold text-gray-900">커뮤니티 게시판</h1>
+              <h1 className="text-xl font-bold text-gray-900">
+                {selectedCategoryName ? selectedCategoryName : '커뮤니티 게시판'}
+              </h1>
               <p className="text-xs text-gray-400 mt-0.5">총 {totalElements}개의 게시글</p>
             </div>
             {isLoggedIn && (
@@ -133,9 +155,7 @@ function PostsContent() {
           </button>
         </form>
 
-        {/* 게시글 목록 */}
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          {/* 테이블 헤더 */}
           <div className="hidden md:grid grid-cols-[1fr_auto_auto_auto_auto] gap-4 px-5 py-2.5 bg-gray-50 border-b border-gray-100 text-xs font-semibold text-gray-500 uppercase tracking-wide">
             <span>제목</span>
             <span className="w-20 text-center">작성자</span>
@@ -173,9 +193,7 @@ function PostsContent() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-xs bg-blue-50 text-blue-600 border border-blue-100 px-2 py-0.5 rounded-full shrink-0">{post.categoryName}</span>
-                        <span className="font-medium text-gray-900 truncate group-hover:text-[#003478] transition text-sm">
-                          {post.title}
-                        </span>
+                        <span className="font-medium text-gray-900 truncate group-hover:text-[#003478] transition text-sm">{post.title}</span>
                         {post.commentCount > 0 && (
                           <span className="text-xs text-red-500 font-semibold shrink-0">[{post.commentCount}]</span>
                         )}

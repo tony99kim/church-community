@@ -5,15 +5,23 @@ import { useAuthStore } from '@/store/authStore';
 import { useEffect, useState } from 'react';
 import api from '@/lib/api';
 
+interface Category {
+  id: number;
+  name: string;
+  type: string;
+}
+
 export default function Header() {
   const { user, isLoggedIn, setUser, logout } = useAuthStore();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
 
   useEffect(() => {
     const token = localStorage.getItem('accessToken');
     if (token && !isLoggedIn) {
       api.get('/users/me').then((res) => setUser(res.data.data)).catch(() => {});
     }
+    api.get('/categories').then((res) => setCategories(res.data.data)).catch(() => {});
   }, []);
 
   return (
@@ -38,7 +46,7 @@ export default function Header() {
 
       {/* 메인 헤더 */}
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2 shrink-0">
           <div className="w-8 h-8 bg-[#003478] rounded-lg flex items-center justify-center">
             <span className="text-white text-sm font-bold">C</span>
           </div>
@@ -49,18 +57,20 @@ export default function Header() {
         </Link>
 
         <nav className="hidden md:flex items-center gap-1">
-          {[
-            { href: '/', label: '홈' },
-            { href: '/posts', label: '커뮤니티' },
-            { href: '/posts?type=NOTICE', label: '공지사항' },
-            { href: '/posts?type=EVENT', label: '행사/이벤트' },
-          ].map((item) => (
+          <Link href="/" className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-[#003478] hover:bg-blue-50 rounded-lg transition">
+            홈
+          </Link>
+          <Link href="/posts" className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-[#003478] hover:bg-blue-50 rounded-lg transition">
+            전체 게시판
+          </Link>
+          {/* 카테고리 API에서 동적 로드 (최대 4개) */}
+          {categories.slice(0, 4).map((cat) => (
             <Link
-              key={item.href}
-              href={item.href}
+              key={cat.id}
+              href={`/posts?categoryId=${cat.id}`}
               className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-[#003478] hover:bg-blue-50 rounded-lg transition"
             >
-              {item.label}
+              {cat.name}
             </Link>
           ))}
         </nav>
@@ -68,13 +78,13 @@ export default function Header() {
         {isLoggedIn && (
           <Link
             href="/posts/write"
-            className="hidden md:flex bg-[#003478] text-white text-sm px-4 py-2 rounded-lg hover:bg-blue-800 transition items-center gap-1"
+            className="hidden md:flex bg-[#003478] text-white text-sm px-4 py-2 rounded-lg hover:bg-blue-800 transition items-center gap-1 shrink-0"
           >
             ✏️ 글쓰기
           </Link>
         )}
 
-        {/* 모바일 메뉴 */}
+        {/* 모바일 메뉴 버튼 */}
         <button className="md:hidden p-2" onClick={() => setMenuOpen(!menuOpen)}>
           <div className="w-5 h-0.5 bg-gray-600 mb-1" />
           <div className="w-5 h-0.5 bg-gray-600 mb-1" />
@@ -82,16 +92,19 @@ export default function Header() {
         </button>
       </div>
 
+      {/* 모바일 드롭다운 */}
       {menuOpen && (
-        <div className="md:hidden bg-white border-t border-gray-100 px-4 py-3 space-y-2">
-          {[
-            { href: '/', label: '홈' },
-            { href: '/posts', label: '커뮤니티' },
-            { href: '/posts?type=NOTICE', label: '공지사항' },
-            { href: '/posts?type=EVENT', label: '행사/이벤트' },
-          ].map((item) => (
-            <Link key={item.href} href={item.href} className="block py-2 text-sm text-gray-700" onClick={() => setMenuOpen(false)}>
-              {item.label}
+        <div className="md:hidden bg-white border-t border-gray-100 px-4 py-3 space-y-1">
+          <Link href="/" className="block py-2 text-sm text-gray-700 hover:text-[#003478]" onClick={() => setMenuOpen(false)}>홈</Link>
+          <Link href="/posts" className="block py-2 text-sm text-gray-700 hover:text-[#003478]" onClick={() => setMenuOpen(false)}>전체 게시판</Link>
+          {categories.map((cat) => (
+            <Link
+              key={cat.id}
+              href={`/posts?categoryId=${cat.id}`}
+              className="block py-2 text-sm text-gray-700 hover:text-[#003478]"
+              onClick={() => setMenuOpen(false)}
+            >
+              {cat.name}
             </Link>
           ))}
           {isLoggedIn && (

@@ -6,13 +6,35 @@ import RecentPosts from '@/components/RecentPosts';
 import { useAuthStore } from '@/store/authStore';
 import api from '@/lib/api';
 
+interface Category {
+  id: number;
+  name: string;
+  type: string;
+}
+
+const TYPE_ICON: Record<string, string> = {
+  NOTICE: '📢',
+  EVENT: '📅',
+  COMMUNITY: '💬',
+  LOCAL: '📍',
+};
+
+const TYPE_COLOR: Record<string, string> = {
+  NOTICE: 'bg-blue-50 text-blue-600 border-blue-100',
+  EVENT: 'bg-green-50 text-green-600 border-green-100',
+  COMMUNITY: 'bg-orange-50 text-orange-600 border-orange-100',
+  LOCAL: 'bg-yellow-50 text-yellow-600 border-yellow-100',
+};
+
 export default function Home() {
   const { isLoggedIn, user } = useAuthStore();
-  const [stats, setStats] = useState({ totalPosts: 0, totalUsers: 0 });
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [totalPosts, setTotalPosts] = useState(0);
 
   useEffect(() => {
+    api.get('/categories').then((res) => setCategories(res.data.data)).catch(() => {});
     api.get('/posts', { params: { page: 0, size: 1 } })
-      .then((res) => setStats((s) => ({ ...s, totalPosts: res.data.data.totalElements })))
+      .then((res) => setTotalPosts(res.data.data.totalElements))
       .catch(() => {});
   }, []);
 
@@ -48,38 +70,45 @@ export default function Home() {
             </div>
           </div>
           <div className="hidden md:flex flex-col gap-3 text-sm">
-            {[
-              { icon: '📋', label: '자유게시판', desc: '일상을 공유해요' },
-              { icon: '📢', label: '공지사항', desc: '중요 소식을 확인해요' },
-              { icon: '📅', label: '행사 안내', desc: '다가오는 이벤트' },
-            ].map((item) => (
-              <div key={item.label} className="bg-white/10 backdrop-blur rounded-xl px-5 py-3 flex items-center gap-3 w-56">
-                <span className="text-2xl">{item.icon}</span>
+            {categories.slice(0, 3).map((cat) => (
+              <Link
+                key={cat.id}
+                href={`/posts?categoryId=${cat.id}`}
+                className="bg-white/10 backdrop-blur rounded-xl px-5 py-3 flex items-center gap-3 w-56 hover:bg-white/20 transition"
+              >
+                <span className="text-2xl">{TYPE_ICON[cat.type] ?? '📋'}</span>
                 <div>
-                  <div className="font-semibold">{item.label}</div>
-                  <div className="text-blue-200 text-xs">{item.desc}</div>
+                  <div className="font-semibold">{cat.name}</div>
+                  <div className="text-blue-200 text-xs">게시판 바로가기</div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
       </div>
 
-      {/* 카테고리 바로가기 */}
+      {/* 카테고리 바로가기 - API에서 동적 로드 */}
       <div className="max-w-6xl mx-auto px-4 py-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {[
-            { icon: '💬', label: '자유게시판', href: '/posts', color: 'bg-orange-50 text-orange-600 border-orange-100' },
-            { icon: '📢', label: '공지사항', href: '/posts?type=NOTICE', color: 'bg-blue-50 text-blue-600 border-blue-100' },
-            { icon: '📅', label: '행사/이벤트', href: '/posts?type=EVENT', color: 'bg-green-50 text-green-600 border-green-100' },
-            { icon: '🙏', label: '기도제목', href: '/posts?type=COMMUNITY', color: 'bg-purple-50 text-purple-600 border-purple-100' },
-          ].map((item) => (
-            <Link key={item.label} href={item.href} className={`flex items-center gap-3 bg-white rounded-xl p-4 border hover:shadow-md transition ${item.color}`}>
-              <span className="text-2xl">{item.icon}</span>
-              <span className="font-medium text-sm">{item.label}</span>
-            </Link>
-          ))}
-        </div>
+        {categories.length > 0 ? (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {categories.slice(0, 8).map((cat) => (
+              <Link
+                key={cat.id}
+                href={`/posts?categoryId=${cat.id}`}
+                className={`flex items-center gap-3 bg-white rounded-xl p-4 border hover:shadow-md transition ${TYPE_COLOR[cat.type] ?? 'bg-gray-50 text-gray-600 border-gray-100'}`}
+              >
+                <span className="text-2xl">{TYPE_ICON[cat.type] ?? '📋'}</span>
+                <span className="font-medium text-sm">{cat.name}</span>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-16 bg-white rounded-xl border border-gray-100 animate-pulse" />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* 메인 콘텐츠 */}
@@ -91,22 +120,7 @@ export default function Home() {
 
           {/* 사이드바 */}
           <div className="space-y-4">
-            {/* 공지 */}
-            <div className="bg-white rounded-xl border border-gray-200 p-5">
-              <h3 className="font-bold text-gray-900 mb-3">📌 공지사항</h3>
-              <ul className="space-y-2 text-sm text-gray-600">
-                <li className="flex items-start gap-2">
-                  <span className="text-blue-500 mt-0.5">•</span>
-                  <span>ChurchHub에 오신 것을 환영합니다!</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-blue-500 mt-0.5">•</span>
-                  <span>커뮤니티 이용 규칙을 확인해주세요</span>
-                </li>
-              </ul>
-            </div>
-
-            {/* 로그인 상태에 따른 사이드바 */}
+            {/* 로그인 상태에 따른 카드 */}
             {isLoggedIn ? (
               <div className="bg-white rounded-xl border border-gray-200 p-5">
                 <div className="flex items-center gap-3 mb-4">
@@ -115,7 +129,9 @@ export default function Home() {
                   </div>
                   <div>
                     <div className="font-semibold text-gray-900">{user?.nickname}</div>
-                    <div className="text-xs text-gray-400">{user?.role === 'SUPER_ADMIN' ? '최고관리자' : user?.role === 'ADMIN' ? '관리자' : '일반회원'}</div>
+                    <div className="text-xs text-gray-400">
+                      {user?.role === 'SUPER_ADMIN' ? '최고관리자' : user?.role === 'ADMIN' ? '관리자' : '일반회원'}
+                    </div>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
@@ -137,17 +153,47 @@ export default function Home() {
               </div>
             )}
 
+            {/* 카테고리 목록 */}
+            <div className="bg-white rounded-xl border border-gray-200 p-5">
+              <h3 className="font-bold text-gray-900 mb-3">📁 게시판 목록</h3>
+              {categories.length === 0 ? (
+                <p className="text-sm text-gray-400">카테고리가 없습니다.</p>
+              ) : (
+                <ul className="space-y-1">
+                  <li>
+                    <Link href="/posts" className="flex items-center justify-between py-1.5 text-sm text-gray-700 hover:text-[#003478] transition">
+                      <span>전체 게시글</span>
+                      <span className="text-xs text-gray-400">{totalPosts}</span>
+                    </Link>
+                  </li>
+                  {categories.map((cat) => (
+                    <li key={cat.id}>
+                      <Link
+                        href={`/posts?categoryId=${cat.id}`}
+                        className="flex items-center justify-between py-1.5 text-sm text-gray-700 hover:text-[#003478] transition"
+                      >
+                        <span className="flex items-center gap-1.5">
+                          <span className="text-sm">{TYPE_ICON[cat.type] ?? '📋'}</span>
+                          {cat.name}
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
             {/* 통계 */}
             <div className="bg-white rounded-xl border border-gray-200 p-5">
               <h3 className="font-bold text-gray-900 mb-3">📊 커뮤니티 현황</h3>
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-gray-50 rounded-lg p-3 text-center">
-                  <div className="text-lg font-bold text-[#003478]">{stats.totalPosts}</div>
+                  <div className="text-lg font-bold text-[#003478]">{totalPosts}</div>
                   <div className="text-xs text-gray-500">전체 게시글</div>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-3 text-center">
-                  <div className="text-lg font-bold text-[#003478]">–</div>
-                  <div className="text-xs text-gray-500">전체 회원</div>
+                  <div className="text-lg font-bold text-[#003478]">{categories.length}</div>
+                  <div className="text-xs text-gray-500">게시판 수</div>
                 </div>
               </div>
             </div>
