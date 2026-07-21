@@ -11,6 +11,8 @@ const navItems = [
   { href: '/admin/categories', label: '카테고리 관리', icon: '📁' },
   { href: '/admin/users', label: '회원 관리', icon: '👥' },
   { href: '/admin/posts', label: '게시글 관리', icon: '📝' },
+  { href: '/admin/events', label: '행사 관리', icon: '📅' },
+  { href: '/admin/reports', label: '신고 관리', icon: '🚨' },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
