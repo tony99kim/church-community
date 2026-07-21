@@ -14,6 +14,11 @@ spring:
       ssl:
         enabled: true
 
+supabase:
+  url: ${SUPABASE_URL:https://mcdtxlcsbcxupzmkzjqd.supabase.co}
+  service-role-key: ${SUPABASE_SERVICE_ROLE_KEY}
+  bucket: church-community
+
 logging:
   level:
     com.churchhub: WARN
