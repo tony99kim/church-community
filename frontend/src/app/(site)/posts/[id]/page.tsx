@@ -35,15 +35,38 @@ function formatDate(dateStr: string) {
   return d.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
-function CommentItem({ comment, onReply }: { comment: Comment; onReply: (id: number, nickname: string) => void }) {
+function CommentItem({
+  comment,
+  currentUserId,
+  isAdmin,
+  onReply,
+  onDelete,
+}: {
+  comment: Comment;
+  currentUserId?: number;
+  isAdmin?: boolean;
+  onReply: (id: number, nickname: string) => void;
+  onDelete: (commentId: number) => void;
+}) {
+  const canDelete = currentUserId === comment.authorId || isAdmin;
   return (
-    <div className={`${comment.parentId ? 'ml-8 bg-gray-50 rounded-xl px-4 py-3' : 'py-4 border-b border-gray-50'}`}>
-      <div className="flex items-center gap-2 mb-1.5">
-        <div className="w-7 h-7 bg-[#003478] rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0">
-          {comment.authorNickname[0]}
+    <div className={`${comment.parentId ? 'ml-8 bg-gray-50 rounded-xl px-4 py-3 mt-2' : 'py-4 border-b border-gray-50'}`}>
+      <div className="flex items-start justify-between gap-2 mb-1.5">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 bg-[#003478] rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0">
+            {comment.authorNickname[0]}
+          </div>
+          <span className="text-sm font-semibold text-gray-900">{comment.authorNickname}</span>
+          <span className="text-xs text-gray-400">{new Date(comment.createdAt).toLocaleDateString('ko-KR')}</span>
         </div>
-        <span className="text-sm font-semibold text-gray-900">{comment.authorNickname}</span>
-        <span className="text-xs text-gray-400">{new Date(comment.createdAt).toLocaleDateString('ko-KR')}</span>
+        {canDelete && (
+          <button
+            onClick={() => onDelete(comment.id)}
+            className="text-xs text-gray-300 hover:text-red-400 transition shrink-0"
+          >
+            삭제
+          </button>
+        )}
       </div>
       <p className="text-sm text-gray-700 leading-relaxed ml-9 mb-1.5">{comment.content}</p>
       <button
@@ -53,9 +76,14 @@ function CommentItem({ comment, onReply }: { comment: Comment; onReply: (id: num
         답글 달기
       </button>
       {comment.children?.map((child) => (
-        <div key={child.id} className="mt-2">
-          <CommentItem comment={child} onReply={onReply} />
-        </div>
+        <CommentItem
+          key={child.id}
+          comment={child}
+          currentUserId={currentUserId}
+          isAdmin={isAdmin}
+          onReply={onReply}
+          onDelete={onDelete}
+        />
       ))}
     </div>
   );
@@ -73,6 +101,13 @@ export default function PostDetailPage() {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [loading, setLoading] = useState(true);
+
+  const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
+
+  const fetchComments = async () => {
+    const res = await api.get(`/posts/${id}/comments`);
+    setComments(res.data.data.content ?? res.data.data);
+  };
 
   useEffect(() => {
     Promise.all([
@@ -100,8 +135,13 @@ export default function PostDetailPage() {
     setCommentText('');
     setReplyTo(null);
     setReplyNickname('');
-    const res = await api.get(`/posts/${id}/comments`);
-    setComments(res.data.data.content ?? res.data.data);
+    await fetchComments();
+  };
+
+  const handleCommentDelete = async (commentId: number) => {
+    if (!confirm('댓글을 삭제하시겠어요?')) return;
+    await api.delete(`/posts/${id}/comments/${commentId}`);
+    await fetchComments();
   };
 
   const handleDelete = async () => {
@@ -111,10 +151,10 @@ export default function PostDetailPage() {
   };
 
   if (loading) return (
-    <div className="max-w-3xl mx-auto px-4 py-12 text-center">
+    <div className="max-w-3xl mx-auto px-4 py-12">
       <div className="animate-pulse space-y-4">
-        <div className="h-8 bg-gray-100 rounded w-3/4 mx-auto" />
-        <div className="h-4 bg-gray-100 rounded w-1/4 mx-auto" />
+        <div className="h-8 bg-gray-100 rounded w-3/4" />
+        <div className="h-4 bg-gray-100 rounded w-1/4" />
       </div>
     </div>
   );
@@ -146,9 +186,11 @@ export default function PostDetailPage() {
               </div>
               <div className="flex items-center gap-3 text-xs text-gray-400">
                 <span>조회 {post.viewCount}</span>
-                {user?.id === post.authorId && (
+                {(user?.id === post.authorId || isAdmin) && (
                   <div className="flex gap-2 ml-2">
-                    <Link href={`/posts/${id}/edit`} className="text-gray-400 hover:text-blue-600 transition">수정</Link>
+                    {user?.id === post.authorId && (
+                      <Link href={`/posts/${id}/edit`} className="text-gray-400 hover:text-blue-600 transition">수정</Link>
+                    )}
                     <button onClick={handleDelete} className="text-gray-400 hover:text-red-500 transition">삭제</button>
                   </div>
                 )}
@@ -183,7 +225,10 @@ export default function PostDetailPage() {
                 <CommentItem
                   key={comment.id}
                   comment={comment}
+                  currentUserId={user?.id}
+                  isAdmin={isAdmin}
                   onReply={(cid, nickname) => { setReplyTo(cid); setReplyNickname(nickname); }}
+                  onDelete={handleCommentDelete}
                 />
               ))
             )}

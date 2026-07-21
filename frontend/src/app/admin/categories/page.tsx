@@ -13,13 +13,13 @@ interface Category {
 }
 
 const TYPE_OPTIONS = [
-  { value: 'GENERAL', label: '일반' },
-  { value: 'NOTICE', label: '공지' },
-  { value: 'EVENT', label: '행사' },
   { value: 'COMMUNITY', label: '커뮤니티' },
+  { value: 'EVENT', label: '행사' },
+  { value: 'LOCAL', label: '지역' },
+  { value: 'NOTICE', label: '공지' },
 ];
 
-const emptyForm = { name: '', description: '', type: 'GENERAL', sortOrder: 0 };
+const emptyForm = { name: '', description: '', type: 'COMMUNITY', sortOrder: 0 };
 
 export default function AdminCategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);

@@ -22,7 +22,7 @@ export default function Header() {
       <div className="bg-[#003478] text-white text-xs py-1.5 px-4 flex justify-end gap-4">
         {isLoggedIn ? (
           <>
-            <span className="text-gray-300">{user?.nickname}님</span>
+            <Link href="/my" className="text-gray-300 hover:text-white transition">{user?.nickname}님</Link>
             <button onClick={logout} className="hover:text-yellow-300 transition">로그아웃</button>
             {(user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN') && (
               <Link href="/admin" className="hover:text-yellow-300 transition">관리자</Link>

@@ -1,15 +1,21 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/api';
+import { useAuthStore } from '@/store/authStore';
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { isLoggedIn } = useAuthStore();
   const [form, setForm] = useState({ email: '', password: '', nickname: '', phone: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (isLoggedIn) router.replace('/');
+  }, [isLoggedIn]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,7 +106,6 @@ export default function RegisterPage() {
               {loading ? '처리 중...' : '회원가입'}
             </button>
           </form>
-
           <div className="mt-6 text-center text-sm text-gray-500">
             이미 계정이 있으신가요?{' '}
             <Link href="/login" className="text-[#003478] font-semibold hover:underline">로그인</Link>
