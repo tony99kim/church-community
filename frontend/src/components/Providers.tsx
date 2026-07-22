@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import api from '@/lib/api';
+import api, { clearTokens } from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
 
 function AuthRehydrator() {
@@ -9,14 +9,11 @@ function AuthRehydrator() {
 
   useEffect(() => {
     if (isLoggedIn) { setHydrated(); return; }
-    const token = localStorage.getItem('accessToken');
+    const token = localStorage.getItem('accessToken') ?? sessionStorage.getItem('accessToken');
     if (!token) { setHydrated(); return; }
     api.get('/users/me')
       .then((res) => setUser(res.data.data))
-      .catch(() => {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-      })
+      .catch(() => clearTokens())
       .finally(() => setHydrated());
   }, []);
 

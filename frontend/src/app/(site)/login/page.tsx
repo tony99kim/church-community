@@ -3,7 +3,7 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import api from '@/lib/api';
+import api, { saveTokens } from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
 
 function LoginForm() {
@@ -11,6 +11,7 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const { isLoggedIn, setUser } = useAuthStore();
   const [form, setForm] = useState({ email: '', password: '' });
+  const [remember, setRemember] = useState(true);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const registered = searchParams.get('registered');
@@ -26,8 +27,7 @@ function LoginForm() {
     try {
       const res = await api.post('/auth/login', form);
       const { accessToken, refreshToken, userId, email, nickname, role, profileImageUrl } = res.data.data;
-      localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('refreshToken', refreshToken);
+      saveTokens(accessToken, refreshToken, remember);
       setUser({ id: userId, email, nickname, role, profileImageUrl });
       router.push('/');
     } catch {
@@ -79,6 +79,15 @@ function LoginForm() {
                 required
               />
             </div>
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={remember}
+                onChange={(e) => setRemember(e.target.checked)}
+                className="w-4 h-4 rounded border-gray-300 text-[#003478] accent-[#003478]"
+              />
+              <span className="text-sm text-gray-600">로그인 유지</span>
+            </label>
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl">
                 {error}
