@@ -5,6 +5,7 @@ import com.churchhub.domain.board.entity.PostStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -30,6 +31,14 @@ public interface PostRepository extends JpaRepository<Post, Long> {
                                           Pageable pageable);
 
     Page<Post> findAllByAuthorIdAndStatus(Long authorId, PostStatus status, Pageable pageable);
+
+    @Modifying
+    @Query("UPDATE Post p SET p.commentCount = p.commentCount - 1 WHERE p.id = :postId AND p.commentCount > 0")
+    void decrementCommentCount(@Param("postId") Long postId);
+
+    @Modifying
+    @Query("UPDATE Post p SET p.commentCount = p.commentCount + 1 WHERE p.id = :postId")
+    void incrementCommentCount(@Param("postId") Long postId);
 
     long countByStatus(PostStatus status);
 

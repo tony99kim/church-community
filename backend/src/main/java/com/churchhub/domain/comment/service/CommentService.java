@@ -61,7 +61,7 @@ public class CommentService {
                 .content(request.getContent())
                 .build();
 
-        post.incrementCommentCount();
+        postRepository.incrementCommentCount(postId);
         CommentDto.Response saved = CommentDto.Response.from(commentRepository.save(comment), List.of());
 
         // 댓글 알림: 게시글 작성자에게 (대댓글이면 부모 댓글 작성자에게도)
@@ -89,7 +89,7 @@ public class CommentService {
         if (!isAdmin && !comment.isAuthor(userId)) {
             throw new BusinessException(ErrorCode.COMMENT_ACCESS_DENIED);
         }
-        comment.getPost().decrementCommentCount();
+        postRepository.decrementCommentCount(comment.getPost().getId());
         comment.delete();
     }
 
