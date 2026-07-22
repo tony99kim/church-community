@@ -98,6 +98,9 @@ export default function Header() {
           <Link href="/events" className="text-sm text-gray-600 hover:text-[#003478] font-medium px-3 py-1.5 rounded-lg hover:bg-gray-50 transition">
             행사
           </Link>
+          <Link href="/bible" className="text-sm text-gray-600 hover:text-[#003478] font-medium px-3 py-1.5 rounded-lg hover:bg-gray-50 transition">
+            성경
+          </Link>
         </nav>
 
         <div className="flex-1" />
@@ -219,6 +222,7 @@ export default function Header() {
           <Link href="/" className="block py-2 text-sm font-medium text-gray-700 hover:text-[#003478]" onClick={() => setMenuOpen(false)}>홈</Link>
           <Link href="/posts" className="block py-2 text-sm font-medium text-gray-700 hover:text-[#003478]" onClick={() => setMenuOpen(false)}>게시판</Link>
           <Link href="/events" className="block py-2 text-sm font-medium text-gray-700 hover:text-[#003478]" onClick={() => setMenuOpen(false)}>행사</Link>
+          <Link href="/bible" className="block py-2 text-sm font-medium text-gray-700 hover:text-[#003478]" onClick={() => setMenuOpen(false)}>성경</Link>
           {isLoggedIn ? (
             <>
               <Link href="/posts/write" className="block py-2 text-sm font-medium text-[#003478]" onClick={() => setMenuOpen(false)}>+ 글쓰기</Link>
