@@ -88,6 +88,6 @@ public class User {
         this.phone = null;
         this.profileImageUrl = null;
         this.password = "";
-        this.status = UserStatus.WITHDRAWN;
+        this.status = UserStatus.DELETED;
     }
 }

@@ -22,7 +22,7 @@ const ROLE_LABELS: Record<string, string> = {
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   ACTIVE: { label: '활성', color: 'bg-green-100 text-green-700' },
   SUSPENDED: { label: '정지', color: 'bg-red-100 text-red-600' },
-  WITHDRAWN: { label: '탈퇴', color: 'bg-gray-100 text-gray-500' },
+  DELETED: { label: '삭제됨', color: 'bg-gray-100 text-gray-500' },
 };
 
 export default function AdminUsersPage() {
@@ -137,7 +137,7 @@ export default function AdminUsersPage() {
                     </span>
                   </div>
                   <div className="flex items-center justify-center gap-1.5">
-                    {u.id !== me?.id && u.status !== 'WITHDRAWN' ? (
+                    {u.id !== me?.id && u.status !== 'DELETED' ? (
                       <button
                         onClick={() => handleStatusToggle(u)}
                         className={`text-xs border px-2.5 py-1.5 rounded-lg transition ${
