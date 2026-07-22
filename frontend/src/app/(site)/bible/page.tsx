@@ -79,6 +79,10 @@ const NT: Book[] = [
 
 const ALL_BOOKS = [...OT, ...NT];
 
+const TRANSLATIONS = [
+  { id: 'korean', name: '개역한글', desc: '1938년 · 대한성서공회', source: 'getbible.net' },
+];
+
 export default function BiblePage() {
   const [testament, setTestament] = useState<'OT' | 'NT'>('OT');
   const [book, setBook] = useState<Book | null>(null);
@@ -87,6 +91,7 @@ export default function BiblePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [highlightVerse, setHighlightVerse] = useState<number | null>(null);
+  const [translation, setTranslation] = useState(TRANSLATIONS[0].id);
 
   // 빠른 이동
   const [jumpBookId, setJumpBookId] = useState(1);
@@ -103,7 +108,7 @@ export default function BiblePage() {
     setLoading(true);
     setError('');
     setVerses([]);
-    fetch(`/api/bible/${book.id}/${chapter}`)
+    fetch(`/api/bible/${book.id}/${chapter}?t=${translation}`)
       .then((r) => r.json())
       .then((data) => {
         if (data.error) throw new Error(data.error);
@@ -117,7 +122,7 @@ export default function BiblePage() {
       })
       .catch((e: Error) => setError(e.message || '본문을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.'))
       .finally(() => setLoading(false));
-  }, [book, chapter]);
+  }, [book, chapter, translation]);
 
   useEffect(() => {
     if (highlightVerse !== null && verseRefs.current[highlightVerse]) {
@@ -205,19 +210,33 @@ export default function BiblePage() {
         </div>
       </form>
 
-      {/* 구약 / 신약 탭 */}
-      <div className="flex gap-2 mb-4">
-        {(['OT', 'NT'] as const).map((t) => (
-          <button
-            key={t}
-            onClick={() => { setTestament(t); setBook(null); setChapter(null); setVerses([]); }}
-            className={`px-5 py-2 rounded-full text-sm font-bold transition ${
-              testament === t ? 'bg-[#003478] text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-            }`}
+      {/* 번역본 선택 + 구약/신약 탭 */}
+      <div className="flex items-center justify-between mb-4 gap-2 flex-wrap">
+        <div className="flex gap-2">
+          {(['OT', 'NT'] as const).map((t) => (
+            <button
+              key={t}
+              onClick={() => { setTestament(t); setBook(null); setChapter(null); setVerses([]); }}
+              className={`px-5 py-2 rounded-full text-sm font-bold transition ${
+                testament === t ? 'bg-[#003478] text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+              }`}
+            >
+              {t === 'OT' ? '구약' : '신약'}
+            </button>
+          ))}
+        </div>
+        <div className="flex items-center gap-2">
+          <label className="text-xs text-gray-400">번역본</label>
+          <select
+            value={translation}
+            onChange={(e) => { setTranslation(e.target.value); setVerses([]); }}
+            className="border border-gray-200 rounded-xl px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#003478] bg-white"
           >
-            {t === 'OT' ? '구약' : '신약'}
-          </button>
-        ))}
+            {TRANSLATIONS.map((t) => (
+              <option key={t.id} value={t.id}>{t.name}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* 책 목록 */}
@@ -270,7 +289,9 @@ export default function BiblePage() {
             <button onClick={() => setChapter(null)} className="text-xs text-gray-400 hover:text-[#003478]">← {book.name}</button>
             <span className="text-xs text-gray-300">/</span>
             <span className="text-base font-bold text-gray-900">{book.name} {chapter}장</span>
-            <span className="text-xs text-gray-400 ml-auto">개역한글</span>
+            <span className="text-xs text-gray-400 ml-auto">
+              {TRANSLATIONS.find((t) => t.id === translation)?.name}
+            </span>
           </div>
 
           {/* 본문 영역 */}
@@ -284,20 +305,39 @@ export default function BiblePage() {
             )}
             {error && <p className="text-sm text-red-500 text-center py-8">{error}</p>}
             {!loading && !error && verses.length > 0 && (
-              <div className="space-y-3">
-                {verses.map((v) => (
-                  <div
-                    key={v.verse}
-                    ref={(el) => { verseRefs.current[v.verse] = el; }}
-                    className={`flex gap-3 rounded-lg px-2 py-1 transition ${
-                      highlightVerse === v.verse ? 'bg-yellow-50 border border-yellow-200' : ''
-                    }`}
+              <>
+                <div className="space-y-3">
+                  {verses.map((v) => (
+                    <div
+                      key={v.verse}
+                      ref={(el) => { verseRefs.current[v.verse] = el; }}
+                      className={`flex gap-3 rounded-lg px-2 py-1 transition ${
+                        highlightVerse === v.verse ? 'bg-yellow-50 border border-yellow-200' : ''
+                      }`}
+                    >
+                      <span className="text-xs font-bold text-[#003478] shrink-0 w-6 pt-0.5 text-right">{v.verse}</span>
+                      <p className="text-sm text-gray-800 leading-7">{v.text}</p>
+                    </div>
+                  ))}
+                </div>
+                {/* 출처 */}
+                <div className="mt-6 pt-4 border-t border-gray-50 flex items-center justify-between">
+                  <p className="text-[11px] text-gray-300">
+                    {(() => {
+                      const t = TRANSLATIONS.find((t) => t.id === translation);
+                      return t ? `${t.name} · ${t.desc}` : '';
+                    })()}
+                  </p>
+                  <a
+                    href="https://getbible.net"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[11px] text-gray-300 hover:text-gray-400 transition"
                   >
-                    <span className="text-xs font-bold text-[#003478] shrink-0 w-6 pt-0.5 text-right">{v.verse}</span>
-                    <p className="text-sm text-gray-800 leading-7">{v.text}</p>
-                  </div>
-                ))}
-              </div>
+                    출처: getbible.net
+                  </a>
+                </div>
+              </>
             )}
           </div>
 

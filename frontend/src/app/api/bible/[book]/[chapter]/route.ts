@@ -1,15 +1,21 @@
 import { NextResponse } from 'next/server';
 
+// Supported translations (code → getbible.net version key)
+const TRANSLATION_MAP: Record<string, string> = {
+  korean: 'korean', // 개역한글
+};
+
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ book: string; chapter: string }> }
 ) {
   const { book, chapter } = await params;
+  const { searchParams } = new URL(req.url);
+  const translationKey = TRANSLATION_MAP[searchParams.get('t') ?? 'korean'] ?? 'korean';
 
-  // Try API subdomain first, fallback to main domain
   const urls = [
-    `https://api.getbible.net/v2/korean/${book}/${chapter}.json`,
-    `https://getbible.net/v2/korean/${book}/${chapter}.json`,
+    `https://api.getbible.net/v2/${translationKey}/${book}/${chapter}.json`,
+    `https://getbible.net/v2/${translationKey}/${book}/${chapter}.json`,
   ];
 
   for (const url of urls) {
