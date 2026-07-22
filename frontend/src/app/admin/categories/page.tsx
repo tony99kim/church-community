@@ -19,34 +19,34 @@ const EMPTY_FORM = { name: '', description: '', type: 'COMMUNITY', sortOrder: 0,
 
 const CITIES: { name: string; sortOrder: number; districts: string[] }[] = [
   {
-    name: '부산',
-    sortOrder: 20,
-    districts: ['중구','서구','동구','영도구','부산진구','동래구','남구','북구','해운대구','사하구','금정구','강서구','연제구','수영구','사상구','기장군'],
-  },
-  {
-    name: '대구',
-    sortOrder: 30,
-    districts: ['중구','동구','서구','남구','북구','수성구','달서구','달성군'],
-  },
-  {
     name: '인천',
-    sortOrder: 40,
+    sortOrder: 20,
     districts: ['중구','동구','미추홀구','연수구','남동구','부평구','계양구','서구','강화군','옹진군'],
   },
   {
-    name: '광주',
-    sortOrder: 50,
-    districts: ['동구','서구','남구','북구','광산구'],
-  },
-  {
     name: '대전',
-    sortOrder: 60,
+    sortOrder: 30,
     districts: ['동구','중구','서구','유성구','대덕구'],
   },
   {
+    name: '광주',
+    sortOrder: 40,
+    districts: ['동구','서구','남구','북구','광산구'],
+  },
+  {
+    name: '대구',
+    sortOrder: 50,
+    districts: ['중구','동구','서구','남구','북구','수성구','달서구','달성군'],
+  },
+  {
     name: '울산',
-    sortOrder: 70,
+    sortOrder: 60,
     districts: ['중구','남구','동구','북구','울주군'],
+  },
+  {
+    name: '부산',
+    sortOrder: 70,
+    districts: ['중구','서구','동구','영도구','부산진구','동래구','남구','북구','해운대구','사하구','금정구','강서구','연제구','수영구','사상구','기장군'],
   },
 ];
 
