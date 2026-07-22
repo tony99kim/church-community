@@ -18,6 +18,8 @@ public class UserDto {
     public static class UpdateRequest {
         @Size(min = 2, max = 20, message = "닉네임은 2~20자여야 합니다.")
         private String nickname;
+        @Size(min = 2, max = 30, message = "이름은 2~30자여야 합니다.")
+        private String name;
         private String phone;
         private String profileImageUrl;
     }
@@ -41,6 +43,7 @@ public class UserDto {
         private Long id;
         private String email;
         private String nickname;
+        private String name;
         private String phone;
         private String profileImageUrl;
         private UserRole role;
@@ -52,6 +55,7 @@ public class UserDto {
                     .id(user.getId())
                     .email(user.getEmail())
                     .nickname(user.getNickname())
+                    .name(user.getName())
                     .phone(user.getPhone())
                     .profileImageUrl(user.getProfileImageUrl())
                     .role(user.getRole())

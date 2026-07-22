@@ -18,7 +18,7 @@ function ConditionRow({ ok, label }: { ok: boolean; label: string }) {
 export default function RegisterPage() {
   const router = useRouter();
   const { isLoggedIn } = useAuthStore();
-  const [form, setForm] = useState({ email: '', password: '', nickname: '', phone: '' });
+  const [form, setForm] = useState({ email: '', password: '', name: '', nickname: '', phone: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [emailStatus, setEmailStatus] = useState<'idle' | 'checking' | 'ok' | 'dup'>('idle');
@@ -66,7 +66,7 @@ export default function RegisterPage() {
     setLoading(true);
     setError('');
     try {
-      const body: Record<string, string> = { email: form.email, password: form.password, nickname: form.nickname, phone: form.phone };
+      const body: Record<string, string> = { email: form.email, password: form.password, name: form.name, nickname: form.nickname, phone: form.phone };
       await api.post('/auth/register', body);
       router.push('/login?registered=1');
     } catch (err: unknown) {
@@ -135,6 +135,20 @@ export default function RegisterPage() {
               )}
             </div>
 
+            {/* 이름 */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">이름 <span className="text-red-500">*</span></label>
+              <input
+                type="text"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                placeholder="실명을 입력하세요"
+                className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478] transition"
+                required
+              />
+              <p className="text-xs text-gray-400 mt-1">행사 참여 명단 등 관리 목적으로만 사용됩니다.</p>
+            </div>
+
             {/* 닉네임 */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1.5">닉네임 <span className="text-red-500">*</span></label>
@@ -146,6 +160,7 @@ export default function RegisterPage() {
                 className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478] transition"
                 required
               />
+              <p className="text-xs text-gray-400 mt-1">게시글, 댓글 등 모든 활동에 닉네임으로 표시됩니다.</p>
             </div>
 
             {/* 전화번호 */}

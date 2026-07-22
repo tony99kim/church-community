@@ -113,6 +113,9 @@ export default function AdminUsersPage() {
                 <li key={u.id} className="grid grid-cols-[1fr_1.2fr_80px_80px_180px] gap-4 px-6 py-4 items-center hover:bg-gray-50 transition">
                   <div>
                     <div className="text-sm font-medium text-gray-900">{u.nickname}</div>
+                    {(u as { name?: string }).name && (u as { name?: string }).name !== u.nickname && (
+                      <div className="text-xs text-gray-500 mt-0.5">실명: {(u as { name?: string }).name}</div>
+                    )}
                     <div className="text-xs text-gray-400 mt-0.5">{new Date(u.createdAt).toLocaleDateString('ko-KR')} 가입</div>
                   </div>
                   <div className="text-sm text-gray-600 truncate">{u.email}</div>

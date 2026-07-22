@@ -28,6 +28,9 @@ public class User {
     @Column(nullable = false, unique = true, length = 20)
     private String nickname;
 
+    @Column(length = 30)
+    private String name;
+
     @Column(length = 20)
     private String phone;
 
@@ -49,15 +52,17 @@ public class User {
     private LocalDateTime updatedAt;
 
     @Builder
-    public User(String email, String password, String nickname, String phone) {
+    public User(String email, String password, String nickname, String name, String phone) {
         this.email = email;
         this.password = password;
         this.nickname = nickname;
+        this.name = name != null ? name : nickname;
         this.phone = phone;
     }
 
-    public void updateProfile(String nickname, String phone, String profileImageUrl) {
+    public void updateProfile(String nickname, String name, String phone, String profileImageUrl) {
         if (nickname != null) this.nickname = nickname;
+        if (name != null) this.name = name;
         if (phone != null) this.phone = phone;
         if (profileImageUrl != null) this.profileImageUrl = profileImageUrl;
     }
@@ -85,6 +90,7 @@ public class User {
     public void anonymize() {
         this.email = "deleted_" + this.id + "@deleted.invalid";
         this.nickname = "탈퇴회원_" + this.id;
+        this.name = "탈퇴회원";
         this.phone = null;
         this.profileImageUrl = null;
         this.password = "";

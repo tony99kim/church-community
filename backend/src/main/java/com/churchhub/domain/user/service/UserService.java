@@ -32,7 +32,7 @@ public class UserService {
             }
         }
 
-        user.updateProfile(request.getNickname(), request.getPhone(), request.getProfileImageUrl());
+        user.updateProfile(request.getNickname(), request.getName(), request.getPhone(), request.getProfileImageUrl());
         return UserDto.Response.from(user);
     }
 

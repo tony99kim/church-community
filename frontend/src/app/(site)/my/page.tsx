@@ -24,8 +24,9 @@ export default function MyPage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [postsLoading, setPostsLoading] = useState(false);
 
-  // 닉네임 수정
+  // 프로필 수정
   const [nickname, setNickname] = useState('');
+  const [name, setName] = useState('');
   const [nicknameMsg, setNicknameMsg] = useState('');
   const [nicknameLoading, setNicknameLoading] = useState(false);
 
@@ -38,6 +39,7 @@ export default function MyPage() {
     if (!hydrated) return;
     if (!isLoggedIn) { router.replace('/login'); return; }
     setNickname(user?.nickname || '');
+    setName((user as { name?: string })?.name || '');
   }, [hydrated, isLoggedIn, user]);
 
   useEffect(() => {
@@ -54,9 +56,9 @@ export default function MyPage() {
     setNicknameLoading(true);
     setNicknameMsg('');
     try {
-      const res = await api.put('/users/me', { nickname });
+      const res = await api.put('/users/me', { nickname, name });
       setUser({ ...user!, nickname: res.data.data.nickname });
-      setNicknameMsg('✅ 닉네임이 변경되었습니다.');
+      setNicknameMsg('✅ 정보가 변경되었습니다.');
     } catch (err: unknown) {
       const e = err as { response?: { data?: { message?: string } } };
       setNicknameMsg(e.response?.data?.message || '변경에 실패했습니다.');
@@ -129,17 +131,28 @@ export default function MyPage() {
         {/* 내 정보 */}
         {tab === 'info' && (
           <div className="bg-white rounded-2xl border border-gray-200 p-6">
-            <h2 className="font-bold text-gray-900 mb-5">닉네임 변경</h2>
+            <h2 className="font-bold text-gray-900 mb-5">내 정보 수정</h2>
             <form onSubmit={handleNickname} className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">이름</label>
+                <input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="실명"
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]"
+                />
+                <p className="text-xs text-gray-400 mt-1">행사 참여 명단 등 관리 목적으로만 사용됩니다.</p>
+              </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1.5">닉네임</label>
                 <input
                   value={nickname}
                   onChange={(e) => setNickname(e.target.value)}
-                  placeholder="새 닉네임"
+                  placeholder="닉네임"
                   className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]"
                   required
                 />
+                <p className="text-xs text-gray-400 mt-1">게시글, 댓글 등 모든 활동에 닉네임으로 표시됩니다.</p>
               </div>
               {nicknameMsg && (
                 <p className={`text-sm ${nicknameMsg.startsWith('✅') ? 'text-green-600' : 'text-red-500'}`}>{nicknameMsg}</p>
@@ -149,7 +162,7 @@ export default function MyPage() {
                 disabled={nicknameLoading}
                 className="w-full bg-[#003478] text-white py-3 rounded-xl text-sm font-semibold hover:bg-blue-900 disabled:opacity-50 transition"
               >
-                {nicknameLoading ? '변경 중...' : '닉네임 변경'}
+                {nicknameLoading ? '저장 중...' : '저장'}
               </button>
             </form>
           </div>
