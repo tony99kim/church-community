@@ -155,7 +155,8 @@ export default function AdminCategoriesPage() {
 
   const localParents = categories.filter((c) => c.type === 'LOCAL' && !c.parentId).sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
   const rootCategories = categories.filter((c) => !c.parentId).sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
-  const nonLocalRoots = rootCategories.filter((c) => c.type !== 'LOCAL');
+  const noticeRoots = rootCategories.filter((c) => c.type === 'NOTICE');
+  const nonLocalRoots = rootCategories.filter((c) => c.type !== 'LOCAL' && c.type !== 'NOTICE');
 
   return (
     <div className="p-8">
@@ -207,6 +208,32 @@ export default function AdminCategoriesPage() {
                   <button onClick={() => handleToggleVisible(cat)} className={`w-2 h-2 rounded-full shrink-0 ${cat.visible ? 'bg-green-400' : 'bg-gray-300'}`} title={cat.visible ? '표시 중' : '숨김'} />
                   <span className="font-medium text-sm text-gray-900">{cat.name}</span>
                   <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">{TYPE_LABEL[cat.type] ?? cat.type}</span>
+                  {!cat.visible && <span className="text-xs bg-gray-100 text-gray-400 px-1.5 py-0.5 rounded">숨김</span>}
+                </div>
+                <span className="text-xs text-gray-400 text-center">순서 {cat.sortOrder}</span>
+                <div className="flex gap-2 justify-end">
+                  <button onClick={() => openEdit(cat)} className="text-xs text-gray-500 hover:text-[#003478] border border-gray-200 px-2.5 py-1 rounded-lg hover:border-blue-200">수정</button>
+                  <button onClick={() => handleDelete(cat)} className="text-xs text-gray-500 hover:text-red-500 border border-gray-200 px-2.5 py-1 rounded-lg hover:border-red-200">삭제</button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* 공지 카테고리 */}
+      {noticeRoots.length > 0 && (
+        <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden mb-4">
+          <div className="px-6 py-3 bg-yellow-50 border-b border-yellow-100 text-xs font-semibold text-yellow-700 uppercase tracking-wide">
+            공지 카테고리
+          </div>
+          <ul className="divide-y divide-gray-50">
+            {noticeRoots.map((cat) => (
+              <li key={cat.id} className="grid grid-cols-[1fr_80px_100px] gap-4 px-6 py-3 items-center hover:bg-gray-50">
+                <div className="flex items-center gap-2">
+                  <button onClick={() => handleToggleVisible(cat)} className={`w-2 h-2 rounded-full shrink-0 ${cat.visible ? 'bg-green-400' : 'bg-gray-300'}`} title={cat.visible ? '표시 중' : '숨김'} />
+                  <span className="font-medium text-sm text-gray-900">{cat.name}</span>
+                  <span className="text-xs bg-yellow-50 text-yellow-600 px-2 py-0.5 rounded-full border border-yellow-200">공지</span>
                   {!cat.visible && <span className="text-xs bg-gray-100 text-gray-400 px-1.5 py-0.5 rounded">숨김</span>}
                 </div>
                 <span className="text-xs text-gray-400 text-center">순서 {cat.sortOrder}</span>
