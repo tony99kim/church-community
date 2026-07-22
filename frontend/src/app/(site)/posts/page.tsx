@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import api from '@/lib/api';
 import Sidebar from '@/components/Sidebar';
+import Pagination from '@/components/Pagination';
 import { useCategoryStore } from '@/store/categoryStore';
 import { formatDate } from '@/lib/utils';
 import type { Post } from '@/types';
@@ -168,38 +169,7 @@ function PostsContent() {
           )}
         </div>
 
-        {totalPages > 1 && (
-          <div className="flex justify-center gap-1">
-            <button
-              onClick={() => setPage(Math.max(0, page - 1))}
-              disabled={page === 0}
-              className="px-3 py-1.5 rounded-full text-sm border border-[#EDEFF1] bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-30"
-            >
-              ‹
-            </button>
-            {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
-              const pageNum = Math.max(0, Math.min(page - 3, totalPages - 7)) + i;
-              return (
-                <button
-                  key={pageNum}
-                  onClick={() => setPage(pageNum)}
-                  className={`w-9 h-9 rounded-full text-sm font-medium transition ${
-                    page === pageNum ? 'bg-[#003478] text-white' : 'bg-white border border-[#EDEFF1] text-gray-600 hover:bg-gray-50'
-                  }`}
-                >
-                  {pageNum + 1}
-                </button>
-              );
-            })}
-            <button
-              onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
-              disabled={page >= totalPages - 1}
-              className="px-3 py-1.5 rounded-full text-sm border border-[#EDEFF1] bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-30"
-            >
-              ›
-            </button>
-          </div>
-        )}
+        <Pagination page={page} totalPages={totalPages} onChange={setPage} />
       </div>
     </div>
   );
