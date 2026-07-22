@@ -67,6 +67,8 @@ export default function AdminDashboardPage() {
             {[
               { href: '/admin/categories', label: '카테고리 관리', icon: '📁', desc: '게시판 카테고리 추가/수정/삭제' },
               { href: '/admin/users', label: '회원 관리', icon: '👥', desc: '회원 목록 조회 및 상태 관리' },
+              { href: '/admin/events', label: '행사 관리', icon: '🎉', desc: '행사 등록/수정 및 상태 관리' },
+              { href: '/admin/participants', label: '행사 참여자', icon: '🎫', desc: '신청자 조회 및 CSV 다운로드' },
               { href: '/admin/posts', label: '게시글 관리', icon: '📝', desc: '게시글 목록 조회 및 삭제' },
               { href: '/', label: '사이트 바로가기', icon: '🌐', desc: '커뮤니티 사이트 확인' },
             ].map((item) => (
@@ -87,10 +89,12 @@ export default function AdminDashboardPage() {
           <h2 className="font-bold text-gray-900 mb-4">시스템 정보</h2>
           <dl className="space-y-3">
             {[
-              { label: '백엔드', value: 'Spring Boot 3.2.5' },
+              { label: '백엔드', value: 'Spring Boot 3.2.5 (Java 21)' },
+              { label: '프론트엔드', value: 'Next.js 14 (Vercel)' },
               { label: '데이터베이스', value: 'PostgreSQL (Supabase)' },
               { label: '캐시', value: 'Redis (Upstash)' },
-              { label: '서버', value: 'Render (Free)' },
+              { label: '파일 스토리지', value: 'Supabase Storage' },
+              { label: '서버', value: 'Fly.io' },
             ].map((item) => (
               <div key={item.label} className="flex items-center justify-between py-2 border-b border-gray-50">
                 <dt className="text-sm text-gray-500">{item.label}</dt>
