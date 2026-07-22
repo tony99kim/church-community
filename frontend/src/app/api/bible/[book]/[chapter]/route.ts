@@ -2,9 +2,9 @@ import { NextResponse } from 'next/server';
 
 export async function GET(
   _req: Request,
-  { params }: { params: { book: string; chapter: string } }
+  { params }: { params: Promise<{ book: string; chapter: string }> }
 ) {
-  const { book, chapter } = params;
+  const { book, chapter } = await params;
   const url = `https://getbible.net/v2/korean/${book}/${chapter}.json`;
 
   try {
