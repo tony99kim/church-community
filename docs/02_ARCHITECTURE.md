@@ -1,139 +1,96 @@
 # 시스템 아키텍처
 
-## 전체 구조 다이어그램
+## 전체 구조
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                         CLIENT LAYER                        │
-│                                                             │
-│   ┌─────────────────────┐   ┌─────────────────────────┐   │
-│   │   사용자 사이트       │   │     관리자 사이트          │   │
-│   │  (Next.js / React)  │   │       (React / Vite)    │   │
-│   │  port: 3000         │   │       port: 3001        │   │
-│   └──────────┬──────────┘   └───────────┬─────────────┘   │
-└──────────────┼──────────────────────────┼─────────────────┘
-               │                          │
-               ▼                          ▼
-┌─────────────────────────────────────────────────────────────┐
-│                      NGINX (Reverse Proxy)                  │
-│                          port: 80 / 443                     │
-│    /api/*  → Spring Boot                                    │
-│    /admin-api/* → Spring Boot (admin prefix)                │
-└──────────────────────────┬──────────────────────────────────┘
-                           │
-                           ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    SPRING BOOT (API Server)                  │
-│                         port: 8080                          │
-│                                                             │
-│   ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐ │
-│   │  Auth    │  │  Board   │  │  Event   │  │  Admin   │ │
-│   │ Module   │  │ Module   │  │ Module   │  │ Module   │ │
-│   └──────────┘  └──────────┘  └──────────┘  └──────────┘ │
-│                                                             │
-│   ┌──────────────────────────────────────────────────────┐ │
-│   │            Spring Security + JWT Filter              │ │
-│   └──────────────────────────────────────────────────────┘ │
-└───────────────────┬───────────────────────┬────────────────┘
-                    │                       │
-          ┌─────────▼──────┐    ┌──────────▼──────┐
-          │   MySQL 8.x    │    │   Redis 7.x      │
-          │  (메인 DB)      │    │  (캐시/세션)      │
-          └────────────────┘    └─────────────────┘
+사용자/관리자 브라우저
+        │
+        ▼
+┌───────────────────────┐
+│  Vercel (Next.js 14)  │  https://church-community-zeta.vercel.app
+│  - 사용자 사이트        │  /
+│  - 관리자 사이트        │  /admin/*
+└──────────┬────────────┘
+           │ API 요청 (/api/v1/*)
+           ▼
+┌───────────────────────┐
+│  Fly.io (Spring Boot) │  https://churchhub-backend.fly.dev
+│  - REST API           │
+│  - JWT 인증/인가       │
+└────┬──────────────────┘
+     │              │
+     ▼              ▼
+┌─────────┐   ┌──────────┐
+│Supabase │   │ Upstash  │
+│(PostgreSQL) │  (Redis) │
+│ 메인 DB  │   │ 토큰 블랙 │
+│          │   │ 리스트   │
+└─────────┘   └──────────┘
 ```
 
-## 모노레포 구조 (Monorepo)
+## 모노레포 구조
 
 ```
 church-community/
 ├── backend/                          # Spring Boot API 서버
-│   ├── src/
-│   │   ├── main/
-│   │   │   ├── java/com/churchhub/
-│   │   │   │   ├── ChurchHubApplication.java
-│   │   │   │   ├── config/           # 설정 클래스 (Security, Redis, CORS 등)
-│   │   │   │   ├── domain/           # 도메인 엔티티
-│   │   │   │   │   ├── user/
-│   │   │   │   │   ├── board/
-│   │   │   │   │   ├── event/
-│   │   │   │   │   ├── comment/
-│   │   │   │   │   ├── category/
-│   │   │   │   │   └── notification/
-│   │   │   │   ├── api/              # REST 컨트롤러
-│   │   │   │   │   ├── user/
-│   │   │   │   │   ├── board/
-│   │   │   │   │   ├── event/
-│   │   │   │   │   └── admin/
-│   │   │   │   ├── service/          # 비즈니스 로직
-│   │   │   │   ├── repository/       # JPA Repository
-│   │   │   │   ├── dto/              # Data Transfer Objects
-│   │   │   │   ├── exception/        # 예외 처리
-│   │   │   │   ├── security/         # JWT, Security 관련
-│   │   │   │   └── common/           # 공통 유틸, 응답 형식
-│   │   │   └── resources/
-│   │   │       ├── application.yml
-│   │   │       ├── application-dev.yml
-│   │   │       └── application-prod.yml
-│   │   └── test/
+│   ├── src/main/java/com/churchhub/
+│   │   ├── ChurchHubApplication.java
+│   │   ├── config/                   # SecurityConfig, RedisConfig, CorsConfig 등
+│   │   ├── domain/
+│   │   │   ├── user/
+│   │   │   │   ├── entity/User.java
+│   │   │   │   ├── repository/UserRepository.java
+│   │   │   │   ├── service/UserService.java
+│   │   │   │   ├── dto/UserDto.java
+│   │   │   │   └── api/UserController.java
+│   │   │   ├── board/               # Post (게시글)
+│   │   │   ├── comment/
+│   │   │   ├── category/
+│   │   │   ├── report/              # 신고
+│   │   │   └── notification/
+│   │   ├── security/                # JwtTokenProvider, JwtAuthenticationFilter
+│   │   └── exception/               # GlobalExceptionHandler, ErrorCode
 │   ├── build.gradle
-│   └── Dockerfile
+│   ├── Dockerfile
+│   └── fly.toml
 │
-├── frontend-user/                    # 사용자 사이트 (Next.js)
+├── frontend/                         # Next.js 14 (사용자 + 관리자 통합)
 │   ├── src/
-│   │   ├── app/                      # Next.js App Router
-│   │   │   ├── (auth)/               # 인증 관련 페이지
-│   │   │   │   ├── login/
-│   │   │   │   └── register/
-│   │   │   ├── (main)/               # 메인 레이아웃
-│   │   │   │   ├── board/            # 커뮤니티 게시판
-│   │   │   │   ├── event/            # 행사
-│   │   │   │   ├── local/            # 지역 홍보
-│   │   │   │   └── profile/          # 프로필
+│   │   ├── app/
+│   │   │   ├── (site)/               # 사용자 레이아웃 그룹
+│   │   │   │   ├── posts/            # 게시글 목록/상세
+│   │   │   │   └── layout.tsx
+│   │   │   ├── (auth)/               # 로그인/회원가입
+│   │   │   ├── admin/                # 관리자 페이지 (/admin/*)
+│   │   │   │   ├── users/
+│   │   │   │   ├── posts/
+│   │   │   │   ├── categories/
+│   │   │   │   └── reports/
 │   │   │   └── layout.tsx
-│   │   ├── components/
-│   │   ├── hooks/
-│   │   ├── lib/                      # API 클라이언트, 유틸
-│   │   ├── store/                    # Zustand 상태
-│   │   └── types/
-│   ├── package.json
-│   └── Dockerfile
+│   │   ├── components/               # 공통 컴포넌트
+│   │   ├── store/                    # Zustand 스토어
+│   │   └── lib/                      # API 클라이언트, 유틸
+│   └── package.json
 │
-├── frontend-admin/                   # 관리자 사이트 (React + Vite)
-│   ├── src/
-│   │   ├── pages/
-│   │   │   ├── Dashboard/
-│   │   │   ├── Users/
-│   │   │   ├── Boards/
-│   │   │   ├── Events/
-│   │   │   └── Reports/
-│   │   ├── components/
-│   │   ├── hooks/
-│   │   ├── api/
-│   │   └── store/
-│   ├── package.json
-│   └── Dockerfile
+├── .github/workflows/
+│   └── deploy-backend.yml            # GitHub Actions (Fly.io 자동 배포)
 │
-├── docs/                             # 프로젝트 문서
-├── docker-compose.yml                # 로컬 개발 환경
-├── docker-compose.prod.yml           # 운영 환경
-└── README.md
+└── docs/
 ```
 
 ## API 설계 원칙
 
-- RESTful API 설계
-- 모든 API 응답은 공통 포맷 사용
-- JWT Access Token (15분) + Refresh Token (7일) 방식
+- RESTful API
+- JWT Access Token (1시간) + Refresh Token (7일)
 - API 버전 관리: `/api/v1/...`
-- 관리자 API 분리: `/api/v1/admin/...`
+- 관리자 API: `/api/v1/admin/...`
 
 ### 공통 응답 형식
 ```json
 {
   "success": true,
   "message": "요청이 성공적으로 처리되었습니다.",
-  "data": { ... },
-  "timestamp": "2026-01-01T00:00:00Z"
+  "data": { ... }
 }
 ```
 
@@ -142,7 +99,6 @@ church-community/
 {
   "success": false,
   "message": "오류 메시지",
-  "errorCode": "USER_NOT_FOUND",
-  "timestamp": "2026-01-01T00:00:00Z"
+  "errorCode": "USER_NOT_FOUND"
 }
 ```
