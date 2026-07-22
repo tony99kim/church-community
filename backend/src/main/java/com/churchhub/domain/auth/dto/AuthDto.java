@@ -26,6 +26,7 @@ public class AuthDto {
         @Size(min = 2, max = 20, message = "닉네임은 2~20자여야 합니다.")
         private String nickname;
 
+        @NotBlank(message = "전화번호를 입력해주세요.")
         private String phone;
     }
 

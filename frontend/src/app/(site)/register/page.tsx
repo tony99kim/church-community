@@ -66,8 +66,7 @@ export default function RegisterPage() {
     setLoading(true);
     setError('');
     try {
-      const body: Record<string, string> = { email: form.email, password: form.password, nickname: form.nickname };
-      if (form.phone) body.phone = form.phone;
+      const body: Record<string, string> = { email: form.email, password: form.password, nickname: form.nickname, phone: form.phone };
       await api.post('/auth/register', body);
       router.push('/login?registered=1');
     } catch (err: unknown) {
@@ -151,13 +150,14 @@ export default function RegisterPage() {
 
             {/* 전화번호 */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">전화번호 <span className="text-gray-400 font-normal">(선택)</span></label>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">전화번호 <span className="text-red-500">*</span></label>
               <input
                 type="tel"
                 value={form.phone}
                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
                 placeholder="010-0000-0000"
                 className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478] transition"
+                required
               />
             </div>
 
