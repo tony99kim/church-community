@@ -153,8 +153,8 @@ export default function AdminCategoriesPage() {
     finally { setSeeding(null); }
   };
 
-  const localParents = categories.filter((c) => c.type === 'LOCAL' && !c.parentId);
-  const rootCategories = categories.filter((c) => !c.parentId);
+  const localParents = categories.filter((c) => c.type === 'LOCAL' && !c.parentId).sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+  const rootCategories = categories.filter((c) => !c.parentId).sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
   const nonLocalRoots = rootCategories.filter((c) => c.type !== 'LOCAL');
 
   return (
