@@ -65,6 +65,12 @@ export default function EventDetailPage() {
       </Link>
 
       <article className="bg-white border border-[#EDEFF1] rounded-xl overflow-hidden">
+        {event.thumbnailUrl && (
+          <div className="w-full h-52 overflow-hidden">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={event.thumbnailUrl} alt={event.title} className="w-full h-full object-cover" />
+          </div>
+        )}
         <div className="px-6 pt-6 pb-4 border-b border-[#EDEFF1]">
           <div className="flex items-center gap-2 mb-3">
             <span className="text-xs bg-blue-50 text-[#003478] border border-blue-100 px-2.5 py-1 rounded font-bold">
@@ -97,7 +103,10 @@ export default function EventDetailPage() {
         </div>
 
         <div className="px-6 py-6">
-          <p className="text-gray-800 leading-loose whitespace-pre-wrap text-sm">{event.description}</p>
+          <div
+            className="prose prose-sm max-w-none text-gray-800"
+            dangerouslySetInnerHTML={{ __html: event.description }}
+          />
         </div>
 
         {canJoin && (

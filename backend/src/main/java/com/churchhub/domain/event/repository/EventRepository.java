@@ -5,8 +5,19 @@ import com.churchhub.domain.event.entity.EventStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface EventRepository extends JpaRepository<Event, Long> {
     Page<Event> findAllByStatusNot(EventStatus status, Pageable pageable);
     long countByStatus(EventStatus status);
+
+    @Modifying
+    @Query("UPDATE Event e SET e.currentParticipants = e.currentParticipants + 1 WHERE e.id = :eventId")
+    void incrementParticipants(@Param("eventId") Long eventId);
+
+    @Modifying
+    @Query("UPDATE Event e SET e.currentParticipants = GREATEST(0, e.currentParticipants - 1) WHERE e.id = :eventId")
+    void decrementParticipants(@Param("eventId") Long eventId);
 }

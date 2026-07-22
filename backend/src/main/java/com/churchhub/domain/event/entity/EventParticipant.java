@@ -42,5 +42,7 @@ public class EventParticipant {
         this.user = user;
     }
 
+    public boolean isRegistered() { return this.status == EventParticipantStatus.REGISTERED; }
     public void cancel() { this.status = EventParticipantStatus.CANCELLED; }
+    public void register() { this.status = EventParticipantStatus.REGISTERED; }
 }

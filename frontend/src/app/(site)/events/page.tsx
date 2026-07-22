@@ -59,27 +59,31 @@ export default function EventsPage() {
             <Link
               key={event.id}
               href={`/events/${event.id}`}
-              className="block bg-white border border-[#EDEFF1] rounded-xl p-5 hover:border-[#003478] hover:shadow-sm transition"
+              className="block bg-white border border-[#EDEFF1] rounded-xl overflow-hidden hover:border-[#003478] hover:shadow-sm transition"
             >
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className={`text-xs px-2 py-0.5 rounded border font-medium ${STATUS_COLOR[event.status]}`}>
-                      {STATUS_LABEL[event.status]}
-                    </span>
-                    <h2 className="text-sm font-bold text-gray-900 truncate">{event.title}</h2>
-                  </div>
-                  <div className="flex items-center gap-3 text-xs text-gray-400 flex-wrap">
-                    <span>📍 {event.location}</span>
-                    <span>·</span>
-                    <span>📅 {new Date(event.startDate).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' })}</span>
-                    {event.maxParticipants !== null && (
-                      <>
-                        <span>·</span>
-                        <span>👥 {event.currentParticipants}/{event.maxParticipants}명</span>
-                      </>
-                    )}
-                  </div>
+              {event.thumbnailUrl && (
+                <div className="w-full h-36 overflow-hidden">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={event.thumbnailUrl} alt={event.title} className="w-full h-full object-cover" />
+                </div>
+              )}
+              <div className="p-5">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className={`text-xs px-2 py-0.5 rounded border font-medium ${STATUS_COLOR[event.status]}`}>
+                    {STATUS_LABEL[event.status]}
+                  </span>
+                  <h2 className="text-sm font-bold text-gray-900 truncate">{event.title}</h2>
+                </div>
+                <div className="flex items-center gap-3 text-xs text-gray-400 flex-wrap">
+                  <span>📍 {event.location}</span>
+                  <span>·</span>
+                  <span>📅 {new Date(event.startDate).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' })}</span>
+                  {event.maxParticipants !== null && (
+                    <>
+                      <span>·</span>
+                      <span>👥 {event.currentParticipants}/{event.maxParticipants}명</span>
+                    </>
+                  )}
                 </div>
               </div>
             </Link>

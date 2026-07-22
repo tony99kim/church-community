@@ -74,12 +74,18 @@ public class EventService {
     public void joinEvent(Long eventId, Long userId) {
         Event event = getEventOrThrow(eventId);
         if (event.isFull()) throw new BusinessException(ErrorCode.EVENT_FULL);
-        if (participantRepository.existsByEventIdAndUserIdAndStatus(eventId, userId, EventParticipantStatus.REGISTERED)) {
-            throw new BusinessException(ErrorCode.EVENT_ALREADY_JOINED);
-        }
-        User user = userRepository.getReferenceById(userId);
-        participantRepository.save(EventParticipant.builder().event(event).user(user).build());
-        event.incrementParticipants();
+
+        participantRepository.findByEventIdAndUserId(eventId, userId).ifPresentOrElse(
+            existing -> {
+                if (existing.isRegistered()) throw new BusinessException(ErrorCode.EVENT_ALREADY_JOINED);
+                existing.register();
+            },
+            () -> {
+                User user = userRepository.getReferenceById(userId);
+                participantRepository.save(EventParticipant.builder().event(event).user(user).build());
+            }
+        );
+        eventRepository.incrementParticipants(eventId);
     }
 
     @Transactional
@@ -88,7 +94,7 @@ public class EventService {
                 .findByEventIdAndUserIdAndStatus(eventId, userId, EventParticipantStatus.REGISTERED)
                 .orElseThrow(() -> new BusinessException(ErrorCode.EVENT_NOT_JOINED));
         participant.cancel();
-        getEventOrThrow(eventId).decrementParticipants();
+        eventRepository.decrementParticipants(eventId);
     }
 
     private Event getEventOrThrow(Long eventId) {

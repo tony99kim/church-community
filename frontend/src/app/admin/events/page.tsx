@@ -1,9 +1,12 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
 import api from '@/lib/api';
 import type { Event } from '@/types';
 import { uploadImage } from '@/lib/supabase';
+
+const RichEditor = dynamic(() => import('@/components/RichEditor'), { ssr: false });
 
 const STATUS_LABEL: Record<string, string> = {
   UPCOMING: '예정', ONGOING: '진행 중', ENDED: '종료', CANCELLED: '취소',
@@ -150,13 +153,13 @@ export default function AdminEventsPage() {
 
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">내용</label>
-                <textarea
-                  value={form.description}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  rows={4}
-                  className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478] resize-none"
-                  required
-                />
+                <div className="border border-gray-300 rounded-xl overflow-hidden">
+                  <RichEditor
+                    content={form.description}
+                    onChange={(html) => setForm((f) => ({ ...f, description: html }))}
+                    placeholder="행사 내용을 입력하세요..."
+                  />
+                </div>
               </div>
               <div className="flex gap-2 justify-end pt-2">
                 <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 text-sm border border-gray-300 rounded-xl hover:bg-gray-50">
