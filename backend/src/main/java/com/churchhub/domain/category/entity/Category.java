@@ -45,6 +45,7 @@ public class Category {
         this.description = description;
         this.type = type;
         this.sortOrder = sortOrder;
+        this.visible = true;
     }
 
     public void update(String name, String description, CategoryType type, boolean visible, int sortOrder) {
