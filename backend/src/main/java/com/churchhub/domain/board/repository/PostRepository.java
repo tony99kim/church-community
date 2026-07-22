@@ -33,8 +33,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Page<Post> findAllByAuthorIdAndStatus(Long authorId, PostStatus status, Pageable pageable);
 
     @Modifying
-    @Query("UPDATE Post p SET p.commentCount = p.commentCount - 1 WHERE p.id = :postId AND p.commentCount > 0")
-    void decrementCommentCount(@Param("postId") Long postId);
+    @Query("UPDATE Post p SET p.commentCount = GREATEST(0, p.commentCount - :count) WHERE p.id = :postId")
+    void decrementCommentCount(@Param("postId") Long postId, @Param("count") int count);
 
     @Modifying
     @Query("UPDATE Post p SET p.commentCount = p.commentCount + 1 WHERE p.id = :postId")

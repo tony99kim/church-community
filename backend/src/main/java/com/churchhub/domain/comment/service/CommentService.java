@@ -89,7 +89,14 @@ public class CommentService {
         if (!isAdmin && !comment.isAuthor(userId)) {
             throw new BusinessException(ErrorCode.COMMENT_ACCESS_DENIED);
         }
-        postRepository.decrementCommentCount(comment.getPost().getId());
+        Long postId = comment.getPost().getId();
+        int totalDecrement = 1;
+        if (comment.getParent() == null) {
+            List<Comment> replies = commentRepository.findRepliesByParentId(commentId, CommentStatus.ACTIVE);
+            replies.forEach(Comment::delete);
+            totalDecrement += replies.size();
+        }
+        postRepository.decrementCommentCount(postId, totalDecrement);
         comment.delete();
     }
 
