@@ -37,12 +37,22 @@ public class PostService {
     public Page<PostDto.Summary> getPosts(Long categoryId, String keyword, Pageable pageable) {
         boolean hasKeyword = keyword != null && !keyword.isBlank();
         Page<Post> posts;
-        if (hasKeyword && categoryId != null) {
-            posts = postRepository.searchByKeywordAndCategory(PostStatus.ACTIVE, keyword, categoryId, pageable);
+        if (categoryId != null) {
+            // 부모 카테고리(자식 없는지 확인)인지 체크 — LOCAL 시/도 클릭 시 자식 글 포함
+            boolean isParent = categoryRepository.findById(categoryId)
+                    .map(c -> c.getParent() == null && !c.getChildren().isEmpty())
+                    .orElse(false);
+            if (hasKeyword) {
+                posts = isParent
+                        ? postRepository.searchByKeywordAndCategoryOrParent(PostStatus.ACTIVE, keyword, categoryId, pageable)
+                        : postRepository.searchByKeywordAndCategory(PostStatus.ACTIVE, keyword, categoryId, pageable);
+            } else {
+                posts = isParent
+                        ? postRepository.findAllByStatusAndCategoryIdOrParent(PostStatus.ACTIVE, categoryId, pageable)
+                        : postRepository.findAllByStatusAndCategoryId(PostStatus.ACTIVE, categoryId, pageable);
+            }
         } else if (hasKeyword) {
             posts = postRepository.searchByKeyword(PostStatus.ACTIVE, keyword, pageable);
-        } else if (categoryId != null) {
-            posts = postRepository.findAllByStatusAndCategoryId(PostStatus.ACTIVE, categoryId, pageable);
         } else {
             posts = postRepository.findAllByStatus(PostStatus.ACTIVE, pageable);
         }

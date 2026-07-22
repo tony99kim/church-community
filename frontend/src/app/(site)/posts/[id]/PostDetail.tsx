@@ -10,7 +10,8 @@ import ReportModal from '@/components/ReportModal';
 import type { Post, Comment } from '@/types';
 
 function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString('ko-KR', {
+  const d = new Date(dateStr.includes('Z') || dateStr.includes('+') ? dateStr : dateStr + 'Z');
+  return d.toLocaleDateString('ko-KR', {
     year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit',
   });
 }

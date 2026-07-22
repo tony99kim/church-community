@@ -15,6 +15,13 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     Page<Post> findAllByStatusAndCategoryId(PostStatus status, Long categoryId, Pageable pageable);
 
+    // 부모 카테고리 클릭 시 자식 카테고리 글까지 포함
+    @Query("SELECT p FROM Post p WHERE p.status = :status AND (p.category.id = :categoryId OR p.category.parent.id = :categoryId) ORDER BY p.createdAt DESC")
+    Page<Post> findAllByStatusAndCategoryIdOrParent(@Param("status") PostStatus status, @Param("categoryId") Long categoryId, Pageable pageable);
+
+    @Query("SELECT p FROM Post p WHERE p.status = :status AND (p.category.id = :categoryId OR p.category.parent.id = :categoryId) AND (p.title LIKE %:keyword% OR p.content LIKE %:keyword%)")
+    Page<Post> searchByKeywordAndCategoryOrParent(@Param("status") PostStatus status, @Param("keyword") String keyword, @Param("categoryId") Long categoryId, Pageable pageable);
+
     Page<Post> findAllByStatus(PostStatus status, Pageable pageable);
 
     @Query("SELECT p FROM Post p WHERE p.status = :status AND " +
