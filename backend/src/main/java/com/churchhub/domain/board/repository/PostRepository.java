@@ -22,6 +22,13 @@ public interface PostRepository extends JpaRepository<Post, Long> {
                                @Param("keyword") String keyword,
                                Pageable pageable);
 
+    @Query("SELECT p FROM Post p WHERE p.status = :status AND p.category.id = :categoryId AND " +
+           "(p.title LIKE %:keyword% OR p.content LIKE %:keyword%)")
+    Page<Post> searchByKeywordAndCategory(@Param("status") PostStatus status,
+                                          @Param("keyword") String keyword,
+                                          @Param("categoryId") Long categoryId,
+                                          Pageable pageable);
+
     Page<Post> findAllByAuthorIdAndStatus(Long authorId, PostStatus status, Pageable pageable);
 
     long countByStatus(PostStatus status);

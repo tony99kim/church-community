@@ -35,8 +35,11 @@ public class PostService {
     private final NotificationService notificationService;
 
     public Page<PostDto.Summary> getPosts(Long categoryId, String keyword, Pageable pageable) {
+        boolean hasKeyword = keyword != null && !keyword.isBlank();
         Page<Post> posts;
-        if (keyword != null && !keyword.isBlank()) {
+        if (hasKeyword && categoryId != null) {
+            posts = postRepository.searchByKeywordAndCategory(PostStatus.ACTIVE, keyword, categoryId, pageable);
+        } else if (hasKeyword) {
             posts = postRepository.searchByKeyword(PostStatus.ACTIVE, keyword, pageable);
         } else if (categoryId != null) {
             posts = postRepository.findAllByStatusAndCategoryId(PostStatus.ACTIVE, categoryId, pageable);

@@ -62,11 +62,13 @@ function PostsContent() {
             <h1 className="text-lg font-bold text-gray-900">
               {activeCategoryName ?? '전체 게시판'}
             </h1>
-            <p className="text-xs text-gray-400 mt-0.5">게시글 {totalElements.toLocaleString()}개</p>
+            <p className="text-xs text-gray-400 mt-0.5">
+              {keyword ? `"${keyword}" 검색 결과 ${totalElements.toLocaleString()}개` : `게시글 ${totalElements.toLocaleString()}개`}
+            </p>
           </div>
         </div>
 
-        <form onSubmit={handleSearch} className="flex gap-2 mb-4">
+        <form onSubmit={handleSearch} className="flex gap-2 mb-3">
           <div className="relative flex-1">
             <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -74,14 +76,33 @@ function PostsContent() {
             <input
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              placeholder="검색어 입력"
-              className="w-full bg-white border border-[#EDEFF1] rounded-full px-4 py-2 pl-9 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478] focus:border-transparent"
+              placeholder="제목 또는 내용 검색"
+              className="w-full bg-white border border-[#EDEFF1] rounded-full px-4 py-2 pl-9 pr-9 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478] focus:border-transparent"
             />
+            {searchInput && (
+              <button
+                type="button"
+                onClick={() => { setSearchInput(''); setKeyword(''); setPage(0); }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-500"
+              >
+                ✕
+              </button>
+            )}
           </div>
           <button type="submit" className="bg-[#003478] text-white px-5 py-2 rounded-full text-sm font-bold hover:bg-[#002560] transition">
             검색
           </button>
         </form>
+
+        {keyword && (
+          <div className="flex items-center gap-2 mb-3 text-sm text-gray-500">
+            <span>검색:</span>
+            <span className="bg-blue-50 text-[#003478] border border-blue-100 px-2.5 py-0.5 rounded-full text-xs font-medium flex items-center gap-1.5">
+              {keyword}
+              <button onClick={() => { setKeyword(''); setSearchInput(''); setPage(0); }} className="text-gray-400 hover:text-gray-600">✕</button>
+            </span>
+          </div>
+        )}
 
         <div className="bg-white border border-[#EDEFF1] rounded-xl overflow-hidden mb-4">
           <div className="hidden md:grid grid-cols-[1fr_auto] gap-4 px-4 py-2.5 border-b border-[#EDEFF1] bg-gray-50">
