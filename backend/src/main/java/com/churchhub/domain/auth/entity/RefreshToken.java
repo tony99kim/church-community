@@ -1,23 +1,33 @@
 package com.churchhub.domain.auth.entity;
 
-import lombok.AllArgsConstructor;
+import jakarta.persistence.*;
 import lombok.Getter;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.redis.core.RedisHash;
-import org.springframework.data.redis.core.TimeToLive;
-import org.springframework.data.redis.core.index.Indexed;
+import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "refresh_tokens", indexes = @Index(columnList = "userId"))
 @Getter
-@AllArgsConstructor
-@RedisHash("refresh_token")
+@NoArgsConstructor
 public class RefreshToken {
 
     @Id
     private String token;
 
-    @Indexed
+    @Column(nullable = false)
     private Long userId;
 
-    @TimeToLive
-    private Long expiration;
+    @Column(nullable = false)
+    private LocalDateTime expiresAt;
+
+    public RefreshToken(String token, Long userId, long ttlSeconds) {
+        this.token = token;
+        this.userId = userId;
+        this.expiresAt = LocalDateTime.now().plusSeconds(ttlSeconds);
+    }
+
+    public boolean isExpired() {
+        return LocalDateTime.now().isAfter(expiresAt);
+    }
 }

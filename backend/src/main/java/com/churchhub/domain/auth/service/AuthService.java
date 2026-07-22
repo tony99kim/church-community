@@ -87,6 +87,11 @@ public class AuthService {
         RefreshToken savedToken = refreshTokenRepository.findById(refreshTokenValue)
                 .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_TOKEN));
 
+        if (savedToken.isExpired()) {
+            refreshTokenRepository.delete(savedToken);
+            throw new BusinessException(ErrorCode.INVALID_TOKEN);
+        }
+
         Long userId = savedToken.getUserId();
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
