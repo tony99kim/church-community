@@ -7,6 +7,8 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "categories")
@@ -32,6 +34,14 @@ public class Category {
 
     private int sortOrder = 0;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    private Category parent;
+
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
+    @OrderBy("sortOrder ASC")
+    private List<Category> children = new ArrayList<>();
+
     @CreatedDate
     @Column(updatable = false)
     private LocalDateTime createdAt;
@@ -40,12 +50,13 @@ public class Category {
     private LocalDateTime updatedAt;
 
     @Builder
-    public Category(String name, String description, CategoryType type, int sortOrder) {
+    public Category(String name, String description, CategoryType type, int sortOrder, Category parent) {
         this.name = name;
         this.description = description;
         this.type = type;
         this.sortOrder = sortOrder;
         this.visible = true;
+        this.parent = parent;
     }
 
     public void update(String name, String description, CategoryType type, boolean visible, int sortOrder) {
@@ -54,5 +65,9 @@ public class Category {
         this.type = type;
         this.visible = visible;
         this.sortOrder = sortOrder;
+    }
+
+    public Long getParentId() {
+        return parent != null ? parent.getId() : null;
     }
 }

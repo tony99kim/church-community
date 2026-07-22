@@ -7,16 +7,16 @@ import dynamic from 'next/dynamic';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
 import { uploadImage } from '@/lib/supabase';
+import type { Category } from '@/types';
 
 const RichEditor = dynamic(() => import('@/components/RichEditor'), { ssr: false });
-
-interface Category { id: number; name: string; }
 
 export default function WritePostPage() {
   const router = useRouter();
   const { isLoggedIn, hydrated } = useAuthStore();
   const [categories, setCategories] = useState<Category[]>([]);
   const [form, setForm] = useState({ title: '', content: '', categoryId: '', thumbnailUrl: '' });
+  const [subCategoryId, setSubCategoryId] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [thumbUploading, setThumbUploading] = useState(false);
@@ -26,10 +26,29 @@ export default function WritePostPage() {
     if (!hydrated) return;
     if (!isLoggedIn) { router.push('/login'); return; }
     api.get('/categories').then((res) => {
-      setCategories(res.data.data);
-      if (res.data.data.length > 0) setForm((f) => ({ ...f, categoryId: String(res.data.data[0].id) }));
+      const all: Category[] = res.data.data;
+      setCategories(all);
+      // 최상위 카테고리 중 첫 번째를 기본값으로
+      const first = all.find((c) => !c.parentId);
+      if (first) setForm((f) => ({ ...f, categoryId: String(first.id) }));
     });
   }, [hydrated, isLoggedIn]);
+
+  // 선택된 카테고리 정보
+  const selectedCat = categories.find((c) => String(c.id) === form.categoryId);
+  const isLocalParent = selectedCat?.type === 'LOCAL' && !selectedCat?.parentId;
+  const childCategories = isLocalParent
+    ? categories.filter((c) => c.parentId === selectedCat.id)
+    : [];
+
+  // LOCAL 부모 선택 시 첫 번째 자식을 기본값으로
+  useEffect(() => {
+    if (isLocalParent && childCategories.length > 0) {
+      setSubCategoryId(String(childCategories[0].id));
+    } else {
+      setSubCategoryId('');
+    }
+  }, [form.categoryId]);
 
   const handleThumb = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -48,10 +67,19 @@ export default function WritePostPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // LOCAL 부모 선택 시 자식(구) ID를 실제 categoryId로 사용
+    const finalCategoryId = isLocalParent && subCategoryId
+      ? Number(subCategoryId)
+      : Number(form.categoryId);
+
+    if (isLocalParent && !subCategoryId) {
+      setError('구/지역을 선택해주세요.');
+      return;
+    }
     setLoading(true);
     setError('');
     try {
-      const res = await api.post('/posts', { ...form, categoryId: Number(form.categoryId) });
+      const res = await api.post('/posts', { ...form, categoryId: finalCategoryId });
       router.push(`/posts/${res.data.data.id}`);
     } catch {
       setError('글 작성에 실패했습니다. 다시 시도해주세요.');
@@ -59,6 +87,9 @@ export default function WritePostPage() {
       setLoading(false);
     }
   };
+
+  // 드롭다운에 표시할 최상위 카테고리만
+  const rootCategories = categories.filter((c) => !c.parentId);
 
   return (
     <div className="bg-[#f4f6f8] min-h-screen">
@@ -74,18 +105,36 @@ export default function WritePostPage() {
         <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
           <form onSubmit={handleSubmit}>
             <div className="px-6 pt-6 pb-4 border-b border-gray-100 space-y-4">
-              <div className="flex items-center gap-3">
+              {/* 카테고리 */}
+              <div className="flex items-center gap-3 flex-wrap">
                 <label className="text-sm font-semibold text-gray-700 w-16 shrink-0">카테고리</label>
                 <select
                   value={form.categoryId}
                   onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
-                  className="border border-gray-300 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478] bg-white min-w-[160px]"
+                  className="border border-gray-300 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478] bg-white min-w-[140px]"
                 >
-                  {categories.map((cat) => (
+                  {rootCategories.map((cat) => (
                     <option key={cat.id} value={cat.id}>{cat.name}</option>
                   ))}
                 </select>
+
+                {/* LOCAL 부모 선택 시 구 드롭다운 */}
+                {isLocalParent && childCategories.length > 0 && (
+                  <select
+                    value={subCategoryId}
+                    onChange={(e) => setSubCategoryId(e.target.value)}
+                    className="border border-gray-300 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478] bg-white min-w-[120px]"
+                  >
+                    {childCategories.map((c) => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                )}
+                {isLocalParent && childCategories.length === 0 && (
+                  <span className="text-xs text-gray-400">등록된 지역이 없습니다</span>
+                )}
               </div>
+
               <div className="flex items-center gap-3">
                 <label className="text-sm font-semibold text-gray-700 w-16 shrink-0">제목</label>
                 <input
@@ -125,7 +174,6 @@ export default function WritePostPage() {
               </div>
             </div>
 
-            {/* 본문 에디터 */}
             <RichEditor
               content={form.content}
               onChange={(html) => setForm((f) => ({ ...f, content: html }))}

@@ -7,9 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -21,9 +19,21 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
-    @Operation(summary = "카테고리 목록 조회")
+    @Operation(summary = "카테고리 목록 (평탄)")
     @GetMapping
     public ResponseEntity<ApiResponse<List<CategoryDto.Response>>> getCategories() {
         return ResponseEntity.ok(ApiResponse.success(categoryService.getVisibleCategories()));
+    }
+
+    @Operation(summary = "카테고리 트리 (최상위 + 자식 포함)")
+    @GetMapping("/tree")
+    public ResponseEntity<ApiResponse<List<CategoryDto.Response>>> getCategoryTree() {
+        return ResponseEntity.ok(ApiResponse.success(categoryService.getVisibleCategoryTree()));
+    }
+
+    @Operation(summary = "자식 카테고리 목록 (구 단위)")
+    @GetMapping("/{parentId}/children")
+    public ResponseEntity<ApiResponse<List<CategoryDto.Response>>> getChildren(@PathVariable Long parentId) {
+        return ResponseEntity.ok(ApiResponse.success(categoryService.getChildCategories(parentId)));
     }
 }

@@ -7,10 +7,9 @@ import dynamic from 'next/dynamic';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
 import { uploadImage } from '@/lib/supabase';
+import type { Category } from '@/types';
 
 const RichEditor = dynamic(() => import('@/components/RichEditor'), { ssr: false });
-
-interface Category { id: number; name: string; }
 
 export default function EditPostPage() {
   const { id } = useParams();
@@ -18,6 +17,7 @@ export default function EditPostPage() {
   const { isLoggedIn, hydrated } = useAuthStore();
   const [categories, setCategories] = useState<Category[]>([]);
   const [form, setForm] = useState({ title: '', content: '', categoryId: '', thumbnailUrl: '' });
+  const [subCategoryId, setSubCategoryId] = useState('');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -29,16 +29,36 @@ export default function EditPostPage() {
     if (!isLoggedIn) { router.replace('/login'); return; }
     Promise.all([api.get(`/posts/${id}`), api.get('/categories')]).then(([postRes, catRes]) => {
       const post = postRes.data.data;
-      setCategories(catRes.data.data);
-      const matched = catRes.data.data.find((c: Category) => c.name === post.categoryName);
-      setForm({
-        title: post.title,
-        content: post.content,
-        categoryId: matched ? String(matched.id) : String(catRes.data.data[0]?.id ?? ''),
-        thumbnailUrl: post.thumbnailUrl ?? '',
-      });
+      const all: Category[] = catRes.data.data;
+      setCategories(all);
+
+      // 현재 게시글 카테고리 찾기
+      const matched = all.find((c: Category) => c.name === post.categoryName);
+      if (matched) {
+        if (matched.parentId) {
+          // 자식 카테고리면 부모를 선택, 자식을 sub로 설정
+          setForm({ title: post.title, content: post.content, categoryId: String(matched.parentId), thumbnailUrl: post.thumbnailUrl ?? '' });
+          setSubCategoryId(String(matched.id));
+        } else {
+          setForm({ title: post.title, content: post.content, categoryId: String(matched.id), thumbnailUrl: post.thumbnailUrl ?? '' });
+        }
+      } else {
+        const first = all.find((c: Category) => !c.parentId);
+        setForm({ title: post.title, content: post.content, categoryId: String(first?.id ?? ''), thumbnailUrl: post.thumbnailUrl ?? '' });
+      }
     }).finally(() => setLoading(false));
   }, [hydrated, isLoggedIn, id]);
+
+  const selectedCat = categories.find((c) => String(c.id) === form.categoryId);
+  const isLocalParent = selectedCat?.type === 'LOCAL' && !selectedCat?.parentId;
+  const childCategories = isLocalParent ? categories.filter((c) => c.parentId === selectedCat.id) : [];
+
+  useEffect(() => {
+    if (isLocalParent && childCategories.length > 0 && !subCategoryId) {
+      setSubCategoryId(String(childCategories[0].id));
+    }
+    if (!isLocalParent) setSubCategoryId('');
+  }, [form.categoryId]);
 
   const handleThumb = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -57,10 +77,12 @@ export default function EditPostPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const finalCategoryId = isLocalParent && subCategoryId ? Number(subCategoryId) : Number(form.categoryId);
+    if (isLocalParent && !subCategoryId) { setError('구/지역을 선택해주세요.'); return; }
     setSubmitting(true);
     setError('');
     try {
-      await api.put(`/posts/${id}`, { ...form, categoryId: Number(form.categoryId) });
+      await api.put(`/posts/${id}`, { ...form, categoryId: finalCategoryId });
       router.push(`/posts/${id}`);
     } catch {
       setError('수정에 실패했습니다. 다시 시도해주세요.');
@@ -68,6 +90,8 @@ export default function EditPostPage() {
       setSubmitting(false);
     }
   };
+
+  const rootCategories = categories.filter((c) => !c.parentId);
 
   if (loading) return <div className="p-12 text-center text-gray-400">불러오는 중...</div>;
 
@@ -85,18 +109,30 @@ export default function EditPostPage() {
         <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
           <form onSubmit={handleSubmit}>
             <div className="px-6 pt-6 pb-4 border-b border-gray-100 space-y-4">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-wrap">
                 <label className="text-sm font-semibold text-gray-700 w-16 shrink-0">카테고리</label>
                 <select
                   value={form.categoryId}
                   onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
-                  className="border border-gray-300 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478] bg-white min-w-[160px]"
+                  className="border border-gray-300 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478] bg-white min-w-[140px]"
                 >
-                  {categories.map((cat) => (
+                  {rootCategories.map((cat) => (
                     <option key={cat.id} value={cat.id}>{cat.name}</option>
                   ))}
                 </select>
+                {isLocalParent && childCategories.length > 0 && (
+                  <select
+                    value={subCategoryId}
+                    onChange={(e) => setSubCategoryId(e.target.value)}
+                    className="border border-gray-300 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478] bg-white min-w-[120px]"
+                  >
+                    {childCategories.map((c) => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                )}
               </div>
+
               <div className="flex items-center gap-3">
                 <label className="text-sm font-semibold text-gray-700 w-16 shrink-0">제목</label>
                 <input
@@ -108,7 +144,6 @@ export default function EditPostPage() {
                 />
               </div>
 
-              {/* 썸네일 */}
               <div className="flex items-start gap-3">
                 <label className="text-sm font-semibold text-gray-700 w-16 shrink-0 pt-1">썸네일</label>
                 <div className="flex items-center gap-3">

@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.jackson.Jacksonized;
 
+import java.util.List;
+
 public class CategoryDto {
 
     @Getter
@@ -18,6 +20,7 @@ public class CategoryDto {
         @NotNull(message = "카테고리 타입을 선택해주세요.")
         private CategoryType type;
         private int sortOrder;
+        private Long parentId;
     }
 
     @Getter
@@ -41,6 +44,8 @@ public class CategoryDto {
         private CategoryType type;
         private boolean visible;
         private int sortOrder;
+        private Long parentId;
+        private List<Response> children;
 
         public static Response from(Category category) {
             return Response.builder()
@@ -50,6 +55,24 @@ public class CategoryDto {
                     .type(category.getType())
                     .visible(category.isVisible())
                     .sortOrder(category.getSortOrder())
+                    .parentId(category.getParentId())
+                    .build();
+        }
+
+        public static Response fromWithChildren(Category category) {
+            List<Response> children = category.getChildren().stream()
+                    .filter(Category::isVisible)
+                    .map(Response::from)
+                    .toList();
+            return Response.builder()
+                    .id(category.getId())
+                    .name(category.getName())
+                    .description(category.getDescription())
+                    .type(category.getType())
+                    .visible(category.isVisible())
+                    .sortOrder(category.getSortOrder())
+                    .parentId(category.getParentId())
+                    .children(children)
                     .build();
         }
     }

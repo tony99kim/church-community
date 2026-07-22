@@ -33,6 +33,8 @@ export interface Category {
   type: string;
   visible?: boolean;
   sortOrder?: number;
+  parentId?: number | null;
+  children?: Category[];
 }
 
 export interface Event {
