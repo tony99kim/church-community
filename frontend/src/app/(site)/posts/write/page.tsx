@@ -13,7 +13,7 @@ const RichEditor = dynamic(() => import('@/components/RichEditor'), { ssr: false
 
 export default function WritePostPage() {
   const router = useRouter();
-  const { isLoggedIn, hydrated } = useAuthStore();
+  const { isLoggedIn, hydrated, user } = useAuthStore();
   const [categories, setCategories] = useState<Category[]>([]);
   const [form, setForm] = useState({ title: '', content: '', categoryId: '', thumbnailUrl: '' });
   const [subCategoryId, setSubCategoryId] = useState('');
@@ -88,8 +88,9 @@ export default function WritePostPage() {
     }
   };
 
-  // 드롭다운에 표시할 최상위 카테고리만
-  const rootCategories = categories.filter((c) => !c.parentId);
+  const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
+  // 드롭다운에 표시할 최상위 카테고리 (일반 유저는 NOTICE 제외)
+  const rootCategories = categories.filter((c) => !c.parentId && (isAdmin || c.type !== 'NOTICE'));
 
   return (
     <div className="bg-[#f4f6f8] min-h-screen">

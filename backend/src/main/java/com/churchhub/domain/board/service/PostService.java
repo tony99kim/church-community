@@ -65,6 +65,10 @@ public class PostService {
         Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.CATEGORY_NOT_FOUND));
 
+        if (category.getType() == com.churchhub.domain.category.entity.CategoryType.NOTICE && !user.isAdmin()) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
+
         Post post = Post.builder()
                 .author(user)
                 .category(category)
@@ -84,10 +88,14 @@ public class PostService {
             throw new BusinessException(ErrorCode.POST_ACCESS_DENIED);
         }
 
-        Category category = request.getCategoryId() != null
-                ? categoryRepository.findById(request.getCategoryId())
-                        .orElseThrow(() -> new BusinessException(ErrorCode.CATEGORY_NOT_FOUND))
-                : null;
+        Category category = null;
+        if (request.getCategoryId() != null) {
+            category = categoryRepository.findById(request.getCategoryId())
+                    .orElseThrow(() -> new BusinessException(ErrorCode.CATEGORY_NOT_FOUND));
+            if (category.getType() == com.churchhub.domain.category.entity.CategoryType.NOTICE && !post.getAuthor().isAdmin()) {
+                throw new BusinessException(ErrorCode.FORBIDDEN);
+            }
+        }
 
         post.update(
                 request.getTitle() != null ? request.getTitle() : post.getTitle(),

@@ -14,7 +14,7 @@ const RichEditor = dynamic(() => import('@/components/RichEditor'), { ssr: false
 export default function EditPostPage() {
   const { id } = useParams();
   const router = useRouter();
-  const { isLoggedIn, hydrated } = useAuthStore();
+  const { isLoggedIn, hydrated, user } = useAuthStore();
   const [categories, setCategories] = useState<Category[]>([]);
   const [form, setForm] = useState({ title: '', content: '', categoryId: '', thumbnailUrl: '' });
   const [subCategoryId, setSubCategoryId] = useState('');
@@ -91,7 +91,8 @@ export default function EditPostPage() {
     }
   };
 
-  const rootCategories = categories.filter((c) => !c.parentId);
+  const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
+  const rootCategories = categories.filter((c) => !c.parentId && (isAdmin || c.type !== 'NOTICE'));
 
   if (loading) return <div className="p-12 text-center text-gray-400">불러오는 중...</div>;
 
