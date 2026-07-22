@@ -2,7 +2,6 @@ package com.churchhub.domain.category.service;
 
 import com.churchhub.domain.category.dto.CategoryDto;
 import com.churchhub.domain.category.entity.Category;
-import com.churchhub.domain.category.entity.CategoryType;
 import com.churchhub.domain.category.repository.CategoryRepository;
 import com.churchhub.exception.BusinessException;
 import com.churchhub.exception.ErrorCode;
@@ -33,7 +32,7 @@ public class CategoryService {
 
     // LOCAL 타입 자식 카테고리 (구 단위)
     public List<CategoryDto.Response> getChildCategories(Long parentId) {
-        return categoryRepository.findByParentIdAndVisibleTrueOrderBySortOrderAsc(parentId)
+        return categoryRepository.findVisibleChildrenByParentId(parentId)
                 .stream().map(CategoryDto.Response::from).toList();
     }
 
