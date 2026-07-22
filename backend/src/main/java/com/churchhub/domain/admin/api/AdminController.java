@@ -6,6 +6,7 @@ import com.churchhub.domain.admin.service.AdminService;
 import com.churchhub.domain.category.dto.CategoryDto;
 import com.churchhub.domain.category.service.CategoryService;
 import com.churchhub.domain.event.dto.EventDto;
+import com.churchhub.domain.event.entity.EventStatus;
 import com.churchhub.domain.event.repository.EventParticipantRepository;
 import com.churchhub.domain.event.service.EventService;
 import com.churchhub.domain.report.dto.ReportDto;
@@ -113,6 +114,13 @@ public class AdminController {
         return ResponseEntity.ok(ApiResponse.success(categoryService.getAllCategories()));
     }
 
+    @Operation(summary = "행사 목록 조회 (관리자 - DRAFT 포함)")
+    @GetMapping("/events")
+    public ResponseEntity<ApiResponse<Page<EventDto.Response>>> getAdminEvents(
+            @PageableDefault(size = 50, sort = "createdAt", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(ApiResponse.success(eventService.getAllEventsForAdmin(pageable)));
+    }
+
     @Operation(summary = "행사 생성")
     @PostMapping("/events")
     public ResponseEntity<ApiResponse<EventDto.Response>> createEvent(
@@ -128,6 +136,15 @@ public class AdminController {
             @PathVariable Long eventId,
             @Valid @RequestBody EventDto.UpdateRequest request) {
         return ResponseEntity.ok(ApiResponse.success(eventService.updateEvent(eventId, request)));
+    }
+
+    @Operation(summary = "행사 상태만 변경")
+    @PatchMapping("/events/{eventId}/status")
+    public ResponseEntity<ApiResponse<Void>> changeEventStatus(
+            @PathVariable Long eventId,
+            @RequestBody java.util.Map<String, String> body) {
+        eventService.changeEventStatus(eventId, EventStatus.valueOf(body.get("status")));
+        return ResponseEntity.ok(ApiResponse.success(null));
     }
 
     @Operation(summary = "행사 삭제 (상태 CANCELLED)")

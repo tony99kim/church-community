@@ -9,12 +9,20 @@ import { uploadImage } from '@/lib/supabase';
 const RichEditor = dynamic(() => import('@/components/RichEditor'), { ssr: false });
 
 const STATUS_LABEL: Record<string, string> = {
-  UPCOMING: '예정', ONGOING: '진행 중', ENDED: '종료', CANCELLED: '취소',
+  DRAFT: '임시저장', UPCOMING: '예정', ONGOING: '진행 중', ENDED: '종료', CANCELLED: '취소',
+};
+
+const STATUS_COLOR: Record<string, string> = {
+  DRAFT: 'bg-gray-100 text-gray-500',
+  UPCOMING: 'bg-blue-50 text-blue-600',
+  ONGOING: 'bg-green-50 text-green-600',
+  ENDED: 'bg-gray-100 text-gray-400',
+  CANCELLED: 'bg-red-50 text-red-400',
 };
 
 const EMPTY_FORM = {
   title: '', description: '', location: '',
-  startDate: '', endDate: '', maxParticipants: '', thumbnailUrl: '',
+  startDate: '', endDate: '', maxParticipants: '', thumbnailUrl: '', status: 'DRAFT',
 };
 
 export default function AdminEventsPage() {
@@ -28,7 +36,7 @@ export default function AdminEventsPage() {
   const thumbRef = useRef<HTMLInputElement>(null);
 
   const fetchEvents = () =>
-    api.get('/events', { params: { page: 0, size: 50 } })
+    api.get('/admin/events', { params: { page: 0, size: 50 } })
       .then((r) => setEvents(r.data.data.content))
       .finally(() => setLoading(false));
 
@@ -60,8 +68,14 @@ export default function AdminEventsPage() {
       endDate: e.endDate.slice(0, 16),
       maxParticipants: e.maxParticipants?.toString() ?? '',
       thumbnailUrl: e.thumbnailUrl ?? '',
+      status: e.status,
     });
     setShowForm(true);
+  };
+
+  const handlePublish = async (id: number) => {
+    await api.patch(`/admin/events/${id}/status`, { status: 'UPCOMING' });
+    fetchEvents();
   };
 
   const handleSave = async (ev: React.FormEvent) => {
@@ -152,6 +166,20 @@ export default function AdminEventsPage() {
               </div>
 
               <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">공개 상태</label>
+                <select
+                  value={form.status}
+                  onChange={(e) => setForm((f) => ({ ...f, status: e.target.value }))}
+                  className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]"
+                >
+                  <option value="DRAFT">임시저장 (비공개)</option>
+                  <option value="UPCOMING">예정 (공개)</option>
+                  <option value="ONGOING">진행 중</option>
+                  <option value="ENDED">종료</option>
+                </select>
+              </div>
+
+              <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">내용</label>
                 <div className="border border-gray-300 rounded-xl overflow-hidden">
                   <RichEditor
@@ -204,13 +232,16 @@ export default function AdminEventsPage() {
                     {new Date(e.startDate).toLocaleDateString('ko-KR')}
                   </td>
                   <td className="px-4 py-3">
-                    <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded">{STATUS_LABEL[e.status]}</span>
+                    <span className={`text-xs px-2 py-0.5 rounded font-medium ${STATUS_COLOR[e.status]}`}>{STATUS_LABEL[e.status]}</span>
                   </td>
                   <td className="px-4 py-3 text-gray-500">
                     {e.currentParticipants}{e.maxParticipants ? `/${e.maxParticipants}` : ''}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-2 justify-end">
+                      {e.status === 'DRAFT' && (
+                        <button onClick={() => handlePublish(e.id)} className="text-xs text-green-600 hover:underline font-semibold">공개</button>
+                      )}
                       <button onClick={() => openEdit(e)} className="text-xs text-[#003478] hover:underline">수정</button>
                       <button onClick={() => handleDelete(e.id)} className="text-xs text-red-500 hover:underline">삭제</button>
                     </div>

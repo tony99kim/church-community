@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface EventRepository extends JpaRepository<Event, Long> {
-    Page<Event> findAllByStatusNot(EventStatus status, Pageable pageable);
+    Page<Event> findAllByStatusNotIn(java.util.List<EventStatus> statuses, Pageable pageable);
     long countByStatus(EventStatus status);
 
     @Modifying

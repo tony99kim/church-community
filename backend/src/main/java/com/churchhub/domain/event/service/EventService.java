@@ -14,6 +14,7 @@ import com.churchhub.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,8 +27,14 @@ public class EventService {
     private final EventParticipantRepository participantRepository;
     private final UserRepository userRepository;
 
+    public Page<EventDto.Response> getAllEventsForAdmin(Pageable pageable) {
+        return eventRepository.findAll(pageable)
+                .map(e -> EventDto.Response.from(e, false));
+    }
+
     public Page<EventDto.Response> getEvents(Pageable pageable) {
-        return eventRepository.findAllByStatusNot(EventStatus.CANCELLED, pageable)
+        return eventRepository.findAllByStatusNotIn(
+                List.of(EventStatus.CANCELLED, EventStatus.DRAFT), pageable)
                 .map(e -> EventDto.Response.from(e, false));
     }
 
@@ -68,6 +75,11 @@ public class EventService {
     @Transactional
     public void deleteEvent(Long eventId) {
         getEventOrThrow(eventId).changeStatus(EventStatus.CANCELLED);
+    }
+
+    @Transactional
+    public void changeEventStatus(Long eventId, EventStatus status) {
+        getEventOrThrow(eventId).changeStatus(status);
     }
 
     @Transactional

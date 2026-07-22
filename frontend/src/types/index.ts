@@ -45,7 +45,7 @@ export interface Event {
   maxParticipants: number | null;
   currentParticipants: number;
   thumbnailUrl: string | null;
-  status: 'UPCOMING' | 'ONGOING' | 'ENDED' | 'CANCELLED';
+  status: 'DRAFT' | 'UPCOMING' | 'ONGOING' | 'ENDED' | 'CANCELLED';
   authorNickname: string;
   joined?: boolean;
   createdAt: string;
