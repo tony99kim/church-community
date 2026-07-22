@@ -45,10 +45,17 @@ public class UploadController {
                 file.getContentType() != null ? file.getContentType() : "application/octet-stream"));
 
         HttpEntity<byte[]> entity = new HttpEntity<>(file.getBytes(), headers);
-        restTemplate.exchange(uploadUrl, HttpMethod.POST, entity, String.class);
-
-        String publicUrl = supabaseUrl + "/storage/v1/object/public/" + bucket + "/" + path;
-        return ResponseEntity.ok(ApiResponse.success(Map.of("url", publicUrl)));
+        Exception lastError = null;
+        for (int attempt = 0; attempt < 2; attempt++) {
+            try {
+                restTemplate.exchange(uploadUrl, HttpMethod.POST, entity, String.class);
+                String publicUrl = supabaseUrl + "/storage/v1/object/public/" + bucket + "/" + path;
+                return ResponseEntity.ok(ApiResponse.success(Map.of("url", publicUrl)));
+            } catch (Exception e) {
+                lastError = e;
+            }
+        }
+        throw lastError;
     }
 
     private String getExtension(String filename) {
