@@ -220,12 +220,22 @@ export default function PostDetailClient() {
 
         <article className="bg-white border border-[#EDEFF1] rounded-xl overflow-hidden mb-4">
           <div className="px-6 pt-6 pb-4 border-b border-[#EDEFF1]">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-xs bg-blue-50 text-[#003478] border border-blue-100 px-2.5 py-1 rounded font-bold">
-                {post.categoryName}
-              </span>
+            <div className="flex items-start gap-4">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-xs bg-blue-50 text-[#003478] border border-blue-100 px-2.5 py-1 rounded font-bold">
+                    {post.categoryName}
+                  </span>
+                </div>
+                <h1 className="text-xl font-bold text-gray-900 leading-snug mb-4">{post.title}</h1>
+              </div>
+              {post.thumbnailUrl && (
+                <div className="w-28 h-20 rounded-xl overflow-hidden border border-gray-100 shrink-0">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={post.thumbnailUrl} alt="썸네일" className="w-full h-full object-cover" />
+                </div>
+              )}
             </div>
-            <h1 className="text-xl font-bold text-gray-900 leading-snug mb-4">{post.title}</h1>
             <div className="flex items-center justify-between flex-wrap gap-3">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 bg-[#003478] rounded-full flex items-center justify-center text-white text-sm font-bold">
@@ -254,17 +264,6 @@ export default function PostDetailClient() {
               </div>
             </div>
           </div>
-
-          {post.thumbnailUrl && (
-            <div className="px-6 pt-6">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={post.thumbnailUrl}
-                alt="썸네일"
-                className="w-full max-h-80 object-cover rounded-xl border border-gray-100"
-              />
-            </div>
-          )}
 
           <div className="px-6 py-6">
             <div
