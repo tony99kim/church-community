@@ -107,12 +107,15 @@ export default function BiblePage() {
       .then((r) => r.json())
       .then((data) => {
         if (data.error) throw new Error(data.error);
-        const list: Verse[] = Object.values(data.verses as Record<string, { verse: number; text: string }>)
+        const verseSource = data.verses ?? data;
+        const list: Verse[] = Object.values(verseSource as Record<string, { verse: number; text: string }>)
+          .filter((v) => typeof v === 'object' && v.verse)
           .map((v) => ({ verse: v.verse, text: v.text.trim() }))
           .sort((a, b) => a.verse - b.verse);
+        if (list.length === 0) throw new Error('본문 데이터가 없습니다.');
         setVerses(list);
       })
-      .catch(() => setError('본문을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.'))
+      .catch((e: Error) => setError(e.message || '본문을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.'))
       .finally(() => setLoading(false));
   }, [book, chapter]);
 
