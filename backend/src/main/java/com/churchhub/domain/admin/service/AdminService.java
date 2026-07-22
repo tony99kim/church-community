@@ -36,7 +36,8 @@ public class AdminService {
     }
 
     public Page<UserDto.Response> getUsers(Pageable pageable) {
-        return userRepository.findAll(pageable).map(UserDto.Response::from);
+        return userRepository.findAllByStatusNot(com.churchhub.domain.user.entity.UserStatus.DELETED, pageable)
+                .map(UserDto.Response::from);
     }
 
     @Transactional
