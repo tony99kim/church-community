@@ -6,6 +6,7 @@ import Link from 'next/link';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
 import Sidebar from '@/components/Sidebar';
+import ReportModal from '@/components/ReportModal';
 import type { Post, Comment } from '@/types';
 
 function formatDate(dateStr: string) {
@@ -27,9 +28,11 @@ function CommentItem({
   const [editing, setEditing] = useState(false);
   const [editText, setEditText] = useState(comment.content);
   const [saving, setSaving] = useState(false);
+  const [reporting, setReporting] = useState(false);
 
   const canModify = !comment.deleted && currentUserId === comment.authorId;
   const canDelete = !comment.deleted && (currentUserId === comment.authorId || isAdmin);
+  const canReport = !comment.deleted && !!currentUserId && currentUserId !== comment.authorId && !isAdmin;
 
   const handleSave = async () => {
     if (!editText.trim()) return;
@@ -60,7 +63,13 @@ function CommentItem({
               {canDelete && (
                 <button onClick={() => onDelete(comment.id)} className="text-gray-400 hover:text-red-500">삭제</button>
               )}
+              {canReport && (
+                <button onClick={() => setReporting(true)} className="text-gray-300 hover:text-red-400">신고</button>
+              )}
             </div>
+            {reporting && (
+              <ReportModal type="COMMENT" targetId={comment.id} onClose={() => setReporting(false)} />
+            )}
           </div>
 
           {editing ? (
@@ -112,6 +121,7 @@ export default function PostDetailPage() {
   const [likeCount, setLikeCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [reportingPost, setReportingPost] = useState(false);
 
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
 
@@ -198,6 +208,9 @@ export default function PostDetailPage() {
 
   return (
     <div className="flex gap-6 max-w-6xl mx-auto px-4 py-5">
+      {reportingPost && post && (
+        <ReportModal type="POST" targetId={post.id} onClose={() => setReportingPost(false)} />
+      )}
       <Sidebar activeCategoryId={null} />
 
       <div className="flex-1 min-w-0">
@@ -237,6 +250,9 @@ export default function PostDetailPage() {
                     )}
                     <button onClick={handlePostDelete} className="text-gray-400 hover:text-red-500 transition">삭제</button>
                   </div>
+                )}
+                {isLoggedIn && user?.id !== post.authorId && !isAdmin && (
+                  <button onClick={() => setReportingPost(true)} className="text-gray-300 hover:text-red-400 transition ml-1">신고</button>
                 )}
               </div>
             </div>
