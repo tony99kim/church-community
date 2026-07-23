@@ -26,6 +26,9 @@ public class ChurchService {
     public ChurchDto.Response getChurch(Long id) {
         Church church = churchRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.CHURCH_NOT_FOUND));
+        if (!church.isVisible()) {
+            throw new BusinessException(ErrorCode.CHURCH_NOT_FOUND);
+        }
         return ChurchDto.Response.from(church);
     }
 
