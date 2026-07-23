@@ -44,4 +44,22 @@ public class FaithController {
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         return ApiResponse.success(faithService.createAnswer(id, userDetails.getUserId(), req));
     }
+
+    @GetMapping("/prayers")
+    public ApiResponse<List<FaithDto.PrayerResponse>> getPrayers() {
+        return ApiResponse.success(faithService.getPublicPrayers());
+    }
+
+    @PostMapping("/prayers")
+    public ApiResponse<FaithDto.PrayerResponse> createPrayer(
+            @Valid @RequestBody FaithDto.PrayerRequestForm req,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ApiResponse.success(faithService.createPrayer(userDetails.getUserId(), req));
+    }
+
+    @PostMapping("/prayers/{id}/pray")
+    public ApiResponse<FaithDto.PrayerResponse> pray(
+            @PathVariable Long id) {
+        return ApiResponse.success(faithService.pray(id));
+    }
 }

@@ -3,8 +3,10 @@ package com.churchhub.domain.faith.service;
 import com.churchhub.domain.faith.dto.FaithDto;
 import com.churchhub.domain.faith.entity.FaithAnswer;
 import com.churchhub.domain.faith.entity.FaithQuestion;
+import com.churchhub.domain.faith.entity.PrayerRequest;
 import com.churchhub.domain.faith.repository.FaithAnswerRepository;
 import com.churchhub.domain.faith.repository.FaithQuestionRepository;
+import com.churchhub.domain.faith.repository.PrayerRequestRepository;
 import com.churchhub.domain.user.entity.User;
 import com.churchhub.domain.user.repository.UserRepository;
 import com.churchhub.exception.BusinessException;
@@ -23,6 +25,7 @@ public class FaithService {
     private final FaithQuestionRepository questionRepository;
     private final FaithAnswerRepository answerRepository;
     private final UserRepository userRepository;
+    private final PrayerRequestRepository prayerRequestRepository;
 
     public List<FaithDto.QuestionResponse> getPublicQuestions() {
         return questionRepository.findAllByPublicVisibleTrueOrderByCreatedAtDesc()
@@ -51,5 +54,27 @@ public class FaithService {
         FaithAnswer answer = FaithAnswer.builder()
                 .question(question).pastor(pastor).content(req.getContent()).build();
         return FaithDto.AnswerResponse.from(answerRepository.save(answer));
+    }
+
+    public List<FaithDto.PrayerResponse> getPublicPrayers() {
+        return prayerRequestRepository.findAllByPublicVisibleTrueOrderByCreatedAtDesc()
+                .stream().map(FaithDto.PrayerResponse::from).toList();
+    }
+
+    @Transactional
+    public FaithDto.PrayerResponse createPrayer(Long userId, FaithDto.PrayerRequestForm req) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        PrayerRequest prayer = PrayerRequest.builder()
+                .author(user).content(req.getContent()).publicVisible(req.isPublicVisible()).build();
+        return FaithDto.PrayerResponse.from(prayerRequestRepository.save(prayer));
+    }
+
+    @Transactional
+    public FaithDto.PrayerResponse pray(Long prayerId) {
+        PrayerRequest prayer = prayerRequestRepository.findById(prayerId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
+        prayer.pray();
+        return FaithDto.PrayerResponse.from(prayer);
     }
 }
