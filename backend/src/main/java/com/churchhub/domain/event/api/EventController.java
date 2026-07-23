@@ -2,6 +2,7 @@ package com.churchhub.domain.event.api;
 
 import com.churchhub.common.response.ApiResponse;
 import com.churchhub.domain.event.dto.EventDto;
+import com.churchhub.domain.event.entity.EventCategory;
 import com.churchhub.domain.event.service.EventService;
 import com.churchhub.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,7 +28,11 @@ public class EventController {
     @Operation(summary = "행사 목록 조회")
     @GetMapping
     public ResponseEntity<ApiResponse<Page<EventDto.Response>>> getEvents(
+            @RequestParam(required = false) EventCategory category,
             @PageableDefault(size = 10, sort = "startDate", direction = Sort.Direction.ASC) Pageable pageable) {
+        if (category != null) {
+            return ResponseEntity.ok(ApiResponse.success(eventService.getEventsByCategory(category, pageable)));
+        }
         return ResponseEntity.ok(ApiResponse.success(eventService.getEvents(pageable)));
     }
 

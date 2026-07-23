@@ -1,6 +1,7 @@
 package com.churchhub.domain.event.dto;
 
 import com.churchhub.domain.event.entity.Event;
+import com.churchhub.domain.event.entity.EventCategory;
 import com.churchhub.domain.event.entity.EventStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -20,6 +21,7 @@ public class EventDto {
         @NotNull  private LocalDateTime endDate;
         private Integer maxParticipants;
         private String thumbnailUrl;
+        private EventCategory category;
     }
 
     @Getter
@@ -32,6 +34,7 @@ public class EventDto {
         private Integer maxParticipants;
         private String thumbnailUrl;
         private EventStatus status;
+        private EventCategory category;
     }
 
     @Getter
@@ -46,6 +49,7 @@ public class EventDto {
         private Integer maxParticipants;
         private int currentParticipants;
         private String thumbnailUrl;
+        private EventCategory category;
         private EventStatus status;
         private String authorNickname;
         private boolean joined;
@@ -62,6 +66,7 @@ public class EventDto {
                     .maxParticipants(event.getMaxParticipants())
                     .currentParticipants(event.getCurrentParticipants())
                     .thumbnailUrl(event.getThumbnailUrl())
+                    .category(event.getCategory())
                     .status(event.getStatus())
                     .authorNickname(event.getAuthor().getNickname())
                     .joined(joined)

@@ -2,6 +2,7 @@ package com.churchhub.domain.event.service;
 
 import com.churchhub.domain.event.dto.EventDto;
 import com.churchhub.domain.event.entity.Event;
+import com.churchhub.domain.event.entity.EventCategory;
 import com.churchhub.domain.event.entity.EventParticipant;
 import com.churchhub.domain.event.entity.EventParticipantStatus;
 import com.churchhub.domain.event.entity.EventStatus;
@@ -38,6 +39,11 @@ public class EventService {
                 .map(e -> EventDto.Response.from(e, false));
     }
 
+    public Page<EventDto.Response> getEventsByCategory(EventCategory category, Pageable pageable) {
+        return eventRepository.findAllByCategoryOrderByStartDateDesc(category, pageable)
+                .map(e -> EventDto.Response.from(e, false));
+    }
+
     public EventDto.Response getEvent(Long eventId, Long userId) {
         Event event = getEventOrThrow(eventId);
         boolean joined = userId != null && participantRepository
@@ -58,6 +64,7 @@ public class EventService {
                 .endDate(request.getEndDate())
                 .maxParticipants(request.getMaxParticipants())
                 .thumbnailUrl(request.getThumbnailUrl())
+                .category(request.getCategory())
                 .build();
         return EventDto.Response.from(eventRepository.save(event), false);
     }
@@ -67,7 +74,7 @@ public class EventService {
         Event event = getEventOrThrow(eventId);
         event.update(request.getTitle(), request.getDescription(), request.getLocation(),
                 request.getStartDate(), request.getEndDate(),
-                request.getMaxParticipants(), request.getThumbnailUrl());
+                request.getMaxParticipants(), request.getThumbnailUrl(), request.getCategory());
         if (request.getStatus() != null) event.changeStatus(request.getStatus());
         return EventDto.Response.from(event, false);
     }

@@ -46,6 +46,10 @@ public class Event {
     private String thumbnailUrl;
 
     @Enumerated(EnumType.STRING)
+    @Column(length = 30)
+    private EventCategory category = EventCategory.CHURCH;
+
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private EventStatus status = EventStatus.UPCOMING;
 
@@ -59,7 +63,7 @@ public class Event {
     @Builder
     public Event(User author, String title, String description, String location,
                  LocalDateTime startDate, LocalDateTime endDate,
-                 Integer maxParticipants, String thumbnailUrl) {
+                 Integer maxParticipants, String thumbnailUrl, EventCategory category) {
         this.author = author;
         this.title = title;
         this.description = description;
@@ -68,11 +72,12 @@ public class Event {
         this.endDate = endDate;
         this.maxParticipants = maxParticipants;
         this.thumbnailUrl = thumbnailUrl;
+        this.category = category != null ? category : EventCategory.CHURCH;
     }
 
     public void update(String title, String description, String location,
                        LocalDateTime startDate, LocalDateTime endDate,
-                       Integer maxParticipants, String thumbnailUrl) {
+                       Integer maxParticipants, String thumbnailUrl, EventCategory category) {
         this.title = title;
         this.description = description;
         this.location = location;
@@ -80,6 +85,7 @@ public class Event {
         this.endDate = endDate;
         this.maxParticipants = maxParticipants;
         if (thumbnailUrl != null) this.thumbnailUrl = thumbnailUrl;
+        if (category != null) this.category = category;
     }
 
     public void changeStatus(EventStatus status) { this.status = status; }

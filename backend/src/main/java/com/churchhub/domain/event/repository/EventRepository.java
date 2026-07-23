@@ -1,6 +1,7 @@
 package com.churchhub.domain.event.repository;
 
 import com.churchhub.domain.event.entity.Event;
+import com.churchhub.domain.event.entity.EventCategory;
 import com.churchhub.domain.event.entity.EventStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface EventRepository extends JpaRepository<Event, Long> {
     Page<Event> findAllByStatusNotIn(java.util.List<EventStatus> statuses, Pageable pageable);
+    Page<Event> findAllByCategoryOrderByStartDateDesc(EventCategory category, Pageable pageable);
     long countByStatus(EventStatus status);
 
     @Modifying
