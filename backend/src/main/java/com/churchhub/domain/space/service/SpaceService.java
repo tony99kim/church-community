@@ -36,6 +36,28 @@ public class SpaceService {
                 .stream().map(SpaceDto.Response::from).toList();
     }
 
+    public List<SpaceDto.Response> getAdminSpaces() {
+        return spaceRepository.findAllByOrderByCreatedAtDesc()
+                .stream().map(SpaceDto.Response::from).toList();
+    }
+
+    @Transactional
+    public SpaceDto.Response updateSpace(Long id, SpaceDto.UpdateRequest req) {
+        Space space = spaceRepository.findById(id)
+                .orElseThrow(() -> new BusinessException(ErrorCode.SPACE_NOT_FOUND));
+        Church church = churchRepository.findById(req.getChurchId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.CHURCH_NOT_FOUND));
+        space.update(req.getName(), req.getDescription(), req.getUsageTypes(), req.getCapacity(), req.isAvailable());
+        space.updateChurch(church);
+        return SpaceDto.Response.from(space);
+    }
+
+    @Transactional
+    public void deleteSpace(Long id) {
+        if (!spaceRepository.existsById(id)) throw new BusinessException(ErrorCode.SPACE_NOT_FOUND);
+        spaceRepository.deleteById(id);
+    }
+
     public List<SpaceDto.RentalResponse> getAllRentals() {
         return spaceRentalRepository.findAllByOrderByCreatedAtDesc()
                 .stream().map(SpaceDto.RentalResponse::from).toList();

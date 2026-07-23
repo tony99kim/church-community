@@ -38,10 +38,31 @@ public class SpaceController {
         return ApiResponse.success(spaceService.getMyRentals(userDetails.getUserId()));
     }
 
+    @GetMapping("/admin/spaces")
+    @PreAuthorize("hasAnyRole('CHURCH_MANAGER', 'SUPER_ADMIN')")
+    public ApiResponse<List<SpaceDto.Response>> getAdminSpaces() {
+        return ApiResponse.success(spaceService.getAdminSpaces());
+    }
+
     @PostMapping("/admin/spaces")
     @PreAuthorize("hasAnyRole('CHURCH_MANAGER', 'SUPER_ADMIN')")
     public ApiResponse<SpaceDto.Response> createSpace(@Valid @RequestBody SpaceDto.CreateRequest req) {
         return ApiResponse.success(spaceService.createSpace(req));
+    }
+
+    @PutMapping("/admin/spaces/{id}")
+    @PreAuthorize("hasAnyRole('CHURCH_MANAGER', 'SUPER_ADMIN')")
+    public ApiResponse<SpaceDto.Response> updateSpace(
+            @PathVariable Long id,
+            @Valid @RequestBody SpaceDto.UpdateRequest req) {
+        return ApiResponse.success(spaceService.updateSpace(id, req));
+    }
+
+    @DeleteMapping("/admin/spaces/{id}")
+    @PreAuthorize("hasAnyRole('CHURCH_MANAGER', 'SUPER_ADMIN')")
+    public ApiResponse<Void> deleteSpace(@PathVariable Long id) {
+        spaceService.deleteSpace(id);
+        return ApiResponse.success(null);
     }
 
     @GetMapping("/admin/spaces/rentals")

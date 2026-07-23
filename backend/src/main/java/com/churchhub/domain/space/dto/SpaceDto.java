@@ -22,6 +22,16 @@ public class SpaceDto {
     }
 
     @Getter
+    public static class UpdateRequest {
+        @NotNull private Long churchId;
+        @NotBlank private String name;
+        private String description;
+        private String usageTypes;
+        private Integer capacity;
+        private boolean available = true;
+    }
+
+    @Getter
     public static class RentalRequest {
         @NotNull private LocalDateTime startDateTime;
         @NotNull private LocalDateTime endDateTime;
@@ -39,6 +49,7 @@ public class SpaceDto {
     @Builder
     public static class Response {
         private Long id;
+        private Long churchId;
         private String churchName;
         private String name;
         private String description;
@@ -49,6 +60,7 @@ public class SpaceDto {
         public static Response from(Space s) {
             return Response.builder()
                     .id(s.getId())
+                    .churchId(s.getChurch() != null ? s.getChurch().getId() : null)
                     .churchName(s.getChurch() != null ? s.getChurch().getName() : null)
                     .name(s.getName())
                     .description(s.getDescription())

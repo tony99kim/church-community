@@ -60,4 +60,8 @@ public class Space {
         this.capacity = capacity;
         this.available = available;
     }
+
+    public void updateChurch(Church church) {
+        this.church = church;
+    }
 }
