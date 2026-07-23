@@ -38,10 +38,31 @@ public class ItemController {
         return ApiResponse.success(itemService.getMyRentals(userDetails.getUserId()));
     }
 
+    @GetMapping("/admin/items")
+    @PreAuthorize("hasAnyRole('CHURCH_MANAGER', 'SUPER_ADMIN')")
+    public ApiResponse<List<ItemDto.Response>> getAdminItems() {
+        return ApiResponse.success(itemService.getAdminItems());
+    }
+
     @PostMapping("/admin/items")
     @PreAuthorize("hasAnyRole('CHURCH_MANAGER', 'SUPER_ADMIN')")
     public ApiResponse<ItemDto.Response> createItem(@Valid @RequestBody ItemDto.CreateRequest req) {
         return ApiResponse.success(itemService.createItem(req));
+    }
+
+    @PutMapping("/admin/items/{id}")
+    @PreAuthorize("hasAnyRole('CHURCH_MANAGER', 'SUPER_ADMIN')")
+    public ApiResponse<ItemDto.Response> updateItem(
+            @PathVariable Long id,
+            @Valid @RequestBody ItemDto.UpdateRequest req) {
+        return ApiResponse.success(itemService.updateItem(id, req));
+    }
+
+    @DeleteMapping("/admin/items/{id}")
+    @PreAuthorize("hasAnyRole('CHURCH_MANAGER', 'SUPER_ADMIN')")
+    public ApiResponse<Void> deleteItem(@PathVariable Long id) {
+        itemService.deleteItem(id);
+        return ApiResponse.success(null);
     }
 
     @GetMapping("/admin/items/rentals")
