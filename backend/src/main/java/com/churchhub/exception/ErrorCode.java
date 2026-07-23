@@ -40,6 +40,12 @@ public enum ErrorCode {
     // Church
     CHURCH_NOT_FOUND(HttpStatus.NOT_FOUND, "교회를 찾을 수 없습니다."),
 
+    // Item
+    ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "물품을 찾을 수 없습니다."),
+    ITEM_RENTAL_NOT_FOUND(HttpStatus.NOT_FOUND, "물품 대여 신청을 찾을 수 없습니다."),
+    ITEM_OUT_OF_STOCK(HttpStatus.BAD_REQUEST, "재고가 부족합니다."),
+    ITEM_TERMS_NOT_AGREED(HttpStatus.BAD_REQUEST, "약관에 동의해야 합니다."),
+
     // Space
     SPACE_NOT_FOUND(HttpStatus.NOT_FOUND, "공간을 찾을 수 없습니다."),
     SPACE_RENTAL_NOT_FOUND(HttpStatus.NOT_FOUND, "대여 신청을 찾을 수 없습니다."),
