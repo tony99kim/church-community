@@ -16,6 +16,16 @@ public class ItemDto {
 
     @Getter
     public static class CreateRequest {
+        private Long churchId;
+        @NotBlank private String name;
+        private String description;
+        @NotNull private ItemCategory category;
+        private int totalQuantity = 1;
+    }
+
+    @Getter
+    public static class UpdateRequest {
+        private Long churchId;
         @NotBlank private String name;
         private String description;
         @NotNull private ItemCategory category;
@@ -41,6 +51,8 @@ public class ItemDto {
     @Builder
     public static class Response {
         private Long id;
+        private Long churchId;
+        private String churchName;
         private String name;
         private String description;
         private ItemCategory category;
@@ -49,9 +61,15 @@ public class ItemDto {
 
         public static Response from(Item i) {
             return Response.builder()
-                    .id(i.getId()).name(i.getName()).description(i.getDescription())
-                    .category(i.getCategory()).totalQuantity(i.getTotalQuantity())
-                    .availableQuantity(i.getAvailableQuantity()).build();
+                    .id(i.getId())
+                    .churchId(i.getChurch() != null ? i.getChurch().getId() : null)
+                    .churchName(i.getChurch() != null ? i.getChurch().getName() : null)
+                    .name(i.getName())
+                    .description(i.getDescription())
+                    .category(i.getCategory())
+                    .totalQuantity(i.getTotalQuantity())
+                    .availableQuantity(i.getAvailableQuantity())
+                    .build();
         }
     }
 
