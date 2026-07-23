@@ -1,5 +1,6 @@
 package com.churchhub.domain.user.entity;
 
+import com.churchhub.domain.church.entity.Church;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -44,6 +45,10 @@ public class User {
     @Column(nullable = false)
     private UserStatus status = UserStatus.ACTIVE;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "church_id")
+    private Church church;
+
     @CreatedDate
     @Column(updatable = false)
     private LocalDateTime createdAt;
@@ -85,6 +90,10 @@ public class User {
 
     public boolean isAdmin() {
         return this.role == UserRole.CHURCH_MANAGER || this.role == UserRole.SUPER_ADMIN;
+    }
+
+    public void assignChurch(Church church) {
+        this.church = church;
     }
 
     public void anonymize() {

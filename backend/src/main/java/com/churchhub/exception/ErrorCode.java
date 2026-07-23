@@ -37,6 +37,9 @@ public enum ErrorCode {
     // Report
     REPORT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 신고입니다."),
 
+    // Church
+    CHURCH_NOT_FOUND(HttpStatus.NOT_FOUND, "교회를 찾을 수 없습니다."),
+
     // Event
     EVENT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 행사입니다."),
     EVENT_FULL(HttpStatus.CONFLICT, "참여 정원이 초과되었습니다."),
