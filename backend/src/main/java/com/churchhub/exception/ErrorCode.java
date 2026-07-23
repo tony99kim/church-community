@@ -45,11 +45,13 @@ public enum ErrorCode {
     ITEM_RENTAL_NOT_FOUND(HttpStatus.NOT_FOUND, "물품 대여 신청을 찾을 수 없습니다."),
     ITEM_OUT_OF_STOCK(HttpStatus.BAD_REQUEST, "재고가 부족합니다."),
     ITEM_TERMS_NOT_AGREED(HttpStatus.BAD_REQUEST, "약관에 동의해야 합니다."),
+    ITEM_HAS_RENTALS(HttpStatus.BAD_REQUEST, "대여 신청이 있는 물품은 삭제할 수 없습니다."),
 
     // Space
     SPACE_NOT_FOUND(HttpStatus.NOT_FOUND, "공간을 찾을 수 없습니다."),
     SPACE_RENTAL_NOT_FOUND(HttpStatus.NOT_FOUND, "대여 신청을 찾을 수 없습니다."),
     SPACE_NOT_AVAILABLE(HttpStatus.BAD_REQUEST, "현재 대여 불가능한 공간입니다."),
+    SPACE_HAS_RENTALS(HttpStatus.BAD_REQUEST, "대여 신청이 있는 공간은 삭제할 수 없습니다."),
 
     // Event
     EVENT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 행사입니다."),

@@ -37,7 +37,7 @@ public class SpaceService {
     }
 
     public List<SpaceDto.Response> getAdminSpaces() {
-        return spaceRepository.findAllByOrderByCreatedAtDesc()
+        return spaceRepository.findAllWithChurchOrderByCreatedAtDesc()
                 .stream().map(SpaceDto.Response::from).toList();
     }
 
@@ -55,6 +55,7 @@ public class SpaceService {
     @Transactional
     public void deleteSpace(Long id) {
         if (!spaceRepository.existsById(id)) throw new BusinessException(ErrorCode.SPACE_NOT_FOUND);
+        if (spaceRentalRepository.existsBySpaceId(id)) throw new BusinessException(ErrorCode.SPACE_HAS_RENTALS);
         spaceRepository.deleteById(id);
     }
 

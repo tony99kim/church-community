@@ -8,4 +8,5 @@ import java.util.List;
 public interface SpaceRentalRepository extends JpaRepository<SpaceRental, Long> {
     List<SpaceRental> findAllByOrderByCreatedAtDesc();
     List<SpaceRental> findAllByApplicantIdOrderByCreatedAtDesc(Long userId);
+    boolean existsBySpaceId(Long spaceId);
 }

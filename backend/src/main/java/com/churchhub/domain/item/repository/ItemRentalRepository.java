@@ -8,4 +8,5 @@ import java.util.List;
 public interface ItemRentalRepository extends JpaRepository<ItemRental, Long> {
     List<ItemRental> findAllByOrderByCreatedAtDesc();
     List<ItemRental> findAllByApplicantIdOrderByCreatedAtDesc(Long userId);
+    boolean existsByItemId(Long itemId);
 }

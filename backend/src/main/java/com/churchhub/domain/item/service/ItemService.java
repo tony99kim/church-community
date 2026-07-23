@@ -37,7 +37,7 @@ public class ItemService {
     }
 
     public List<ItemDto.Response> getAdminItems() {
-        return itemRepository.findAllByOrderByCreatedAtDesc()
+        return itemRepository.findAllWithChurchOrderByCreatedAtDesc()
                 .stream().map(ItemDto.Response::from).toList();
     }
 
@@ -72,6 +72,7 @@ public class ItemService {
     @Transactional
     public void deleteItem(Long id) {
         if (!itemRepository.existsById(id)) throw new BusinessException(ErrorCode.ITEM_NOT_FOUND);
+        if (itemRentalRepository.existsByItemId(id)) throw new BusinessException(ErrorCode.ITEM_HAS_RENTALS);
         itemRepository.deleteById(id);
     }
 
