@@ -1,5 +1,6 @@
 package com.churchhub.domain.item.entity;
 
+import com.churchhub.domain.church.entity.Church;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -18,6 +19,10 @@ public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "church_id")
+    private Church church;
 
     @Column(nullable = false, length = 100)
     private String name;
@@ -40,7 +45,8 @@ public class Item {
     private LocalDateTime updatedAt;
 
     @Builder
-    public Item(String name, String description, ItemCategory category, int totalQuantity) {
+    public Item(Church church, String name, String description, ItemCategory category, int totalQuantity) {
+        this.church = church;
         this.name = name;
         this.description = description;
         this.category = category;
@@ -48,7 +54,8 @@ public class Item {
         this.availableQuantity = totalQuantity;
     }
 
-    public void update(String name, String description, ItemCategory category, int totalQuantity) {
+    public void update(Church church, String name, String description, ItemCategory category, int totalQuantity) {
+        this.church = church;
         this.name = name;
         this.description = description;
         this.category = category;
