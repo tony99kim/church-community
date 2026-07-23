@@ -14,6 +14,10 @@ const navItems = [
   { href: '/admin/events', label: '행사 관리', icon: '📅' },
   { href: '/admin/participants', label: '행사 참여자', icon: '🎫' },
   { href: '/admin/reports', label: '신고 관리', icon: '🚨' },
+  { href: '/admin/churches', label: '교회 관리', icon: '⛪' },
+  { href: '/admin/spaces', label: '공간 대여 관리', icon: '🏠' },
+  { href: '/admin/items', label: '물품 대여 관리', icon: '📦' },
+  { href: '/admin/welcome-kits', label: '웰컴 키트 신청', icon: '🎁' },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

@@ -89,18 +89,14 @@ export default function Header() {
 
         {/* 네비게이션 */}
         <nav className="hidden md:flex items-center gap-1 ml-2">
-          <Link href="/" className="text-sm text-gray-600 hover:text-[#003478] font-medium px-3 py-1.5 rounded-lg hover:bg-gray-50 transition">
-            홈
-          </Link>
-          <Link href="/posts" className="text-sm text-gray-600 hover:text-[#003478] font-medium px-3 py-1.5 rounded-lg hover:bg-gray-50 transition">
-            게시판
-          </Link>
-          <Link href="/events" className="text-sm text-gray-600 hover:text-[#003478] font-medium px-3 py-1.5 rounded-lg hover:bg-gray-50 transition">
-            행사
-          </Link>
-          <Link href="/bible" className="text-sm text-gray-600 hover:text-[#003478] font-medium px-3 py-1.5 rounded-lg hover:bg-gray-50 transition">
-            성경
-          </Link>
+          <Link href="/welcome" className="text-sm text-gray-600 hover:text-[#003478] font-medium px-3 py-1.5 rounded-lg hover:bg-gray-50 transition">처음 오셨나요?</Link>
+          <Link href="/churches" className="text-sm text-gray-600 hover:text-[#003478] font-medium px-3 py-1.5 rounded-lg hover:bg-gray-50 transition">함께하는 교회</Link>
+          <Link href="/events" className="text-sm text-gray-600 hover:text-[#003478] font-medium px-3 py-1.5 rounded-lg hover:bg-gray-50 transition">행사 안내</Link>
+          <Link href="/community" className="text-sm text-gray-600 hover:text-[#003478] font-medium px-3 py-1.5 rounded-lg hover:bg-gray-50 transition">커뮤니티</Link>
+          <Link href="/spaces" className="text-sm text-gray-600 hover:text-[#003478] font-medium px-3 py-1.5 rounded-lg hover:bg-gray-50 transition">공간 대여</Link>
+          <Link href="/items" className="text-sm text-gray-600 hover:text-[#003478] font-medium px-3 py-1.5 rounded-lg hover:bg-gray-50 transition">물품 대여</Link>
+          <Link href="/faith" className="text-sm text-gray-600 hover:text-[#003478] font-medium px-3 py-1.5 rounded-lg hover:bg-gray-50 transition">신앙 Q&A</Link>
+          <Link href="/service" className="text-sm text-gray-600 hover:text-[#003478] font-medium px-3 py-1.5 rounded-lg hover:bg-gray-50 transition">지역 섬김</Link>
         </nav>
 
         <div className="flex-1" />
@@ -219,10 +215,14 @@ export default function Header() {
       {/* 모바일 드롭다운 */}
       {menuOpen && (
         <div className="md:hidden bg-white border-t border-[#EDEFF1] px-4 py-3 space-y-1">
-          <Link href="/" className="block py-2 text-sm font-medium text-gray-700 hover:text-[#003478]" onClick={() => setMenuOpen(false)}>홈</Link>
-          <Link href="/posts" className="block py-2 text-sm font-medium text-gray-700 hover:text-[#003478]" onClick={() => setMenuOpen(false)}>게시판</Link>
-          <Link href="/events" className="block py-2 text-sm font-medium text-gray-700 hover:text-[#003478]" onClick={() => setMenuOpen(false)}>행사</Link>
-          <Link href="/bible" className="block py-2 text-sm font-medium text-gray-700 hover:text-[#003478]" onClick={() => setMenuOpen(false)}>성경</Link>
+          <Link href="/welcome" className="block py-2 text-sm font-medium text-gray-700 hover:text-[#003478]" onClick={() => setMenuOpen(false)}>처음 오셨나요?</Link>
+          <Link href="/churches" className="block py-2 text-sm font-medium text-gray-700 hover:text-[#003478]" onClick={() => setMenuOpen(false)}>함께하는 교회</Link>
+          <Link href="/events" className="block py-2 text-sm font-medium text-gray-700 hover:text-[#003478]" onClick={() => setMenuOpen(false)}>행사 안내</Link>
+          <Link href="/community" className="block py-2 text-sm font-medium text-gray-700 hover:text-[#003478]" onClick={() => setMenuOpen(false)}>커뮤니티</Link>
+          <Link href="/spaces" className="block py-2 text-sm font-medium text-gray-700 hover:text-[#003478]" onClick={() => setMenuOpen(false)}>공간 대여</Link>
+          <Link href="/items" className="block py-2 text-sm font-medium text-gray-700 hover:text-[#003478]" onClick={() => setMenuOpen(false)}>물품 대여</Link>
+          <Link href="/faith" className="block py-2 text-sm font-medium text-gray-700 hover:text-[#003478]" onClick={() => setMenuOpen(false)}>신앙 Q&A</Link>
+          <Link href="/service" className="block py-2 text-sm font-medium text-gray-700 hover:text-[#003478]" onClick={() => setMenuOpen(false)}>지역 섬김</Link>
           {isLoggedIn ? (
             <>
               <Link href="/posts/write" className="block py-2 text-sm font-medium text-[#003478]" onClick={() => setMenuOpen(false)}>+ 글쓰기</Link>

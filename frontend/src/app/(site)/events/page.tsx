@@ -19,24 +19,47 @@ const STATUS_COLOR: Record<string, string> = {
   CANCELLED: 'bg-red-50 text-red-400 border-red-100',
 };
 
+const EVENT_CATEGORIES = [
+  { value: '', label: '전체' },
+  { value: 'NEIGHBORHOOD', label: '🏘 동네 모임' },
+  { value: 'FAITH', label: '✝️ 신앙 모임' },
+  { value: 'SERVICE', label: '🤝 섬김 모임' },
+  { value: 'CHURCH', label: '⛪ 교회별 행사' },
+  { value: 'WELCOME_TABLE', label: '🍽 웰컴 테이블' },
+];
+
 export default function EventsPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
+  const [category, setCategory] = useState('');
 
   useEffect(() => {
-    api.get('/events', { params: { page: 0, size: 20, sort: 'startDate,asc' } })
+    setLoading(true);
+    const params: Record<string, string | number> = { page: 0, size: 20, sort: 'startDate,asc' };
+    if (category) params.category = category;
+    api.get('/events', { params })
       .then((r) => {
         const data: PageResponse<Event> = r.data.data;
         setEvents(data.content);
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [category]);
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6">
       <div className="mb-6">
-        <h1 className="text-xl font-bold text-gray-900">행사 일정</h1>
-        <p className="text-sm text-gray-500 mt-1">교회 행사 일정을 확인하고 참여 신청하세요</p>
+        <h1 className="text-xl font-bold text-gray-900">행사 안내</h1>
+        <p className="text-sm text-gray-500 mt-1">염리동 청년 커뮤니티 행사를 확인하고 참여 신청하세요</p>
+      </div>
+
+      {/* 카테고리 필터 */}
+      <div className="flex flex-wrap gap-2 mb-6">
+        {EVENT_CATEGORIES.map(cat => (
+          <button key={cat.value} onClick={() => setCategory(cat.value)}
+            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${category === cat.value ? 'bg-[#003478] text-white' : 'bg-white border border-[#EDEFF1] text-gray-600 hover:border-[#003478]'}`}>
+            {cat.label}
+          </button>
+        ))}
       </div>
 
       {loading ? (

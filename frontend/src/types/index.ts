@@ -71,3 +71,115 @@ export interface PageResponse<T> {
   size: number;
   number: number;
 }
+
+// Church
+export interface Church {
+  id: number;
+  name: string;
+  address: string;
+  sundayServiceTime: string | null;
+  hasYouthGroup: boolean;
+  contactInfo: string | null;
+  introduction: string | null;
+  websiteUrl: string | null;
+  instagramUrl: string | null;
+  visible: boolean;
+  createdAt: string;
+}
+
+// Space Rental
+export type RentalStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED';
+
+export interface Space {
+  id: number;
+  churchName: string | null;
+  name: string;
+  description: string | null;
+  usageTypes: string | null;
+  capacity: number | null;
+  available: boolean;
+}
+
+export interface SpaceRental {
+  id: number;
+  spaceId: number;
+  spaceName: string;
+  applicantNickname: string;
+  startDateTime: string;
+  endDateTime: string;
+  headcount: number | null;
+  purpose: string;
+  contactPhone: string;
+  status: RentalStatus;
+  rejectReason: string | null;
+  createdAt: string;
+}
+
+// Item Rental
+export type ItemCategory = 'MOVING' | 'CLEANING' | 'LIVING' | 'EVENT';
+
+export interface Item {
+  id: number;
+  name: string;
+  description: string | null;
+  category: ItemCategory;
+  totalQuantity: number;
+  availableQuantity: number;
+}
+
+export interface ItemRental {
+  id: number;
+  itemId: number;
+  itemName: string;
+  itemCategory: ItemCategory;
+  applicantNickname: string;
+  quantity: number;
+  startDate: string;
+  endDate: string;
+  contactPhone: string;
+  purpose: string | null;
+  status: RentalStatus;
+  rejectReason: string | null;
+  createdAt: string;
+}
+
+// Faith
+export interface FaithAnswer {
+  id: number;
+  pastorNickname: string;
+  content: string;
+  createdAt: string;
+}
+
+export interface FaithQuestion {
+  id: number;
+  authorNickname: string | null;
+  anonymous: boolean;
+  content: string;
+  publicVisible: boolean;
+  answers: FaithAnswer[];
+  createdAt: string;
+}
+
+export interface PrayerRequest {
+  id: number;
+  authorNickname: string;
+  content: string;
+  publicVisible: boolean;
+  prayerCount: number;
+  createdAt: string;
+}
+
+// Event category
+export type EventCategory = 'NEIGHBORHOOD' | 'FAITH' | 'SERVICE' | 'CHURCH' | 'WELCOME_TABLE';
+
+// WelcomeKit
+export interface WelcomeKit {
+  id: number;
+  name: string;
+  phone: string;
+  address: string | null;
+  message: string | null;
+  processed: boolean;
+  createdAt: string;
+}
