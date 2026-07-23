@@ -92,6 +92,7 @@ export type RentalStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED';
 
 export interface Space {
   id: number;
+  churchId: number | null;
   churchName: string | null;
   name: string;
   description: string | null;
@@ -120,6 +121,8 @@ export type ItemCategory = 'MOVING' | 'CLEANING' | 'LIVING' | 'EVENT';
 
 export interface Item {
   id: number;
+  churchId: number | null;
+  churchName: string | null;
   name: string;
   description: string | null;
   category: ItemCategory;
