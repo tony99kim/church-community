@@ -59,12 +59,13 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/categories/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/events/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/comments/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/churches/**").permitAll()
                 // Swagger
                 .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/api-docs/**", "/webjars/**").permitAll()
                 // 헬스체크
                 .requestMatchers("/actuator/health").permitAll()
                 // 관리자 전용
-                .requestMatchers("/api/v1/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
+                .requestMatchers("/api/v1/admin/**").hasAnyRole("CHURCH_MANAGER", "SUPER_ADMIN")
                 // 나머지는 인증 필요
                 .anyRequest().authenticated()
             )

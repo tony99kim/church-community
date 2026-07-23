@@ -1,0 +1,1 @@
+UPDATE users SET role = 'CHURCH_MANAGER' WHERE role = 'ADMIN';
