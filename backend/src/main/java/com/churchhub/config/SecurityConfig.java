@@ -60,6 +60,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/events/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/comments/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/churches/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/spaces/**").permitAll()
                 // Swagger
                 .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/api-docs/**", "/webjars/**").permitAll()
                 // 헬스체크
