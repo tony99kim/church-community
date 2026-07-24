@@ -11,6 +11,7 @@ import com.churchhub.domain.notification.entity.NotificationType;
 import com.churchhub.domain.notification.entity.RelatedType;
 import com.churchhub.domain.notification.service.NotificationService;
 import com.churchhub.domain.user.entity.User;
+import com.churchhub.domain.user.entity.UserRole;
 import com.churchhub.domain.user.repository.UserRepository;
 import com.churchhub.exception.BusinessException;
 import com.churchhub.exception.ErrorCode;
@@ -36,12 +37,24 @@ public class ItemService {
                 .stream().map(ItemDto.Response::from).toList();
     }
 
-    public List<ItemDto.Response> getAdminItems() {
+    public List<ItemDto.Response> getAdminItems(Long callerId) {
+        User caller = getCallerUser(callerId);
+        if (caller.getRole() == UserRole.CHURCH_MANAGER) {
+            if (caller.getChurch() == null) return List.of();
+            return itemRepository.findByChurchIdWithChurchOrderByCreatedAtDesc(caller.getChurch().getId())
+                    .stream().map(ItemDto.Response::from).toList();
+        }
         return itemRepository.findAllWithChurchOrderByCreatedAtDesc()
                 .stream().map(ItemDto.Response::from).toList();
     }
 
-    public List<ItemDto.RentalResponse> getAllRentals() {
+    public List<ItemDto.RentalResponse> getAllRentals(Long callerId) {
+        User caller = getCallerUser(callerId);
+        if (caller.getRole() == UserRole.CHURCH_MANAGER) {
+            if (caller.getChurch() == null) return List.of();
+            return itemRentalRepository.findByItem_ChurchIdOrderByCreatedAtDesc(caller.getChurch().getId())
+                    .stream().map(ItemDto.RentalResponse::from).toList();
+        }
         return itemRentalRepository.findAllByOrderByCreatedAtDesc()
                 .stream().map(ItemDto.RentalResponse::from).toList();
     }
@@ -52,8 +65,9 @@ public class ItemService {
     }
 
     @Transactional
-    public ItemDto.Response createItem(ItemDto.CreateRequest req) {
-        Church church = resolveChurch(req.getChurchId());
+    public ItemDto.Response createItem(ItemDto.CreateRequest req, Long callerId) {
+        User caller = getCallerUser(callerId);
+        Church church = resolveChurchForAdmin(req.getChurchId(), caller);
         Item item = Item.builder()
                 .church(church).name(req.getName()).description(req.getDescription())
                 .category(req.getCategory()).totalQuantity(req.getTotalQuantity()).build();
@@ -61,10 +75,14 @@ public class ItemService {
     }
 
     @Transactional
-    public ItemDto.Response updateItem(Long id, ItemDto.UpdateRequest req) {
+    public ItemDto.Response updateItem(Long id, ItemDto.UpdateRequest req, Long callerId) {
         Item item = itemRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ITEM_NOT_FOUND));
-        Church church = resolveChurch(req.getChurchId());
+        User caller = getCallerUser(callerId);
+        verifyItemOwnership(item, caller);
+        Church church = caller.getRole() == UserRole.CHURCH_MANAGER
+                ? item.getChurch()
+                : resolveChurch(req.getChurchId());
         item.update(church, req.getName(), req.getDescription(), req.getCategory(), req.getTotalQuantity());
         return ItemDto.Response.from(item);
     }
@@ -93,9 +111,10 @@ public class ItemService {
     }
 
     @Transactional
-    public ItemDto.RentalResponse approveRental(Long rentalId) {
+    public ItemDto.RentalResponse approveRental(Long rentalId, Long callerId) {
         ItemRental rental = itemRentalRepository.findById(rentalId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ITEM_RENTAL_NOT_FOUND));
+        verifyItemOwnership(rental.getItem(), getCallerUser(callerId));
         rental.approve();
         rental.getItem().decreaseStock(rental.getQuantity());
         notificationService.send(
@@ -106,15 +125,39 @@ public class ItemService {
     }
 
     @Transactional
-    public ItemDto.RentalResponse rejectRental(Long rentalId, String reason) {
+    public ItemDto.RentalResponse rejectRental(Long rentalId, String reason, Long callerId) {
         ItemRental rental = itemRentalRepository.findById(rentalId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ITEM_RENTAL_NOT_FOUND));
+        verifyItemOwnership(rental.getItem(), getCallerUser(callerId));
         rental.reject(reason);
         notificationService.send(
                 rental.getApplicant().getId(), null, NotificationType.NOTICE,
                 "물품 대여 신청이 거절되었습니다: " + rental.getItem().getName(),
                 rentalId, RelatedType.POST);
         return ItemDto.RentalResponse.from(rental);
+    }
+
+    private User getCallerUser(Long callerId) {
+        return userRepository.findById(callerId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+    }
+
+    private Church resolveChurchForAdmin(Long requestedChurchId, User caller) {
+        if (caller.getRole() == UserRole.CHURCH_MANAGER) {
+            if (caller.getChurch() == null) throw new BusinessException(ErrorCode.CHURCH_NOT_FOUND);
+            return caller.getChurch();
+        }
+        return resolveChurch(requestedChurchId);
+    }
+
+    private void verifyItemOwnership(Item item, User caller) {
+        if (caller.getRole() != UserRole.CHURCH_MANAGER) return;
+        Church callerChurch = caller.getChurch();
+        Church itemChurch = item.getChurch();
+        if (callerChurch == null || itemChurch == null ||
+                !callerChurch.getId().equals(itemChurch.getId())) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
     }
 
     private Church resolveChurch(Long churchId) {

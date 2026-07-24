@@ -4,6 +4,7 @@ import com.churchhub.domain.item.entity.Item;
 import com.churchhub.domain.item.entity.ItemCategory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -14,4 +15,7 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 
     @Query("SELECT i FROM Item i LEFT JOIN FETCH i.church ORDER BY i.createdAt DESC")
     List<Item> findAllWithChurchOrderByCreatedAtDesc();
+
+    @Query("SELECT i FROM Item i LEFT JOIN FETCH i.church WHERE i.church.id = :churchId ORDER BY i.createdAt DESC")
+    List<Item> findByChurchIdWithChurchOrderByCreatedAtDesc(@Param("churchId") Long churchId);
 }
