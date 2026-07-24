@@ -10,29 +10,24 @@ import { useAuthStore } from '@/store/authStore';
 const RichEditor = dynamic(() => import('@/components/RichEditor'), { ssr: false });
 
 const STATUS_LABEL: Record<string, string> = {
-  DRAFT: '임시저장', UPCOMING: '예정', ONGOING: '진행 중', ENDED: '종료', CANCELLED: '취소',
+  DRAFT: '임시저장', UPCOMING: '모집 중', ONGOING: '진행 중', ENDED: '종료', CANCELLED: '취소',
 };
 
 const STATUS_COLOR: Record<string, string> = {
   DRAFT: 'bg-gray-100 text-gray-500',
-  UPCOMING: 'bg-blue-50 text-blue-600',
-  ONGOING: 'bg-green-50 text-green-600',
+  UPCOMING: 'bg-green-50 text-green-600',
+  ONGOING: 'bg-blue-50 text-blue-600',
   ENDED: 'bg-gray-100 text-gray-400',
   CANCELLED: 'bg-red-50 text-red-400',
-};
-
-const CATEGORY_LABEL: Record<string, string> = {
-  NEIGHBORHOOD: '동네소식', FAITH: '신앙',
-  CHURCH: '교회', WELCOME_TABLE: '환영밥상',
 };
 
 const EMPTY_FORM = {
   title: '', description: '', location: '',
   startDate: '', endDate: '', maxParticipants: '', thumbnailUrl: '',
-  status: 'DRAFT', category: 'CHURCH', churchId: '',
+  status: 'DRAFT', category: 'SERVICE', churchId: '',
 };
 
-export default function AdminEventsPage() {
+export default function AdminServicePage() {
   const { user: me } = useAuthStore();
   const [events, setEvents] = useState<Event[]>([]);
   const [churches, setChurches] = useState<{ id: number; name: string }[]>([]);
@@ -46,7 +41,7 @@ export default function AdminEventsPage() {
 
   const fetchEvents = () =>
     api.get('/admin/events', { params: { page: 0, size: 50 } })
-      .then((r) => setEvents((r.data.data.content as (Event & { category?: string })[]).filter(e => e.category !== 'SERVICE')))
+      .then((r) => setEvents((r.data.data.content as (Event & { category?: string })[]).filter(e => e.category === 'SERVICE')))
       .finally(() => setLoading(false));
 
   useEffect(() => {
@@ -83,7 +78,7 @@ export default function AdminEventsPage() {
       maxParticipants: e.maxParticipants?.toString() ?? '',
       thumbnailUrl: e.thumbnailUrl ?? '',
       status: e.status,
-      category: (e as unknown as { category?: string }).category ?? 'CHURCH',
+      category: 'SERVICE',
       churchId: (e as unknown as { churchId?: number }).churchId?.toString() ?? '',
     });
     setShowForm(true);
@@ -100,6 +95,7 @@ export default function AdminEventsPage() {
     try {
       const body = {
         ...form,
+        category: 'SERVICE',
         maxParticipants: form.maxParticipants ? Number(form.maxParticipants) : null,
         churchId: form.churchId ? Number(form.churchId) : null,
       };
@@ -118,7 +114,7 @@ export default function AdminEventsPage() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm('행사를 삭제(취소)하시겠어요?')) return;
+    if (!confirm('봉사 활동을 삭제(취소)하시겠어요?')) return;
     await api.delete(`/admin/events/${id}`);
     fetchEvents();
   };
@@ -126,23 +122,26 @@ export default function AdminEventsPage() {
   return (
     <div className="p-8">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">행사 관리</h1>
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">봉사 관리</h1>
+          <p className="text-sm text-gray-500 mt-1">지역섬김 봉사 활동을 등록하고 모집을 관리합니다</p>
+        </div>
         <button onClick={openCreate} className="bg-[#003478] text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-blue-900 transition">
-          + 행사 등록
+          + 봉사 등록
         </button>
       </div>
 
       {showForm && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl w-full max-w-lg p-6 shadow-xl max-h-[90vh] overflow-y-auto">
-            <h2 className="font-bold text-gray-900 mb-4">{editId ? '행사 수정' : '행사 등록'}</h2>
+            <h2 className="font-bold text-gray-900 mb-4">{editId ? '봉사 수정' : '봉사 등록'}</h2>
             <form onSubmit={handleSave} className="space-y-3">
               {([
-                { key: 'title', label: '제목', type: 'text', required: true },
+                { key: 'title', label: '봉사명', type: 'text', required: true },
                 { key: 'location', label: '장소', type: 'text', required: true },
                 { key: 'startDate', label: '시작일시', type: 'datetime-local', required: true },
                 { key: 'endDate', label: '종료일시', type: 'datetime-local', required: true },
-                { key: 'maxParticipants', label: '최대 인원 (빈칸=무제한)', type: 'number', required: false },
+                { key: 'maxParticipants', label: '모집 인원 (빈칸=무제한)', type: 'number', required: false },
               ] as { key: keyof typeof EMPTY_FORM; label: string; type: string; required: boolean }[]).map(({ key, label, type, required }) => (
                 <div key={key}>
                   <label className="block text-xs font-semibold text-gray-700 mb-1">{label}</label>
@@ -155,9 +154,9 @@ export default function AdminEventsPage() {
                   />
                 </div>
               ))}
-              {/* 썸네일 */}
+
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">썸네일 이미지</label>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">대표 이미지</label>
                 <div className="flex items-center gap-3">
                   {form.thumbnailUrl && (
                     <div className="relative w-20 h-14 rounded-lg overflow-hidden border border-gray-200">
@@ -182,20 +181,6 @@ export default function AdminEventsPage() {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">카테고리</label>
-                <select
-                  value={form.category}
-                  onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
-                  className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]"
-                >
-                  <option value="NEIGHBORHOOD">동네소식</option>
-                  <option value="FAITH">신앙</option>
-                  <option value="CHURCH">교회</option>
-                  <option value="WELCOME_TABLE">환영밥상</option>
-                </select>
-              </div>
-
               {me?.role === 'SUPER_ADMIN' && (
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-1">교회 (선택)</label>
@@ -211,29 +196,30 @@ export default function AdminEventsPage() {
               )}
 
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">공개 상태</label>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">모집 상태</label>
                 <select
                   value={form.status}
                   onChange={(e) => setForm((f) => ({ ...f, status: e.target.value }))}
                   className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]"
                 >
                   <option value="DRAFT">임시저장 (비공개)</option>
-                  <option value="UPCOMING">예정 (공개)</option>
+                  <option value="UPCOMING">모집 중 (공개)</option>
                   <option value="ONGOING">진행 중</option>
                   <option value="ENDED">종료</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">내용</label>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">봉사 내용</label>
                 <div className="border border-gray-300 rounded-xl overflow-hidden">
                   <RichEditor
                     content={form.description}
                     onChange={(html) => setForm((f) => ({ ...f, description: html }))}
-                    placeholder="행사 내용을 입력하세요..."
+                    placeholder="봉사 내용과 안내사항을 입력하세요..."
                   />
                 </div>
               </div>
+
               <div className="flex gap-2 justify-end pt-2">
                 <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 text-sm border border-gray-300 rounded-xl hover:bg-gray-50">
                   취소
@@ -253,19 +239,18 @@ export default function AdminEventsPage() {
         </div>
       ) : events.length === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-200 py-16 text-center text-gray-400">
-          등록된 행사가 없습니다.
+          등록된 봉사 활동이 없습니다.
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-bold text-gray-500">제목</th>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-500">봉사명</th>
                 <th className="px-4 py-3 text-left text-xs font-bold text-gray-500">장소</th>
                 <th className="px-4 py-3 text-left text-xs font-bold text-gray-500">일정</th>
-                <th className="px-4 py-3 text-left text-xs font-bold text-gray-500">카테고리</th>
                 <th className="px-4 py-3 text-left text-xs font-bold text-gray-500">상태</th>
-                <th className="px-4 py-3 text-left text-xs font-bold text-gray-500">인원</th>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-500">신청 인원</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
@@ -278,15 +263,12 @@ export default function AdminEventsPage() {
                     {new Date(e.startDate).toLocaleDateString('ko-KR')}
                   </td>
                   <td className="px-4 py-3">
-                    <span className="text-xs px-2 py-0.5 bg-blue-50 text-[#003478] rounded-full">
-                      {CATEGORY_LABEL[(e as unknown as { category?: string }).category ?? ''] ?? '-'}
+                    <span className={`text-xs px-2 py-0.5 rounded font-medium ${STATUS_COLOR[e.status]}`}>
+                      {STATUS_LABEL[e.status]}
                     </span>
                   </td>
-                  <td className="px-4 py-3">
-                    <span className={`text-xs px-2 py-0.5 rounded font-medium ${STATUS_COLOR[e.status]}`}>{STATUS_LABEL[e.status]}</span>
-                  </td>
                   <td className="px-4 py-3 text-gray-500">
-                    {e.currentParticipants}{e.maxParticipants ? `/${e.maxParticipants}` : ''}
+                    {e.currentParticipants}{e.maxParticipants ? `/${e.maxParticipants}명` : '명'}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-2 justify-end">
