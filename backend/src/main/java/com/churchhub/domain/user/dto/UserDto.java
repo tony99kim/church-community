@@ -48,6 +48,8 @@ public class UserDto {
         private String profileImageUrl;
         private UserRole role;
         private UserStatus status;
+        private Long churchId;
+        private String churchName;
         private LocalDateTime createdAt;
 
         public static Response from(User user) {
@@ -60,6 +62,8 @@ public class UserDto {
                     .profileImageUrl(user.getProfileImageUrl())
                     .role(user.getRole())
                     .status(user.getStatus())
+                    .churchId(user.getChurch() != null ? user.getChurch().getId() : null)
+                    .churchName(user.getChurch() != null ? user.getChurch().getName() : null)
                     .createdAt(user.getCreatedAt())
                     .build();
         }

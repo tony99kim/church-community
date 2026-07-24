@@ -27,6 +27,7 @@ public class AdminDto {
     @Getter
     public static class UpdateUserRoleRequest {
         private UserRole role;
+        private Long churchId;
     }
 
     @Getter

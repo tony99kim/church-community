@@ -3,8 +3,11 @@ package com.churchhub.domain.admin.service;
 import com.churchhub.domain.admin.dto.AdminDto;
 import com.churchhub.domain.board.entity.PostStatus;
 import com.churchhub.domain.board.repository.PostRepository;
+import com.churchhub.domain.church.entity.Church;
+import com.churchhub.domain.church.repository.ChurchRepository;
 import com.churchhub.domain.user.dto.UserDto;
 import com.churchhub.domain.user.entity.User;
+import com.churchhub.domain.user.entity.UserRole;
 import com.churchhub.domain.user.repository.UserRepository;
 import com.churchhub.exception.BusinessException;
 import com.churchhub.exception.ErrorCode;
@@ -24,6 +27,7 @@ public class AdminService {
 
     private final UserRepository userRepository;
     private final PostRepository postRepository;
+    private final ChurchRepository churchRepository;
 
     public AdminDto.DashboardResponse getDashboard() {
         LocalDateTime startOfToday = LocalDate.now().atStartOfDay();
@@ -53,6 +57,16 @@ public class AdminService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
         user.changeRole(request.getRole());
+        if (request.getRole() == UserRole.CHURCH_MANAGER) {
+            if (request.getChurchId() == null) {
+                throw new BusinessException(ErrorCode.CHURCH_NOT_FOUND);
+            }
+            Church church = churchRepository.findById(request.getChurchId())
+                    .orElseThrow(() -> new BusinessException(ErrorCode.CHURCH_NOT_FOUND));
+            user.assignChurch(church);
+        } else {
+            user.assignChurch(null);
+        }
         return UserDto.Response.from(user);
     }
 
