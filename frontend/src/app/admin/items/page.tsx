@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import { Item, ItemRental, Church, ItemCategory } from '@/types';
+import { useAuthStore } from '@/store/authStore';
 
 const STATUS_LABEL: Record<string, string> = { PENDING: '대기중', APPROVED: '승인', REJECTED: '거절', CANCELLED: '취소' };
 const STATUS_COLOR: Record<string, string> = { PENDING: 'text-amber-500', APPROVED: 'text-green-600', REJECTED: 'text-red-500', CANCELLED: 'text-gray-400' };
@@ -11,6 +12,7 @@ const CATEGORY_LABEL: Record<ItemCategory, string> = { MOVING: '이사', CLEANIN
 const EMPTY_FORM = { churchId: '', name: '', description: '', category: 'LIVING' as ItemCategory, totalQuantity: '1' };
 
 export default function AdminItemsPage() {
+  const { user: me } = useAuthStore();
   const [tab, setTab] = useState<'items' | 'rentals'>('items');
   const [items, setItems] = useState<Item[]>([]);
   const [rentals, setRentals] = useState<ItemRental[]>([]);
@@ -45,13 +47,15 @@ export default function AdminItemsPage() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    const body = {
-      churchId: form.churchId ? Number(form.churchId) : null,
+    const body: Record<string, unknown> = {
       name: form.name,
       description: form.description || null,
       category: form.category,
       totalQuantity: Number(form.totalQuantity),
     };
+    if (me?.role !== 'CHURCH_MANAGER') {
+      body.churchId = form.churchId ? Number(form.churchId) : null;
+    }
     if (editId) {
       await api.put(`/admin/items/${editId}`, body);
     } else {
@@ -158,14 +162,19 @@ export default function AdminItemsPage() {
           <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl">
             <h2 className="font-bold text-gray-900 mb-4">{editId ? '물품 수정' : '물품 추가'}</h2>
             <form onSubmit={handleSave} className="space-y-3">
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">교회</label>
-                <select value={form.churchId} onChange={e => setForm(p => ({ ...p, churchId: e.target.value }))}
-                  className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]">
-                  <option value="">교회 선택 (선택사항)</option>
-                  {churches.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                </select>
-              </div>
+              {me?.role !== 'CHURCH_MANAGER' && (
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">교회</label>
+                  <select
+                    value={form.churchId}
+                    onChange={e => setForm(p => ({ ...p, churchId: e.target.value }))}
+                    className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]"
+                  >
+                    <option value="">교회 선택 (선택사항)</option>
+                    {churches.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                </div>
+              )}
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">물품명 *</label>
                 <input required value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))}

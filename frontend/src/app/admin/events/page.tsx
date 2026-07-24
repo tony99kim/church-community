@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import api from '@/lib/api';
 import type { Event } from '@/types';
 import { uploadImage } from '@/lib/supabase';
+import { useAuthStore } from '@/store/authStore';
 
 const RichEditor = dynamic(() => import('@/components/RichEditor'), { ssr: false });
 
@@ -20,13 +21,21 @@ const STATUS_COLOR: Record<string, string> = {
   CANCELLED: 'bg-red-50 text-red-400',
 };
 
+const CATEGORY_LABEL: Record<string, string> = {
+  NEIGHBORHOOD: '동네소식', FAITH: '신앙', SERVICE: '봉사',
+  CHURCH: '교회', WELCOME_TABLE: '환영밥상',
+};
+
 const EMPTY_FORM = {
   title: '', description: '', location: '',
-  startDate: '', endDate: '', maxParticipants: '', thumbnailUrl: '', status: 'DRAFT',
+  startDate: '', endDate: '', maxParticipants: '', thumbnailUrl: '',
+  status: 'DRAFT', category: 'CHURCH', churchId: '',
 };
 
 export default function AdminEventsPage() {
+  const { user: me } = useAuthStore();
   const [events, setEvents] = useState<Event[]>([]);
+  const [churches, setChurches] = useState<{ id: number; name: string }[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
   const [form, setForm] = useState({ ...EMPTY_FORM });
@@ -40,7 +49,12 @@ export default function AdminEventsPage() {
       .then((r) => setEvents(r.data.data.content))
       .finally(() => setLoading(false));
 
-  useEffect(() => { fetchEvents(); }, []);
+  useEffect(() => {
+    fetchEvents();
+    if (me?.role === 'SUPER_ADMIN') {
+      api.get('/churches').then(r => setChurches(r.data.data ?? []));
+    }
+  }, []);
 
   const handleThumb = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -69,6 +83,8 @@ export default function AdminEventsPage() {
       maxParticipants: e.maxParticipants?.toString() ?? '',
       thumbnailUrl: e.thumbnailUrl ?? '',
       status: e.status,
+      category: (e as unknown as { category?: string }).category ?? 'CHURCH',
+      churchId: (e as unknown as { churchId?: number }).churchId?.toString() ?? '',
     });
     setShowForm(true);
   };
@@ -85,6 +101,7 @@ export default function AdminEventsPage() {
       const body = {
         ...form,
         maxParticipants: form.maxParticipants ? Number(form.maxParticipants) : null,
+        churchId: form.churchId ? Number(form.churchId) : null,
       };
       if (editId) {
         await api.put(`/admin/events/${editId}`, body);
@@ -166,6 +183,35 @@ export default function AdminEventsPage() {
               </div>
 
               <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">카테고리</label>
+                <select
+                  value={form.category}
+                  onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
+                  className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]"
+                >
+                  <option value="NEIGHBORHOOD">동네소식</option>
+                  <option value="FAITH">신앙</option>
+                  <option value="SERVICE">봉사</option>
+                  <option value="CHURCH">교회</option>
+                  <option value="WELCOME_TABLE">환영밥상</option>
+                </select>
+              </div>
+
+              {me?.role === 'SUPER_ADMIN' && (
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">교회 (선택)</label>
+                  <select
+                    value={form.churchId}
+                    onChange={(e) => setForm((f) => ({ ...f, churchId: e.target.value }))}
+                    className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]"
+                  >
+                    <option value="">교회 선택 안함</option>
+                    {churches.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                </div>
+              )}
+
+              <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">공개 상태</label>
                 <select
                   value={form.status}
@@ -218,6 +264,7 @@ export default function AdminEventsPage() {
                 <th className="px-4 py-3 text-left text-xs font-bold text-gray-500">제목</th>
                 <th className="px-4 py-3 text-left text-xs font-bold text-gray-500">장소</th>
                 <th className="px-4 py-3 text-left text-xs font-bold text-gray-500">일정</th>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-500">카테고리</th>
                 <th className="px-4 py-3 text-left text-xs font-bold text-gray-500">상태</th>
                 <th className="px-4 py-3 text-left text-xs font-bold text-gray-500">인원</th>
                 <th className="px-4 py-3" />
@@ -230,6 +277,11 @@ export default function AdminEventsPage() {
                   <td className="px-4 py-3 text-gray-500">{e.location}</td>
                   <td className="px-4 py-3 text-gray-500 text-xs">
                     {new Date(e.startDate).toLocaleDateString('ko-KR')}
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className="text-xs px-2 py-0.5 bg-blue-50 text-[#003478] rounded-full">
+                      {CATEGORY_LABEL[(e as unknown as { category?: string }).category ?? ''] ?? '-'}
+                    </span>
                   </td>
                   <td className="px-4 py-3">
                     <span className={`text-xs px-2 py-0.5 rounded font-medium ${STATUS_COLOR[e.status]}`}>{STATUS_LABEL[e.status]}</span>

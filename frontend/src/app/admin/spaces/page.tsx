@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import { Space, SpaceRental, Church } from '@/types';
+import { useAuthStore } from '@/store/authStore';
 
 const STATUS_LABEL: Record<string, string> = { PENDING: '대기중', APPROVED: '승인', REJECTED: '거절', CANCELLED: '취소' };
 const STATUS_COLOR: Record<string, string> = { PENDING: 'text-amber-500', APPROVED: 'text-green-600', REJECTED: 'text-red-500', CANCELLED: 'text-gray-400' };
@@ -10,6 +11,7 @@ const STATUS_COLOR: Record<string, string> = { PENDING: 'text-amber-500', APPROV
 const EMPTY_FORM = { churchId: '', name: '', description: '', usageTypes: '', capacity: '', available: true };
 
 export default function AdminSpacesPage() {
+  const { user: me } = useAuthStore();
   const [tab, setTab] = useState<'spaces' | 'rentals'>('spaces');
   const [spaces, setSpaces] = useState<Space[]>([]);
   const [rentals, setRentals] = useState<SpaceRental[]>([]);
@@ -45,14 +47,16 @@ export default function AdminSpacesPage() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    const body = {
-      churchId: form.churchId ? Number(form.churchId) : null,
+    const body: Record<string, unknown> = {
       name: form.name,
       description: form.description || null,
       usageTypes: form.usageTypes || null,
       capacity: form.capacity ? Number(form.capacity) : null,
       available: form.available,
     };
+    if (me?.role !== 'CHURCH_MANAGER') {
+      body.churchId = form.churchId ? Number(form.churchId) : null;
+    }
     if (editId) {
       await api.put(`/admin/spaces/${editId}`, body);
     } else {
@@ -160,15 +164,20 @@ export default function AdminSpacesPage() {
           <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl">
             <h2 className="font-bold text-gray-900 mb-4">{editId ? '공간 수정' : '공간 추가'}</h2>
             <form onSubmit={handleSave} className="space-y-3">
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">교회 *</label>
-                <select required value={form.churchId}
-                  onChange={e => setForm(p => ({ ...p, churchId: e.target.value }))}
-                  className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]">
-                  <option value="">교회 선택</option>
-                  {churches.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                </select>
-              </div>
+              {me?.role !== 'CHURCH_MANAGER' && (
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">교회 *</label>
+                  <select
+                    required={me?.role !== 'CHURCH_MANAGER'}
+                    value={form.churchId}
+                    onChange={e => setForm(p => ({ ...p, churchId: e.target.value }))}
+                    className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]"
+                  >
+                    <option value="">교회 선택</option>
+                    {churches.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                </div>
+              )}
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">공간명 *</label>
                 <input required value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
