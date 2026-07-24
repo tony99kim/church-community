@@ -10,7 +10,7 @@ spring:
       ddl-auto: none
     show-sql: false
   flyway:
-    repair-on-migrate: true
+    ignore-migration-patterns: "*:failed"
   data:
     redis:
       ssl:
