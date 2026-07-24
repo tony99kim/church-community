@@ -67,7 +67,7 @@ public class ItemController {
     public ApiResponse<Void> deleteItem(
             @PathVariable Long id,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        itemService.deleteItem(id);
+        itemService.deleteItem(id, userDetails.getUserId());
         return ApiResponse.success(null);
     }
 

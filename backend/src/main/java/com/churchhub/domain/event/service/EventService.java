@@ -108,6 +108,11 @@ public class EventService {
                 request.getStartDate(), request.getEndDate(),
                 request.getMaxParticipants(), request.getThumbnailUrl(), request.getCategory());
         if (request.getStatus() != null) event.changeStatus(request.getStatus());
+        if (caller.getRole() != UserRole.CHURCH_MANAGER && request.getChurchId() != null) {
+            Church church = churchRepository.findById(request.getChurchId())
+                    .orElseThrow(() -> new BusinessException(ErrorCode.CHURCH_NOT_FOUND));
+            event.assignChurch(church);
+        }
         return EventDto.Response.from(event, false);
     }
 

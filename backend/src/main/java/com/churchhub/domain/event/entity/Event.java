@@ -95,6 +95,7 @@ public class Event {
     }
 
     public void changeStatus(EventStatus status) { this.status = status; }
+    public void assignChurch(Church church) { this.church = church; }
 
     public void incrementParticipants() { this.currentParticipants++; }
     public void decrementParticipants() { if (this.currentParticipants > 0) this.currentParticipants--; }

@@ -88,8 +88,10 @@ public class ItemService {
     }
 
     @Transactional
-    public void deleteItem(Long id) {
-        if (!itemRepository.existsById(id)) throw new BusinessException(ErrorCode.ITEM_NOT_FOUND);
+    public void deleteItem(Long id, Long callerId) {
+        Item item = itemRepository.findById(id)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ITEM_NOT_FOUND));
+        verifyItemOwnership(item, getCallerUser(callerId));
         if (itemRentalRepository.existsByItemId(id)) throw new BusinessException(ErrorCode.ITEM_HAS_RENTALS);
         itemRepository.deleteById(id);
     }
