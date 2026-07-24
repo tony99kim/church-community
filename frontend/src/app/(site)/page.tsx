@@ -70,6 +70,32 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* 다가오는 행사 */}
+      {upcomingEvents.length > 0 && (
+        <section className="max-w-5xl mx-auto py-8 px-4">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-bold text-gray-800">다가오는 행사</h2>
+            <Link href="/events" className="text-sm text-[#003478] hover:underline">전체 보기 →</Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {upcomingEvents.map(e => (
+              <Link key={e.id} href={`/events/${e.id}`} className="p-4 bg-white rounded-xl border border-[#EDEFF1] hover:border-[#003478] hover:shadow-sm transition-all">
+                {e.thumbnailUrl && (
+                  <div className="w-full h-28 rounded-lg overflow-hidden mb-3">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={e.thumbnailUrl} alt={e.title} className="w-full h-full object-cover" />
+                  </div>
+                )}
+                <div className="font-semibold text-sm text-gray-800 truncate">{e.title}</div>
+                <div className="text-xs text-gray-500 mt-1">
+                  📍 {e.location} · {new Date(e.startDate).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })}
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* 함께하는 교회 미리보기 */}
       {churches.length > 0 && (
         <section className="max-w-5xl mx-auto py-8 px-4">
@@ -79,13 +105,13 @@ export default function HomePage() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {churches.map(c => (
-              <div key={c.id} className="p-4 bg-white rounded-xl border border-[#EDEFF1]">
+              <Link key={c.id} href={`/churches/${c.id}`} className="p-4 bg-white rounded-xl border border-[#EDEFF1] hover:border-[#003478] hover:shadow-sm transition-all">
                 <div className="font-semibold text-sm text-gray-800">{c.name}</div>
                 <div className="text-xs text-gray-500 mt-1">{c.address}</div>
                 {c.hasYouthGroup && (
                   <span className="mt-2 inline-block px-2 py-0.5 bg-blue-50 text-[#003478] text-xs rounded-full">청년부 있음</span>
                 )}
-              </div>
+              </Link>
             ))}
           </div>
         </section>

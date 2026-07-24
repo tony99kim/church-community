@@ -23,7 +23,6 @@ const EVENT_CATEGORIES = [
   { value: '', label: '전체' },
   { value: 'NEIGHBORHOOD', label: '🏘 동네 모임' },
   { value: 'FAITH', label: '✝️ 신앙 모임' },
-  { value: 'SERVICE', label: '🤝 섬김 모임' },
   { value: 'CHURCH', label: '⛪ 교회별 행사' },
   { value: 'WELCOME_TABLE', label: '🍽 웰컴 테이블' },
 ];
@@ -40,7 +39,7 @@ export default function EventsPage() {
     api.get('/events', { params })
       .then((r) => {
         const data: PageResponse<Event> = r.data.data;
-        setEvents(data.content);
+        setEvents(data.content.filter((e: Event & { category?: string }) => e.category !== 'SERVICE'));
       })
       .finally(() => setLoading(false));
   }, [category]);
