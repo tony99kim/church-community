@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
+import { SpaceRental, ItemRental, FaithQuestion, PrayerRequest, WelcomeKit } from '@/types';
 
 interface Post {
   id: number;
@@ -15,7 +16,15 @@ interface Post {
   createdAt: string;
 }
 
-type Tab = 'info' | 'posts' | 'password';
+type Tab = 'info' | 'posts' | 'password' | 'spaceRentals' | 'itemRentals' | 'faithQuestions' | 'prayers' | 'welcomeKits';
+
+const STATUS_LABEL: Record<string, string> = { PENDING: '대기중', APPROVED: '승인', REJECTED: '거절', CANCELLED: '취소' };
+const STATUS_BADGE: Record<string, string> = {
+  PENDING: 'bg-amber-50 text-amber-600',
+  APPROVED: 'bg-green-50 text-green-600',
+  REJECTED: 'bg-red-50 text-red-500',
+  CANCELLED: 'bg-gray-100 text-gray-400',
+};
 
 export default function MyPage() {
   const router = useRouter();
@@ -23,6 +32,16 @@ export default function MyPage() {
   const [tab, setTab] = useState<Tab>('info');
   const [posts, setPosts] = useState<Post[]>([]);
   const [postsLoading, setPostsLoading] = useState(false);
+  const [spaceRentals, setSpaceRentals] = useState<SpaceRental[]>([]);
+  const [spaceRentalsLoading, setSpaceRentalsLoading] = useState(false);
+  const [itemRentals, setItemRentals] = useState<ItemRental[]>([]);
+  const [itemRentalsLoading, setItemRentalsLoading] = useState(false);
+  const [faithQuestions, setFaithQuestions] = useState<FaithQuestion[]>([]);
+  const [faithQuestionsLoading, setFaithQuestionsLoading] = useState(false);
+  const [myPrayers, setMyPrayers] = useState<PrayerRequest[]>([]);
+  const [prayersLoading, setPrayersLoading] = useState(false);
+  const [welcomeKits, setWelcomeKits] = useState<WelcomeKit[]>([]);
+  const [welcomeKitsLoading, setWelcomeKitsLoading] = useState(false);
 
   // 프로필 수정
   const [nickname, setNickname] = useState('');
@@ -48,6 +67,36 @@ export default function MyPage() {
       api.get(`/users/${user.id}/posts`, { params: { page: 0, size: 20, sort: 'createdAt,desc' } })
         .then((res) => setPosts(res.data.data.content))
         .finally(() => setPostsLoading(false));
+    }
+    if (tab === 'spaceRentals') {
+      setSpaceRentalsLoading(true);
+      api.get('/spaces/rentals/my')
+        .then((res) => setSpaceRentals(res.data.data ?? []))
+        .finally(() => setSpaceRentalsLoading(false));
+    }
+    if (tab === 'itemRentals') {
+      setItemRentalsLoading(true);
+      api.get('/items/rentals/my')
+        .then((res) => setItemRentals(res.data.data ?? []))
+        .finally(() => setItemRentalsLoading(false));
+    }
+    if (tab === 'faithQuestions') {
+      setFaithQuestionsLoading(true);
+      api.get('/faith/questions/my')
+        .then((res) => setFaithQuestions(res.data.data ?? []))
+        .finally(() => setFaithQuestionsLoading(false));
+    }
+    if (tab === 'prayers') {
+      setPrayersLoading(true);
+      api.get('/faith/prayers/my')
+        .then((res) => setMyPrayers(res.data.data ?? []))
+        .finally(() => setPrayersLoading(false));
+    }
+    if (tab === 'welcomeKits') {
+      setWelcomeKitsLoading(true);
+      api.get('/welcome/kits/my')
+        .then((res) => setWelcomeKits(res.data.data ?? []))
+        .finally(() => setWelcomeKitsLoading(false));
     }
   }, [tab, user]);
 
@@ -92,8 +141,13 @@ export default function MyPage() {
 
   const TABS: { key: Tab; label: string }[] = [
     { key: 'info', label: '내 정보' },
-    { key: 'posts', label: '내가 쓴 글' },
-    { key: 'password', label: '비밀번호 변경' },
+    { key: 'posts', label: '쓴 글' },
+    { key: 'spaceRentals', label: '공간 신청' },
+    { key: 'itemRentals', label: '물품 신청' },
+    { key: 'welcomeKits', label: '웰컴키트' },
+    { key: 'faithQuestions', label: '신앙 질문' },
+    { key: 'prayers', label: '기도 요청' },
+    { key: 'password', label: '비밀번호' },
   ];
 
   return (
@@ -116,12 +170,12 @@ export default function MyPage() {
         </div>
 
         {/* 탭 */}
-        <div className="flex gap-1 bg-white rounded-xl border border-gray-200 p-1 mb-5">
+        <div className="flex flex-wrap gap-1 bg-white rounded-xl border border-gray-200 p-1 mb-5">
           {TABS.map((t) => (
             <button
               key={t.key}
               onClick={() => setTab(t.key)}
-              className={`flex-1 py-2 rounded-lg text-sm font-medium transition ${tab === t.key ? 'bg-[#003478] text-white' : 'text-gray-600 hover:bg-gray-50'}`}
+              className={`flex-1 min-w-[80px] py-2 rounded-lg text-sm font-medium transition ${tab === t.key ? 'bg-[#003478] text-white' : 'text-gray-600 hover:bg-gray-50'}`}
             >
               {t.label}
             </button>
@@ -202,6 +256,225 @@ export default function MyPage() {
                         </div>
                       </div>
                     </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+
+        {/* 공간 신청 내역 */}
+        {tab === 'spaceRentals' && (
+          <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100">
+              <h2 className="font-bold text-gray-900">공간 신청 내역</h2>
+            </div>
+            {spaceRentalsLoading ? (
+              <div className="p-8 text-center text-gray-400">불러오는 중...</div>
+            ) : spaceRentals.length === 0 ? (
+              <div className="p-12 text-center">
+                <div className="text-4xl mb-3">📋</div>
+                <p className="text-gray-400 text-sm">신청한 공간 대여가 없습니다.</p>
+                <Link href="/spaces" className="inline-block mt-4 text-[#003478] text-sm font-medium hover:underline">
+                  공간 예약하러 가기 →
+                </Link>
+              </div>
+            ) : (
+              <ul className="divide-y divide-gray-50">
+                {spaceRentals.map((r) => (
+                  <li key={r.id} className="px-6 py-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_BADGE[r.status]}`}>
+                            {STATUS_LABEL[r.status]}
+                          </span>
+                          <span className="text-sm font-medium text-gray-900 truncate">{r.spaceName}</span>
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {r.startDateTime.slice(0, 10)} {r.startDateTime.slice(11, 16)} ~ {r.endDateTime.slice(11, 16)}
+                        </div>
+                        <div className="text-xs text-gray-400 mt-0.5">목적: {r.purpose}</div>
+                        {r.rejectReason && (
+                          <div className="text-xs text-red-400 mt-0.5">거절 사유: {r.rejectReason}</div>
+                        )}
+                      </div>
+                      <div className="text-xs text-gray-400 shrink-0">
+                        {new Date(r.createdAt).toLocaleDateString('ko-KR')}
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+
+        {/* 물품 신청 내역 */}
+        {tab === 'itemRentals' && (
+          <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100">
+              <h2 className="font-bold text-gray-900">물품 신청 내역</h2>
+            </div>
+            {itemRentalsLoading ? (
+              <div className="p-8 text-center text-gray-400">불러오는 중...</div>
+            ) : itemRentals.length === 0 ? (
+              <div className="p-12 text-center">
+                <div className="text-4xl mb-3">📦</div>
+                <p className="text-gray-400 text-sm">신청한 물품 대여가 없습니다.</p>
+                <Link href="/items" className="inline-block mt-4 text-[#003478] text-sm font-medium hover:underline">
+                  물품 대여 신청하러 가기 →
+                </Link>
+              </div>
+            ) : (
+              <ul className="divide-y divide-gray-50">
+                {itemRentals.map((r) => (
+                  <li key={r.id} className="px-6 py-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_BADGE[r.status]}`}>
+                            {STATUS_LABEL[r.status]}
+                          </span>
+                          <span className="text-sm font-medium text-gray-900 truncate">{r.itemName}</span>
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {r.startDate} ~ {r.endDate} · {r.quantity}개
+                        </div>
+                        {r.purpose && <div className="text-xs text-gray-400 mt-0.5">목적: {r.purpose}</div>}
+                        {r.rejectReason && (
+                          <div className="text-xs text-red-400 mt-0.5">거절 사유: {r.rejectReason}</div>
+                        )}
+                      </div>
+                      <div className="text-xs text-gray-400 shrink-0">
+                        {new Date(r.createdAt).toLocaleDateString('ko-KR')}
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+
+        {/* 웰컴키트 신청 내역 */}
+        {tab === 'welcomeKits' && (
+          <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100">
+              <h2 className="font-bold text-gray-900">웰컴키트 신청 내역</h2>
+            </div>
+            {welcomeKitsLoading ? (
+              <div className="p-8 text-center text-gray-400">불러오는 중...</div>
+            ) : welcomeKits.length === 0 ? (
+              <div className="p-12 text-center">
+                <div className="text-4xl mb-3">🎁</div>
+                <p className="text-gray-400 text-sm">웰컴키트 신청 내역이 없습니다.</p>
+                <Link href="/welcome" className="inline-block mt-4 text-[#003478] text-sm font-medium hover:underline">
+                  웰컴키트 신청하러 가기 →
+                </Link>
+              </div>
+            ) : (
+              <ul className="divide-y divide-gray-50">
+                {welcomeKits.map((kit) => (
+                  <li key={kit.id} className="px-6 py-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${kit.processed ? 'bg-green-50 text-green-600' : 'bg-amber-50 text-amber-600'}`}>
+                            {kit.processed ? '처리 완료' : '처리 중'}
+                          </span>
+                          <span className="text-xs text-gray-400">{new Date(kit.createdAt).toLocaleDateString('ko-KR')}</span>
+                        </div>
+                        {kit.address && <div className="text-xs text-gray-500">📍 {kit.address}</div>}
+                        {kit.message && <div className="text-xs text-gray-400 mt-0.5 italic">"{kit.message}"</div>}
+                        {kit.adminMessage && (
+                          <div className="mt-2 bg-blue-50 rounded-lg px-3 py-2">
+                            <div className="text-xs text-[#003478] font-semibold mb-0.5">담당자 메시지</div>
+                            <p className="text-sm text-gray-700">{kit.adminMessage}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+
+        {/* 신앙 질문 내역 */}
+        {tab === 'faithQuestions' && (
+          <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100">
+              <h2 className="font-bold text-gray-900">내 신앙 질문</h2>
+            </div>
+            {faithQuestionsLoading ? (
+              <div className="p-8 text-center text-gray-400">불러오는 중...</div>
+            ) : faithQuestions.length === 0 ? (
+              <div className="p-12 text-center">
+                <div className="text-4xl mb-3">✝️</div>
+                <p className="text-gray-400 text-sm">남긴 신앙 질문이 없습니다.</p>
+                <Link href="/faith" className="inline-block mt-4 text-[#003478] text-sm font-medium hover:underline">
+                  신앙 Q&A 바로가기 →
+                </Link>
+              </div>
+            ) : (
+              <ul className="divide-y divide-gray-50">
+                {faithQuestions.map((q) => (
+                  <li key={q.id} className="px-6 py-4">
+                    <div className="flex items-center gap-2 mb-1 text-xs text-gray-400">
+                      <span>{q.anonymous ? '익명' : '실명'}</span>
+                      <span>·</span>
+                      <span>{new Date(q.createdAt).toLocaleDateString('ko-KR')}</span>
+                      {q.answers.length > 0 && (
+                        <span className="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded text-[10px]">답변 {q.answers.length}개</span>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-800 mb-2">{q.content}</p>
+                    {q.answers.map(a => (
+                      <div key={a.id} className="bg-blue-50 rounded-lg p-3 mt-1">
+                        <div className="text-xs text-[#003478] font-medium mb-1">목사님 답변 — {a.pastorNickname}</div>
+                        <p className="text-sm text-gray-700">{a.content}</p>
+                      </div>
+                    ))}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+
+        {/* 기도 요청 내역 */}
+        {tab === 'prayers' && (
+          <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100">
+              <h2 className="font-bold text-gray-900">내 기도 요청</h2>
+            </div>
+            {prayersLoading ? (
+              <div className="p-8 text-center text-gray-400">불러오는 중...</div>
+            ) : myPrayers.length === 0 ? (
+              <div className="p-12 text-center">
+                <div className="text-4xl mb-3">🙏</div>
+                <p className="text-gray-400 text-sm">남긴 기도 요청이 없습니다.</p>
+                <Link href="/faith" className="inline-block mt-4 text-[#003478] text-sm font-medium hover:underline">
+                  기도 요청하러 가기 →
+                </Link>
+              </div>
+            ) : (
+              <ul className="divide-y divide-gray-50">
+                {myPrayers.map((p) => (
+                  <li key={p.id} className="px-6 py-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 mb-1 text-xs text-gray-400">
+                          <span>{p.publicVisible ? '공개' : '나만 보기'}</span>
+                          <span>·</span>
+                          <span>{new Date(p.createdAt).toLocaleDateString('ko-KR')}</span>
+                        </div>
+                        <p className="text-sm text-gray-800">{p.content}</p>
+                      </div>
+                      <div className="text-xs text-gray-400 shrink-0">🙏 {p.prayerCount}</div>
+                    </div>
                   </li>
                 ))}
               </ul>

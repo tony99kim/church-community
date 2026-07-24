@@ -1,9 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import api from '@/lib/api';
+import { useAuthStore } from '@/store/authStore';
 
 export default function WelcomePage() {
+  const { isLoggedIn } = useAuthStore();
   const [form, setForm] = useState({ name: '', phone: '', address: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -32,7 +35,14 @@ export default function WelcomePage() {
           <section className="bg-white rounded-2xl border border-[#EDEFF1] p-6">
             <h2 className="text-lg font-bold text-gray-800 mb-1">🎁 웰컴 키트 신청</h2>
             <p className="text-sm text-gray-500 mb-4">새로 이사 온 청년, 1인 가구 청년에게 환영 키트를 드립니다.</p>
-            {submitted ? (
+            {!isLoggedIn ? (
+              <div className="text-center py-6">
+                <p className="text-sm text-gray-500 mb-4">웰컴 키트 신청은 로그인 후 이용할 수 있습니다.</p>
+                <Link href="/login" className="inline-block px-5 py-2.5 bg-[#003478] text-white rounded-lg text-sm font-medium hover:bg-blue-900 transition-colors">
+                  로그인하기
+                </Link>
+              </div>
+            ) : submitted ? (
               <div className="text-center py-6 text-green-600 font-medium">
                 신청이 완료되었습니다! 담당자가 연락드릴게요 😊
               </div>

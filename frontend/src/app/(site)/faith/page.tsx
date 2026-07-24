@@ -13,6 +13,9 @@ export default function FaithPage() {
   const [prayers, setPrayers] = useState<PrayerRequest[]>([]);
   const [qForm, setQForm] = useState({ content: '', anonymous: false, publicVisible: true });
   const [pForm, setPForm] = useState({ content: '', publicVisible: true });
+  // qVisibility: 'public'(실명공개) | 'anonymous'(익명공개)
+  const [qVisibility, setQVisibility] = useState<'public' | 'anonymous'>('public');
+  const [pPublic, setPPublic] = useState(true);
   const [loading, setLoading] = useState(true);
   const { isLoggedIn } = useAuthStore();
 
@@ -25,15 +28,21 @@ export default function FaithPage() {
 
   const submitQuestion = async (e: React.FormEvent) => {
     e.preventDefault();
-    await api.post('/faith/questions', qForm);
+    await api.post('/faith/questions', {
+      content: qForm.content,
+      anonymous: qVisibility === 'anonymous',
+      publicVisible: true,
+    });
     setQForm({ content: '', anonymous: false, publicVisible: true });
+    setQVisibility('public');
     api.get('/faith/questions').then(r => setQuestions(r.data.data ?? []));
   };
 
   const submitPrayer = async (e: React.FormEvent) => {
     e.preventDefault();
-    await api.post('/faith/prayers', pForm);
+    await api.post('/faith/prayers', { content: pForm.content, publicVisible: pPublic });
     setPForm({ content: '', publicVisible: true });
+    setPPublic(true);
     api.get('/faith/prayers').then(r => setPrayers(r.data.data ?? []));
   };
 
@@ -67,19 +76,13 @@ export default function FaithPage() {
                   onChange={e => setQForm(p => ({ ...p, content: e.target.value }))}
                   className="w-full px-4 py-2.5 border border-[#EDEFF1] rounded-lg text-sm focus:outline-none focus:border-[#003478] resize-none mb-3" />
                 <div className="flex items-center justify-between">
-                  <div className="flex gap-4">
-                    <label className="flex items-center gap-1.5 text-sm text-gray-600 cursor-pointer">
-                      <input type="checkbox" checked={qForm.anonymous}
-                        onChange={e => setQForm(p => ({ ...p, anonymous: e.target.checked }))}
-                        className="accent-[#003478]" />
-                      익명
-                    </label>
-                    <label className="flex items-center gap-1.5 text-sm text-gray-600 cursor-pointer">
-                      <input type="checkbox" checked={qForm.publicVisible}
-                        onChange={e => setQForm(p => ({ ...p, publicVisible: e.target.checked }))}
-                        className="accent-[#003478]" />
-                      공개
-                    </label>
+                  <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
+                    {(['public', 'anonymous'] as const).map((v) => (
+                      <button key={v} type="button" onClick={() => setQVisibility(v)}
+                        className={`px-3 py-1 rounded-md text-xs font-medium transition ${qVisibility === v ? 'bg-white text-[#003478] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
+                        {v === 'public' ? '실명 공개' : '익명'}
+                      </button>
+                    ))}
                   </div>
                   <button type="submit" className="px-4 py-2 bg-[#003478] text-white rounded-lg text-sm font-medium hover:bg-blue-900 transition-colors">
                     질문하기
@@ -118,12 +121,14 @@ export default function FaithPage() {
                   onChange={e => setPForm(p => ({ ...p, content: e.target.value }))}
                   className="w-full px-4 py-2.5 border border-[#EDEFF1] rounded-lg text-sm focus:outline-none focus:border-[#003478] resize-none mb-3" />
                 <div className="flex items-center justify-between">
-                  <label className="flex items-center gap-1.5 text-sm text-gray-600 cursor-pointer">
-                    <input type="checkbox" checked={pForm.publicVisible}
-                      onChange={e => setPForm(p => ({ ...p, publicVisible: e.target.checked }))}
-                      className="accent-[#003478]" />
-                    공개
-                  </label>
+                  <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
+                    {([true, false] as const).map((v) => (
+                      <button key={String(v)} type="button" onClick={() => setPPublic(v)}
+                        className={`px-3 py-1 rounded-md text-xs font-medium transition ${pPublic === v ? 'bg-white text-[#003478] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
+                        {v ? '공개' : '나만 보기'}
+                      </button>
+                    ))}
+                  </div>
                   <button type="submit" className="px-4 py-2 bg-[#003478] text-white rounded-lg text-sm font-medium hover:bg-blue-900 transition-colors">
                     등록하기
                   </button>

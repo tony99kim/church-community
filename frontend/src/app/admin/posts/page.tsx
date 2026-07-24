@@ -23,9 +23,11 @@ export default function AdminPostsPage() {
   const [keyword, setKeyword] = useState('');
   const [searchInput, setSearchInput] = useState('');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchPosts = (p = 0, kw = keyword) => {
     setLoading(true);
+    setError(null);
     const params: Record<string, unknown> = { page: p, size: 15, sort: 'createdAt,desc' };
     if (kw) params.keyword = kw;
     api.get('/posts', { params })
@@ -34,6 +36,7 @@ export default function AdminPostsPage() {
         setTotalPages(res.data.data.totalPages);
         setTotalElements(res.data.data.totalElements);
       })
+      .catch(() => setError('게시글 목록을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.'))
       .finally(() => setLoading(false));
   };
 
@@ -101,6 +104,8 @@ export default function AdminPostsPage() {
               </div>
             ))}
           </div>
+        ) : error ? (
+          <div className="p-12 text-center text-red-400 text-sm">{error}</div>
         ) : posts.length === 0 ? (
           <div className="p-12 text-center text-gray-400 text-sm">게시글이 없습니다.</div>
         ) : (

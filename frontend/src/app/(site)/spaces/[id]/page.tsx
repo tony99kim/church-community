@@ -131,19 +131,24 @@ export default function SpaceDetailPage() {
     <main className="min-h-screen bg-[#f4f6f8] py-10 px-4">
       <div className="max-w-3xl mx-auto">
         {/* 공간 정보 */}
-        <div className="bg-white rounded-2xl border border-[#EDEFF1] p-5 mb-6">
-          <div className="flex items-start justify-between mb-1">
-            <h1 className="text-xl font-bold text-gray-900">{space.name}</h1>
-            <span className={`px-2 py-0.5 text-xs rounded-full ${space.available ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-500'}`}>
-              {space.available ? '예약 가능' : '예약 불가'}
-            </span>
-          </div>
-          {space.churchName && <p className="text-xs text-gray-400 mb-2">⛪ {space.churchName}</p>}
-          {space.description && <p className="text-sm text-gray-600 mb-2">{space.description}</p>}
-          <div className="text-xs text-gray-400 flex gap-4 flex-wrap">
-            {space.capacity && <span>👥 최대 {space.capacity}명</span>}
-            <span>🕐 {space.openTime?.slice(0,5)} ~ {space.closeTime?.slice(0,5)}</span>
-            <span>⏱ {space.slotMinutes}분 단위</span>
+        <div className="bg-white rounded-2xl border border-[#EDEFF1] overflow-hidden mb-6">
+          {space.imageUrl && (
+            <img src={space.imageUrl} alt={space.name} className="w-full h-52 object-cover" />
+          )}
+          <div className="p-5">
+            <div className="flex items-start justify-between mb-1">
+              <h1 className="text-xl font-bold text-gray-900">{space.name}</h1>
+              <span className={`px-2 py-0.5 text-xs rounded-full ${space.available ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-500'}`}>
+                {space.available ? '예약 가능' : '예약 불가'}
+              </span>
+            </div>
+            {space.churchName && <p className="text-xs text-gray-400 mb-2">⛪ {space.churchName}</p>}
+            {space.description && <p className="text-sm text-gray-600 mb-3 whitespace-pre-line">{space.description}</p>}
+            <div className="text-xs text-gray-400 flex gap-4 flex-wrap">
+              {space.capacity && <span>👥 최대 {space.capacity}명</span>}
+              <span>🕐 {space.openTime?.slice(0,5)} ~ {space.closeTime?.slice(0,5)}</span>
+              <span>⏱ {space.slotMinutes}분 단위</span>
+            </div>
           </div>
         </div>
 
