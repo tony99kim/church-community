@@ -1,57 +1,99 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useAuthStore } from '@/store/authStore';
 import api from '@/lib/api';
 import { PendingCountsProvider, usePendingCounts } from '@/context/PendingCountsContext';
 
-const navItems = [
+type NavLeaf = { href: string; label: string; icon: string; exact?: boolean; countKey?: string };
+type NavGroup = { group: string; icon: string; basePath: string; children: NavLeaf[] };
+type NavEntry = NavLeaf | NavGroup;
+
+const navEntries: NavEntry[] = [
   { href: '/admin', label: '대시보드', icon: '📊', exact: true },
-  { href: '/admin/categories', label: '카테고리 관리', icon: '📁' },
-  { href: '/admin/users', label: '회원 관리', icon: '👥' },
-  { href: '/admin/posts', label: '게시글 관리', icon: '📝' },
-  { href: '/admin/events', label: '행사 관리', icon: '📅' },
-  { href: '/admin/service', label: '봉사 관리', icon: '🤝' },
-  { href: '/admin/participants', label: '행사 참여자', icon: '🎫' },
-  { href: '/admin/reports', label: '신고 관리', icon: '🚨' },
   { href: '/admin/churches', label: '교회 관리', icon: '⛪' },
+  { href: '/admin/users', label: '회원 관리', icon: '👥' },
+  {
+    group: '커뮤니티', icon: '💬', basePath: '/admin/posts',
+    children: [
+      { href: '/admin/posts', label: '게시글 관리', icon: '📝' },
+      { href: '/admin/categories', label: '카테고리 관리', icon: '📁' },
+    ],
+  },
+  {
+    group: '행사 관리', icon: '📅', basePath: '/admin/events',
+    children: [
+      { href: '/admin/events', label: '행사 관리', icon: '📅' },
+      { href: '/admin/participants', label: '행사 참여자', icon: '🎫' },
+    ],
+  },
   { href: '/admin/spaces', label: '공간 대여 관리', icon: '🏠', countKey: 'spaceRentals' },
   { href: '/admin/items', label: '물품 대여 관리', icon: '📦', countKey: 'itemRentals' },
   { href: '/admin/welcome-kits', label: '웰컴 키트 신청', icon: '🎁', countKey: 'welcomeKits' },
   { href: '/admin/faith', label: '신앙 Q&A', icon: '✝️', countKey: 'faithQuestions' },
+  { href: '/admin/service', label: '지역섬김 관리', icon: '🤝' },
+  { href: '/admin/reports', label: '신고 관리', icon: '🚨' },
 ];
 
-function SidebarNav() {
+function NavLink({ item, indent = false }: { item: NavLeaf; indent?: boolean }) {
   const pathname = usePathname();
   const { counts } = usePendingCounts();
+  const isActive = item.exact ? pathname === item.href : pathname.startsWith(item.href);
+  const badge = item.countKey ? counts[item.countKey as keyof typeof counts] : 0;
+  return (
+    <Link
+      href={item.href}
+      className={`flex items-center gap-3 rounded-xl text-sm font-medium transition ${
+        indent ? 'px-3 py-2 ml-3' : 'px-3 py-2.5'
+      } ${isActive ? 'bg-white/20 text-white' : 'text-blue-200 hover:bg-white/10 hover:text-white'}`}
+    >
+      <span className={indent ? 'text-xs' : ''}>{item.icon}</span>
+      <span className="flex-1">{item.label}</span>
+      {badge > 0 && (
+        <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+          {badge}
+        </span>
+      )}
+    </Link>
+  );
+}
+
+function NavGroupItem({ entry }: { entry: NavGroup }) {
+  const pathname = usePathname();
+  const isChildActive = entry.children.some(c => pathname.startsWith(c.href));
+  const [open, setOpen] = useState(isChildActive);
 
   return (
+    <div>
+      <button
+        onClick={() => setOpen(o => !o)}
+        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition ${
+          isChildActive ? 'bg-white/20 text-white' : 'text-blue-200 hover:bg-white/10 hover:text-white'
+        }`}
+      >
+        <span>{entry.icon}</span>
+        <span className="flex-1 text-left">{entry.group}</span>
+        <span className={`text-[10px] transition-transform ${open ? 'rotate-90' : ''}`}>▶</span>
+      </button>
+      {open && (
+        <div className="mt-0.5 space-y-0.5">
+          {entry.children.map(child => <NavLink key={child.href} item={child} indent />)}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SidebarNav() {
+  return (
     <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-      {navItems.map((item) => {
-        const isActive = item.exact ? pathname === item.href : pathname.startsWith(item.href);
-        const badge = item.countKey ? counts[item.countKey as keyof typeof counts] : 0;
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition ${
-              isActive
-                ? 'bg-white/20 text-white'
-                : 'text-blue-200 hover:bg-white/10 hover:text-white'
-            }`}
-          >
-            <span>{item.icon}</span>
-            <span className="flex-1">{item.label}</span>
-            {badge > 0 && (
-              <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
-                {badge}
-              </span>
-            )}
-          </Link>
-        );
-      })}
+      {navEntries.map((entry) =>
+        'group' in entry
+          ? <NavGroupItem key={entry.group} entry={entry} />
+          : <NavLink key={entry.href} item={entry} />
+      )}
     </nav>
   );
 }
