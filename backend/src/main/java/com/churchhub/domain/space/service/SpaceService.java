@@ -173,7 +173,7 @@ public class SpaceService {
         if (!rental.getApplicant().getId().equals(caller.getId())) {
             throw new BusinessException(ErrorCode.FORBIDDEN);
         }
-        if (rental.getStatus() == RentalStatus.APPROVED) {
+        if (rental.getStatus() != RentalStatus.PENDING) {
             throw new BusinessException(ErrorCode.SPACE_RENTAL_ALREADY_APPROVED);
         }
         rental.cancel();
