@@ -22,6 +22,17 @@ supabase:
   service-role-key: ${SUPABASE_SERVICE_ROLE_KEY}
   bucket: church-community
 
+management:
+  endpoint:
+    health:
+      show-details: never
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
 logging:
   level:
     com.churchhub: WARN

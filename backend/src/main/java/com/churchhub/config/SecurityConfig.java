@@ -68,8 +68,8 @@ public class SecurityConfig {
                 .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/api-docs/**", "/webjars/**").permitAll()
                 // 헬스체크
                 .requestMatchers("/actuator/health").permitAll()
-                // 관리자 전용
-                .requestMatchers("/api/v1/admin/**").hasAnyRole("CHURCH_MANAGER", "SUPER_ADMIN")
+                // 관리자 전용 (세부 권한은 각 엔드포인트의 @PreAuthorize 로 제어)
+                .requestMatchers("/api/v1/admin/**").hasAnyRole("PASTOR", "CHURCH_MANAGER", "SUPER_ADMIN")
                 // 나머지는 인증 필요
                 .anyRequest().authenticated()
             )
