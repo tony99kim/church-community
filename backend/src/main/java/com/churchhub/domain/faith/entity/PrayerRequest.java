@@ -28,6 +28,7 @@ public class PrayerRequest {
 
     private boolean publicVisible = true;
     private int prayerCount = 0;
+    private boolean adminPrayed = false;
 
     @CreatedDate
     @Column(updatable = false)
@@ -41,4 +42,5 @@ public class PrayerRequest {
     }
 
     public void pray() { this.prayerCount++; }
+    public void toggleAdminPrayed() { this.adminPrayed = !this.adminPrayed; }
 }

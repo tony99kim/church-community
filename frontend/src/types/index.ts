@@ -102,6 +102,17 @@ export interface Space {
   openTime?: string;    // "HH:mm:ss"
   closeTime?: string;   // "HH:mm:ss"
   slotMinutes?: number;
+  imageUrl?: string | null;
+}
+
+export interface SpaceBlock {
+  id: number;
+  reason: string;
+  recurring: boolean;
+  dayOfWeek: number | null;  // 1=월~7=일
+  blockDate: string | null;
+  startTime: string;
+  endTime: string;
 }
 
 export interface SlotInfo {
@@ -123,6 +134,7 @@ export interface SpaceRental {
   contactPhone: string;
   status: RentalStatus;
   rejectReason: string | null;
+  adminMessage: string | null;
   createdAt: string;
 }
 
@@ -180,6 +192,7 @@ export interface PrayerRequest {
   content: string;
   publicVisible: boolean;
   prayerCount: number;
+  adminPrayed: boolean;
   createdAt: string;
 }
 
@@ -189,10 +202,12 @@ export type EventCategory = 'NEIGHBORHOOD' | 'FAITH' | 'SERVICE' | 'CHURCH' | 'W
 // WelcomeKit
 export interface WelcomeKit {
   id: number;
+  userId: number | null;
   name: string;
   phone: string;
   address: string | null;
   message: string | null;
+  adminMessage: string | null;
   processed: boolean;
   createdAt: string;
 }

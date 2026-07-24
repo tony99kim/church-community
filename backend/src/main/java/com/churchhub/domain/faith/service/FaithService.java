@@ -61,6 +61,30 @@ public class FaithService {
                 .stream().map(FaithDto.PrayerResponse::from).toList();
     }
 
+    public List<FaithDto.QuestionResponse> getAllQuestionsForAdmin() {
+        return questionRepository.findAllByOrderByCreatedAtDesc()
+                .stream().map(q -> FaithDto.QuestionResponse.from(q,
+                        answerRepository.findAllByQuestionIdOrderByCreatedAtAsc(q.getId())))
+                .toList();
+    }
+
+    public List<FaithDto.PrayerResponse> getAllPrayersForAdmin() {
+        return prayerRequestRepository.findAllByOrderByCreatedAtDesc()
+                .stream().map(FaithDto.PrayerResponse::from).toList();
+    }
+
+    public List<FaithDto.QuestionResponse> getMyQuestions(Long userId) {
+        return questionRepository.findAllByAuthorIdOrderByCreatedAtDesc(userId)
+                .stream().map(q -> FaithDto.QuestionResponse.from(q,
+                        answerRepository.findAllByQuestionIdOrderByCreatedAtAsc(q.getId())))
+                .toList();
+    }
+
+    public List<FaithDto.PrayerResponse> getMyPrayers(Long userId) {
+        return prayerRequestRepository.findAllByAuthorIdOrderByCreatedAtDesc(userId)
+                .stream().map(FaithDto.PrayerResponse::from).toList();
+    }
+
     @Transactional
     public FaithDto.PrayerResponse createPrayer(Long userId, FaithDto.PrayerRequestForm req) {
         User user = userRepository.findById(userId)
@@ -75,6 +99,14 @@ public class FaithService {
         PrayerRequest prayer = prayerRequestRepository.findById(prayerId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
         prayer.pray();
+        return FaithDto.PrayerResponse.from(prayer);
+    }
+
+    @Transactional
+    public FaithDto.PrayerResponse toggleAdminPrayed(Long prayerId) {
+        PrayerRequest prayer = prayerRequestRepository.findById(prayerId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
+        prayer.toggleAdminPrayed();
         return FaithDto.PrayerResponse.from(prayer);
     }
 }

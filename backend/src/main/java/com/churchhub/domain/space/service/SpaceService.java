@@ -8,7 +8,9 @@ import com.churchhub.domain.notification.service.NotificationService;
 import com.churchhub.domain.space.dto.SpaceDto;
 import com.churchhub.domain.space.entity.RentalStatus;
 import com.churchhub.domain.space.entity.Space;
+import com.churchhub.domain.space.entity.SpaceBlock;
 import com.churchhub.domain.space.entity.SpaceRental;
+import com.churchhub.domain.space.repository.SpaceBlockRepository;
 import com.churchhub.domain.space.repository.SpaceRentalRepository;
 import com.churchhub.domain.space.repository.SpaceRepository;
 import com.churchhub.domain.user.entity.User;
@@ -32,6 +34,7 @@ public class SpaceService {
 
     private final SpaceRepository spaceRepository;
     private final SpaceRentalRepository spaceRentalRepository;
+    private final SpaceBlockRepository spaceBlockRepository;
     private final ChurchRepository churchRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
@@ -39,6 +42,12 @@ public class SpaceService {
     public List<SpaceDto.Response> getSpaces() {
         return spaceRepository.findAllByOrderByCreatedAtDesc()
                 .stream().map(SpaceDto.Response::from).toList();
+    }
+
+    public SpaceDto.Response getSpace(Long id) {
+        Space space = spaceRepository.findById(id)
+                .orElseThrow(() -> new BusinessException(ErrorCode.SPACE_NOT_FOUND));
+        return SpaceDto.Response.from(space);
     }
 
     // ─── Helpers ────────────────────────────────────────────────
@@ -89,6 +98,7 @@ public class SpaceService {
                 .church(church).name(req.getName()).description(req.getDescription())
                 .usageTypes(req.getUsageTypes()).capacity(req.getCapacity())
                 .openTime(req.getOpenTime()).closeTime(req.getCloseTime()).slotMinutes(req.getSlotMinutes())
+                .imageUrl(req.getImageUrl())
                 .build();
         return SpaceDto.Response.from(spaceRepository.save(space));
     }
@@ -100,7 +110,7 @@ public class SpaceService {
         User caller = getCallerUser(callerId);
         verifySpaceOwnership(space, caller);
         space.update(req.getName(), req.getDescription(), req.getUsageTypes(), req.getCapacity(),
-                req.isAvailable(), req.getOpenTime(), req.getCloseTime(), req.getSlotMinutes());
+                req.isAvailable(), req.getOpenTime(), req.getCloseTime(), req.getSlotMinutes(), req.getImageUrl());
         if (caller.getRole() != UserRole.CHURCH_MANAGER) {
             if (req.getChurchId() == null) throw new BusinessException(ErrorCode.CHURCH_NOT_FOUND);
             Church church = churchRepository.findById(req.getChurchId())
@@ -143,6 +153,7 @@ public class SpaceService {
                 .church(church).name(req.getName()).description(req.getDescription())
                 .usageTypes(req.getUsageTypes()).capacity(req.getCapacity())
                 .openTime(req.getOpenTime()).closeTime(req.getCloseTime()).slotMinutes(req.getSlotMinutes())
+                .imageUrl(req.getImageUrl())
                 .build();
         return SpaceDto.Response.from(spaceRepository.save(space));
     }
@@ -190,6 +201,8 @@ public class SpaceService {
         LocalDateTime dayStart = date.atStartOfDay();
         LocalDateTime dayEnd = date.plusDays(1).atStartOfDay();
         List<SpaceRental> activeRentals = spaceRentalRepository.findActiveBySpaceAndDate(spaceId, dayStart, dayEnd);
+        List<SpaceBlock> blocks = spaceBlockRepository.findAllBySpaceId(spaceId);
+        int isoDayOfWeek = date.getDayOfWeek().getValue(); // 1=월 ~ 7=일
 
         List<SpaceDto.SlotResponse> slots = new ArrayList<>();
         if (space.getSlotMinutes() <= 0) return slots;
@@ -199,17 +212,34 @@ public class SpaceService {
             LocalDateTime slotStart = date.atTime(cursor);
             LocalDateTime slotEndDt = date.atTime(slotEnd);
 
+            // 차단 구간 확인
+            boolean blocked = false;
+            for (SpaceBlock b : blocks) {
+                boolean timeOverlap = b.getStartTime().isBefore(slotEnd) && b.getEndTime().isAfter(cursor);
+                if (!timeOverlap) continue;
+                if (b.isRecurring() && b.getDayOfWeek() != null && b.getDayOfWeek() == isoDayOfWeek) {
+                    blocked = true; break;
+                }
+                if (!b.isRecurring() && date.equals(b.getBlockDate())) {
+                    blocked = true; break;
+                }
+            }
+
             String status = "AVAILABLE";
             Long rentalId = null;
-            for (SpaceRental r : activeRentals) {
-                if (r.getStartDateTime().isBefore(slotEndDt) && r.getEndDateTime().isAfter(slotStart)) {
-                    if (callerId != null && r.getApplicant().getId().equals(callerId)) {
-                        status = r.getStatus() == RentalStatus.PENDING ? "MY_PENDING" : "MY_APPROVED";
-                        rentalId = r.getId();
-                    } else {
-                        status = "TAKEN";
+            if (blocked) {
+                status = "TAKEN";
+            } else {
+                for (SpaceRental r : activeRentals) {
+                    if (r.getStartDateTime().isBefore(slotEndDt) && r.getEndDateTime().isAfter(slotStart)) {
+                        if (callerId != null && r.getApplicant().getId().equals(callerId)) {
+                            status = r.getStatus() == RentalStatus.PENDING ? "MY_PENDING" : "MY_APPROVED";
+                            rentalId = r.getId();
+                        } else {
+                            status = "TAKEN";
+                        }
+                        break;
                     }
-                    break;
                 }
             }
             slots.add(SpaceDto.SlotResponse.builder()
@@ -217,6 +247,40 @@ public class SpaceService {
             cursor = slotEnd;
         }
         return slots;
+    }
+
+    public List<SpaceDto.BlockResponse> getBlocks(Long spaceId) {
+        return spaceBlockRepository.findAllBySpaceId(spaceId)
+                .stream().map(SpaceDto.BlockResponse::from).toList();
+    }
+
+    @Transactional
+    public SpaceDto.BlockResponse createBlock(Long spaceId, SpaceDto.BlockRequest req, Long callerId) {
+        Space space = spaceRepository.findById(spaceId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.SPACE_NOT_FOUND));
+        verifySpaceOwnership(space, getCallerUser(callerId));
+        SpaceBlock block = SpaceBlock.builder()
+                .space(space).reason(req.getReason()).recurring(req.isRecurring())
+                .dayOfWeek(req.getDayOfWeek()).blockDate(req.getBlockDate())
+                .startTime(req.getStartTime()).endTime(req.getEndTime()).build();
+        return SpaceDto.BlockResponse.from(spaceBlockRepository.save(block));
+    }
+
+    @Transactional
+    public void deleteBlock(Long blockId, Long callerId) {
+        SpaceBlock block = spaceBlockRepository.findById(blockId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.SPACE_NOT_FOUND));
+        verifySpaceOwnership(block.getSpace(), getCallerUser(callerId));
+        spaceBlockRepository.deleteById(blockId);
+    }
+
+    @Transactional
+    public SpaceDto.RentalResponse setRentalAdminMessage(Long rentalId, String message, Long callerId) {
+        SpaceRental rental = spaceRentalRepository.findById(rentalId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.SPACE_RENTAL_NOT_FOUND));
+        verifySpaceOwnership(rental.getSpace(), getCallerUser(callerId));
+        rental.setAdminMessage(message);
+        return SpaceDto.RentalResponse.from(rental);
     }
 
     @Transactional

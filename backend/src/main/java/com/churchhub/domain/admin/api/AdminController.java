@@ -49,8 +49,10 @@ public class AdminController {
 
     @Operation(summary = "회원 목록 조회")
     @GetMapping("/users")
-    public ResponseEntity<ApiResponse<Page<UserDto.Response>>> getUsers(Pageable pageable) {
-        return ResponseEntity.ok(ApiResponse.success(adminService.getUsers(pageable)));
+    public ResponseEntity<ApiResponse<Page<UserDto.Response>>> getUsers(
+            @RequestParam(required = false) String search,
+            Pageable pageable) {
+        return ResponseEntity.ok(ApiResponse.success(adminService.getUsers(pageable, search)));
     }
 
     @Operation(summary = "회원 상태 변경 (정지/활성)")

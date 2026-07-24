@@ -11,6 +11,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,7 +38,7 @@ public class FaithController {
     }
 
     @PostMapping("/questions/{id}/answers")
-    @PreAuthorize("hasAnyRole('PASTOR', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('PASTOR', 'CHURCH_MANAGER', 'SUPER_ADMIN')")
     public ApiResponse<FaithDto.AnswerResponse> createAnswer(
             @PathVariable Long id,
             @Valid @RequestBody FaithDto.AnswerRequest req,
@@ -61,5 +62,35 @@ public class FaithController {
     public ApiResponse<FaithDto.PrayerResponse> pray(
             @PathVariable Long id) {
         return ApiResponse.success(faithService.pray(id));
+    }
+
+    @GetMapping("/questions/my")
+    public ApiResponse<List<FaithDto.QuestionResponse>> getMyQuestions(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ApiResponse.success(faithService.getMyQuestions(userDetails.getUserId()));
+    }
+
+    @GetMapping("/prayers/my")
+    public ApiResponse<List<FaithDto.PrayerResponse>> getMyPrayers(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ApiResponse.success(faithService.getMyPrayers(userDetails.getUserId()));
+    }
+
+    @GetMapping("/admin/questions")
+    @PreAuthorize("hasAnyRole('PASTOR', 'CHURCH_MANAGER', 'SUPER_ADMIN')")
+    public ApiResponse<List<FaithDto.QuestionResponse>> getAllQuestionsForAdmin() {
+        return ApiResponse.success(faithService.getAllQuestionsForAdmin());
+    }
+
+    @GetMapping("/admin/prayers")
+    @PreAuthorize("hasAnyRole('PASTOR', 'CHURCH_MANAGER', 'SUPER_ADMIN')")
+    public ApiResponse<List<FaithDto.PrayerResponse>> getAllPrayersForAdmin() {
+        return ApiResponse.success(faithService.getAllPrayersForAdmin());
+    }
+
+    @PutMapping("/admin/prayers/{id}/prayed")
+    @PreAuthorize("hasAnyRole('PASTOR', 'CHURCH_MANAGER', 'SUPER_ADMIN')")
+    public ApiResponse<FaithDto.PrayerResponse> toggleAdminPrayed(@PathVariable Long id) {
+        return ApiResponse.success(faithService.toggleAdminPrayed(id));
     }
 }

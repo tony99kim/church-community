@@ -39,7 +39,11 @@ public class AdminService {
                 .build();
     }
 
-    public Page<UserDto.Response> getUsers(Pageable pageable) {
+    public Page<UserDto.Response> getUsers(Pageable pageable, String keyword) {
+        if (keyword != null && !keyword.isBlank()) {
+            return userRepository.searchByKeyword(keyword.trim(), com.churchhub.domain.user.entity.UserStatus.DELETED, pageable)
+                    .map(UserDto.Response::from);
+        }
         return userRepository.findAllByStatusNot(com.churchhub.domain.user.entity.UserStatus.DELETED, pageable)
                 .map(UserDto.Response::from);
     }

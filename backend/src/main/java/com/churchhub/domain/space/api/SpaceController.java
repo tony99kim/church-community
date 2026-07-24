@@ -26,6 +26,11 @@ public class SpaceController {
         return ApiResponse.success(spaceService.getSpaces());
     }
 
+    @GetMapping("/spaces/{id}")
+    public ApiResponse<SpaceDto.Response> getSpace(@PathVariable Long id) {
+        return ApiResponse.success(spaceService.getSpace(id));
+    }
+
     @PostMapping("/spaces/{id}/rentals")
     public ApiResponse<SpaceDto.RentalResponse> applyRental(
             @PathVariable Long id,
@@ -87,6 +92,40 @@ public class SpaceController {
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         spaceService.deleteSpace(id, userDetails.getUserId());
         return ApiResponse.success(null);
+    }
+
+    @GetMapping("/admin/spaces/{id}/blocks")
+    @PreAuthorize("hasAnyRole('CHURCH_MANAGER', 'SUPER_ADMIN')")
+    public ApiResponse<List<SpaceDto.BlockResponse>> getBlocks(
+            @PathVariable Long id) {
+        return ApiResponse.success(spaceService.getBlocks(id));
+    }
+
+    @PostMapping("/admin/spaces/{id}/blocks")
+    @PreAuthorize("hasAnyRole('CHURCH_MANAGER', 'SUPER_ADMIN')")
+    public ApiResponse<SpaceDto.BlockResponse> createBlock(
+            @PathVariable Long id,
+            @Valid @RequestBody SpaceDto.BlockRequest req,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ApiResponse.success(spaceService.createBlock(id, req, userDetails.getUserId()));
+    }
+
+    @DeleteMapping("/admin/spaces/blocks/{blockId}")
+    @PreAuthorize("hasAnyRole('CHURCH_MANAGER', 'SUPER_ADMIN')")
+    public ApiResponse<Void> deleteBlock(
+            @PathVariable Long blockId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        spaceService.deleteBlock(blockId, userDetails.getUserId());
+        return ApiResponse.success(null);
+    }
+
+    @PutMapping("/admin/spaces/rentals/{rentalId}/message")
+    @PreAuthorize("hasAnyRole('CHURCH_MANAGER', 'SUPER_ADMIN')")
+    public ApiResponse<SpaceDto.RentalResponse> setRentalMessage(
+            @PathVariable Long rentalId,
+            @RequestBody SpaceDto.RentalMessageRequest req,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ApiResponse.success(spaceService.setRentalAdminMessage(rentalId, req.getAdminMessage(), userDetails.getUserId()));
     }
 
     @GetMapping("/admin/spaces/rentals")

@@ -78,6 +78,7 @@ public class FaithDto {
         private String content;
         private boolean publicVisible;
         private int prayerCount;
+        private boolean adminPrayed;
         private LocalDateTime createdAt;
 
         public static PrayerResponse from(PrayerRequest p) {
@@ -87,6 +88,7 @@ public class FaithDto {
                     .content(p.getContent())
                     .publicVisible(p.isPublicVisible())
                     .prayerCount(p.getPrayerCount())
+                    .adminPrayed(p.isAdminPrayed())
                     .createdAt(p.getCreatedAt()).build();
         }
     }

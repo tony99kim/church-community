@@ -48,6 +48,9 @@ public class SpaceRental {
     @Column(length = 300)
     private String rejectReason;
 
+    @Column(length = 500)
+    private String adminMessage;
+
     @CreatedDate
     @Column(updatable = false)
     private LocalDateTime createdAt;
@@ -70,4 +73,5 @@ public class SpaceRental {
         this.rejectReason = reason;
     }
     public void cancel() { this.status = RentalStatus.CANCELLED; }
+    public void setAdminMessage(String msg) { this.adminMessage = msg; }
 }

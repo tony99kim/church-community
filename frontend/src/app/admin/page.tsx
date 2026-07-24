@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import api from '@/lib/api';
+import { usePendingCounts } from '@/context/PendingCountsContext';
 
 interface Dashboard {
   totalUsers: number;
@@ -14,6 +15,7 @@ interface Dashboard {
 export default function AdminDashboardPage() {
   const [data, setData] = useState<Dashboard | null>(null);
   const [loading, setLoading] = useState(true);
+  const { counts } = usePendingCounts();
 
   useEffect(() => {
     api.get('/admin/dashboard')
@@ -30,6 +32,15 @@ export default function AdminDashboardPage() {
       ]
     : [];
 
+  const pending = [
+    { label: '공간 대여 승인 대기', value: counts.spaceRentals, href: '/admin/spaces', color: 'bg-amber-50 border-amber-200 text-amber-700', dot: 'bg-amber-400' },
+    { label: '물품 대여 승인 대기', value: counts.itemRentals, href: '/admin/items', color: 'bg-orange-50 border-orange-200 text-orange-700', dot: 'bg-orange-400' },
+    { label: '웰컴 키트 미처리', value: counts.welcomeKits, href: '/admin/welcome-kits', color: 'bg-rose-50 border-rose-200 text-rose-700', dot: 'bg-rose-400' },
+    { label: '미답변 신앙 질문', value: counts.faithQuestions, href: '/admin/faith', color: 'bg-violet-50 border-violet-200 text-violet-700', dot: 'bg-violet-400' },
+  ];
+
+  const totalPending = counts.spaceRentals + counts.itemRentals + counts.welcomeKits + counts.faithQuestions;
+
   return (
     <div className="p-8">
       <div className="mb-8">
@@ -37,8 +48,9 @@ export default function AdminDashboardPage() {
         <p className="text-gray-500 text-sm mt-1">ChurchHub 커뮤니티 현황을 확인하세요</p>
       </div>
 
+      {/* 통계 카드 */}
       {loading ? (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           {[...Array(4)].map((_, i) => (
             <div key={i} className="bg-white rounded-2xl border border-gray-200 p-6 animate-pulse">
               <div className="h-8 bg-gray-100 rounded w-16 mb-2" />
@@ -60,16 +72,49 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
+      {/* 처리 대기 현황 */}
+      <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-bold text-gray-900">처리 대기 현황</h2>
+          {totalPending > 0 && (
+            <span className="bg-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">
+              총 {totalPending}건
+            </span>
+          )}
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {pending.map((p) => (
+            <Link
+              key={p.href}
+              href={p.href}
+              className={`flex items-center gap-3 p-4 rounded-xl border ${p.color} transition hover:opacity-80`}
+            >
+              <div className={`w-2 h-2 rounded-full shrink-0 ${p.dot} ${p.value === 0 ? 'opacity-30' : ''}`} />
+              <div className="min-w-0">
+                <div className="text-2xl font-bold leading-none mb-1">{p.value}</div>
+                <div className="text-xs opacity-80 leading-tight">{p.label}</div>
+              </div>
+            </Link>
+          ))}
+        </div>
+        {totalPending === 0 && (
+          <p className="text-center text-sm text-gray-400 mt-3">처리 대기 항목이 없습니다 ✓</p>
+        )}
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* 빠른 메뉴 */}
         <div className="bg-white rounded-2xl border border-gray-200 p-6">
           <h2 className="font-bold text-gray-900 mb-4">빠른 메뉴</h2>
           <div className="grid grid-cols-2 gap-3">
             {[
-              { href: '/admin/categories', label: '카테고리 관리', icon: '📁', desc: '게시판 카테고리 추가/수정/삭제' },
-              { href: '/admin/users', label: '회원 관리', icon: '👥', desc: '회원 목록 조회 및 상태 관리' },
-              { href: '/admin/events', label: '행사 관리', icon: '🎉', desc: '행사 등록/수정 및 상태 관리' },
-              { href: '/admin/participants', label: '행사 참여자', icon: '🎫', desc: '신청자 조회 및 CSV 다운로드' },
-              { href: '/admin/posts', label: '게시글 관리', icon: '📝', desc: '게시글 목록 조회 및 삭제' },
+              { href: '/admin/users', label: '회원 관리', icon: '👥', desc: '회원 조회 및 권한/상태 관리' },
+              { href: '/admin/spaces', label: '공간 대여', icon: '🏠', desc: '공간 등록 및 대여 승인' },
+              { href: '/admin/items', label: '물품 대여', icon: '📦', desc: '물품 등록 및 대여 승인' },
+              { href: '/admin/welcome-kits', label: '웰컴 키트', icon: '🎁', desc: '신청 목록 및 메시지 전송' },
+              { href: '/admin/faith', label: '신앙 Q&A', icon: '✝️', desc: '질문 답변 및 기도 요청' },
+              { href: '/admin/events', label: '행사 관리', icon: '📅', desc: '행사 등록 및 상태 관리' },
+              { href: '/admin/posts', label: '게시글 관리', icon: '📝', desc: '게시글 조회 및 삭제' },
               { href: '/', label: '사이트 바로가기', icon: '🌐', desc: '커뮤니티 사이트 확인' },
             ].map((item) => (
               <Link
@@ -85,6 +130,7 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
+        {/* 시스템 정보 */}
         <div className="bg-white rounded-2xl border border-gray-200 p-6">
           <h2 className="font-bold text-gray-900 mb-4">시스템 정보</h2>
           <dl className="space-y-3">

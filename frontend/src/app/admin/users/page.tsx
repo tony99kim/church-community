@@ -34,17 +34,26 @@ export default function AdminUsersPage() {
   const [totalPages, setTotalPages] = useState(0);
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [churches, setChurches] = useState<{ id: number; name: string }[]>([]);
   const [pendingRoleChange, setPendingRoleChange] = useState<{ userId: number } | null>(null);
   const [selectedChurchId, setSelectedChurchId] = useState('');
 
-  const fetchUsers = (p = 0) => {
+  // 검색/필터
+  const [searchInput, setSearchInput] = useState('');
+  const [activeSearch, setActiveSearch] = useState('');
+
+  const fetchUsers = (p = 0, keyword = activeSearch) => {
     setLoading(true);
-    api.get('/admin/users', { params: { page: p, size: 15, sort: 'createdAt,desc' } })
+    setError(null);
+    const params: Record<string, unknown> = { page: p, size: 15, sort: 'createdAt,desc' };
+    if (keyword) params.search = keyword;
+    api.get('/admin/users', { params })
       .then((res) => {
         setUsers(res.data.data.content);
         setTotalPages(res.data.data.totalPages);
       })
+      .catch(() => setError('회원 목록을 불러오지 못했습니다.'))
       .finally(() => setLoading(false));
   };
 
@@ -53,7 +62,21 @@ export default function AdminUsersPage() {
     api.get('/churches').then(r => setChurches(r.data.data ?? []));
   }, []);
 
-  useEffect(() => { fetchUsers(page); }, [page]);
+  useEffect(() => { fetchUsers(page, activeSearch); }, [page]);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setPage(0);
+    setActiveSearch(searchInput);
+    fetchUsers(0, searchInput);
+  };
+
+  const handleClearSearch = () => {
+    setSearchInput('');
+    setActiveSearch('');
+    setPage(0);
+    fetchUsers(0, '');
+  };
 
   const handleStatusToggle = async (u: User) => {
     const newStatus = u.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
@@ -62,19 +85,15 @@ export default function AdminUsersPage() {
     try {
       await api.put(`/admin/users/${u.id}/status`, { status: newStatus });
       fetchUsers(page);
-    } catch {
-      alert('변경에 실패했습니다.');
-    }
+    } catch { alert('변경에 실패했습니다.'); }
   };
 
   const handleDelete = async (u: User) => {
-    if (!confirm(`⚠️ ${u.nickname}님을 완전히 삭제하시겠어요?\n\n개인정보가 익명화되며 복구할 수 없습니다.\n(게시글·댓글은 "탈퇴회원" 이름으로 유지됩니다)`)) return;
+    if (!confirm(`⚠️ ${u.nickname}님을 완전히 삭제하시겠어요?\n\n개인정보가 익명화되며 복구할 수 없습니다.`)) return;
     try {
       await api.delete(`/admin/users/${u.id}`);
       fetchUsers(page);
-    } catch {
-      alert('삭제에 실패했습니다.');
-    }
+    } catch { alert('삭제에 실패했습니다.'); }
   };
 
   const handleRoleChange = async (u: User, newRole: string) => {
@@ -87,23 +106,16 @@ export default function AdminUsersPage() {
     try {
       await api.put(`/admin/users/${u.id}/role`, { role: newRole });
       fetchUsers(page);
-    } catch {
-      alert('권한 변경에 실패했습니다. SUPER_ADMIN만 가능합니다.');
-    }
+    } catch { alert('권한 변경에 실패했습니다.'); }
   };
 
   const confirmChurchManagerAssign = async () => {
     if (!pendingRoleChange || !selectedChurchId) return;
     try {
-      await api.put(`/admin/users/${pendingRoleChange.userId}/role`, {
-        role: 'CHURCH_MANAGER',
-        churchId: Number(selectedChurchId),
-      });
+      await api.put(`/admin/users/${pendingRoleChange.userId}/role`, { role: 'CHURCH_MANAGER', churchId: Number(selectedChurchId) });
       setPendingRoleChange(null);
       fetchUsers(page);
-    } catch {
-      alert('권한 변경에 실패했습니다.');
-    }
+    } catch { alert('권한 변경에 실패했습니다.'); }
   };
 
   const isSuperAdmin = me?.role === 'SUPER_ADMIN';
@@ -114,6 +126,37 @@ export default function AdminUsersPage() {
         <h1 className="text-2xl font-bold text-gray-900">회원 관리</h1>
         <p className="text-sm text-gray-500 mt-1">회원 목록을 조회하고 상태를 관리할 수 있습니다</p>
       </div>
+
+      {/* 검색 */}
+      <form onSubmit={handleSearch} className="flex gap-2 mb-4">
+        <input
+          type="text"
+          value={searchInput}
+          onChange={e => setSearchInput(e.target.value)}
+          placeholder="닉네임 또는 이메일로 검색"
+          className="flex-1 border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]"
+        />
+        <button
+          type="submit"
+          className="bg-[#003478] text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-blue-900 transition"
+        >
+          검색
+        </button>
+        {activeSearch && (
+          <button
+            type="button"
+            onClick={handleClearSearch}
+            className="border border-gray-300 text-gray-600 px-4 py-2.5 rounded-xl text-sm hover:bg-gray-50 transition"
+          >
+            초기화
+          </button>
+        )}
+      </form>
+      {activeSearch && (
+        <p className="text-xs text-gray-400 mb-3">
+          &quot;{activeSearch}&quot; 검색 결과 — {users.length}명
+        </p>
+      )}
 
       <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
         <div className="grid grid-cols-[1fr_1.2fr_80px_80px_180px] gap-4 px-6 py-3 bg-gray-50 border-b border-gray-100 text-xs font-semibold text-gray-500 uppercase tracking-wide">
@@ -133,8 +176,12 @@ export default function AdminUsersPage() {
               </div>
             ))}
           </div>
+        ) : error ? (
+          <div className="p-12 text-center text-red-400 text-sm">{error}</div>
         ) : users.length === 0 ? (
-          <div className="p-12 text-center text-gray-400 text-sm">회원이 없습니다.</div>
+          <div className="p-12 text-center text-gray-400 text-sm">
+            {activeSearch ? `"${activeSearch}"에 해당하는 회원이 없습니다.` : '회원이 없습니다.'}
+          </div>
         ) : (
           <ul className="divide-y divide-gray-50">
             {users.map((u) => {
@@ -221,7 +268,7 @@ export default function AdminUsersPage() {
           >
             ‹ 이전
           </button>
-          {Array.from({ length: totalPages }, (_, i) => (
+          {Array.from({ length: Math.min(totalPages, 10) }, (_, i) => (
             <button
               key={i}
               onClick={() => setPage(i)}
@@ -256,17 +303,8 @@ export default function AdminUsersPage() {
               ))}
             </select>
             <div className="flex gap-2 justify-end">
-              <button
-                type="button"
-                onClick={() => setPendingRoleChange(null)}
-                className="px-4 py-2 text-sm border border-gray-300 rounded-xl hover:bg-gray-50"
-              >취소</button>
-              <button
-                type="button"
-                onClick={confirmChurchManagerAssign}
-                disabled={!selectedChurchId}
-                className="px-4 py-2 text-sm bg-[#003478] text-white rounded-xl font-semibold hover:bg-blue-900 disabled:opacity-50"
-              >지정</button>
+              <button type="button" onClick={() => setPendingRoleChange(null)} className="px-4 py-2 text-sm border border-gray-300 rounded-xl hover:bg-gray-50">취소</button>
+              <button type="button" onClick={confirmChurchManagerAssign} disabled={!selectedChurchId} className="px-4 py-2 text-sm bg-[#003478] text-white rounded-xl font-semibold hover:bg-blue-900 disabled:opacity-50">지정</button>
             </div>
           </div>
         </div>
