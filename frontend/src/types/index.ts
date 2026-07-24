@@ -99,6 +99,15 @@ export interface Space {
   usageTypes: string | null;
   capacity: number | null;
   available: boolean;
+  openTime?: string;    // "HH:mm:ss"
+  closeTime?: string;   // "HH:mm:ss"
+  slotMinutes?: number;
+}
+
+export interface SlotInfo {
+  startTime: string;  // "HH:mm:ss"
+  endTime: string;    // "HH:mm:ss"
+  status: 'AVAILABLE' | 'TAKEN' | 'MY_PENDING' | 'MY_APPROVED';
 }
 
 export interface SpaceRental {
