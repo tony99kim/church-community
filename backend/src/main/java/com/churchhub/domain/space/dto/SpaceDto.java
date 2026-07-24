@@ -90,6 +90,7 @@ public class SpaceDto {
         private LocalTime startTime;
         private LocalTime endTime;
         private String status; // AVAILABLE, TAKEN, MY_PENDING, MY_APPROVED
+        private Long rentalId; // null for AVAILABLE/TAKEN, non-null for MY_PENDING/MY_APPROVED
     }
 
     @Getter

@@ -195,10 +195,12 @@ public class SpaceService {
             LocalDateTime slotEndDt = date.atTime(slotEnd);
 
             String status = "AVAILABLE";
+            Long rentalId = null;
             for (SpaceRental r : activeRentals) {
                 if (r.getStartDateTime().isBefore(slotEndDt) && r.getEndDateTime().isAfter(slotStart)) {
                     if (callerId != null && r.getApplicant().getId().equals(callerId)) {
                         status = r.getStatus() == RentalStatus.PENDING ? "MY_PENDING" : "MY_APPROVED";
+                        rentalId = r.getId();
                     } else {
                         status = "TAKEN";
                     }
@@ -206,7 +208,7 @@ public class SpaceService {
                 }
             }
             slots.add(SpaceDto.SlotResponse.builder()
-                    .startTime(cursor).endTime(slotEnd).status(status).build());
+                    .startTime(cursor).endTime(slotEnd).status(status).rentalId(rentalId).build());
             cursor = slotEnd;
         }
         return slots;

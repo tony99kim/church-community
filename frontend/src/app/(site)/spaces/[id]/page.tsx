@@ -19,7 +19,7 @@ function toDateStr(year: number, month: number, day: number) {
 const slotStyle: Record<string, string> = {
   AVAILABLE: 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100 cursor-pointer',
   TAKEN: 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed',
-  MY_PENDING: 'bg-amber-50 text-amber-700 border-amber-200 cursor-default',
+  MY_PENDING: 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 cursor-pointer',
   MY_APPROVED: 'bg-blue-50 text-[#003478] border-[#003478] cursor-default',
 };
 
@@ -47,6 +47,10 @@ export default function SpaceDetailPage() {
   const [form, setForm] = useState({ headcount: '', purpose: '', contactPhone: '' });
   const [submitting, setSubmitting] = useState(false);
 
+  // 취소 모달 상태
+  const [cancelSlot, setCancelSlot] = useState<SlotInfo | null>(null);
+  const [cancelling, setCancelling] = useState(false);
+
   useEffect(() => {
     api.get(`/spaces/${id}`).then(r => setSpace(r.data.data));
   }, [id]);
@@ -68,10 +72,30 @@ export default function SpaceDetailPage() {
   };
 
   const handleSlotClick = (slot: SlotInfo) => {
+    if (slot.status === 'MY_PENDING' && slot.rentalId) {
+      setCancelSlot(slot);
+      return;
+    }
     if (slot.status !== 'AVAILABLE') return;
     if (!isLoggedIn) { router.push('/login'); return; }
     setPendingSlot(slot);
     setForm({ headcount: '', purpose: '', contactPhone: '' });
+  };
+
+  const handleCancel = async () => {
+    if (!cancelSlot?.rentalId) return;
+    setCancelling(true);
+    try {
+      await api.put(`/spaces/rentals/${cancelSlot.rentalId}/cancel`);
+      setCancelSlot(null);
+      const r = await api.get(`/spaces/${id}/slots?date=${selectedDate}`);
+      setSlots(r.data.data ?? []);
+    } catch (e: unknown) {
+      const msg = (e as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      alert(msg ?? '취소 중 오류가 발생했습니다.');
+    } finally {
+      setCancelling(false);
+    }
   };
 
   const handleSubmit = async () => {
@@ -79,8 +103,8 @@ export default function SpaceDetailPage() {
     setSubmitting(true);
     try {
       await api.post(`/spaces/${id}/rentals`, {
-        startDateTime: `${selectedDate}T${pendingSlot.startTime.slice(0, 5)}`,
-        endDateTime: `${selectedDate}T${pendingSlot.endTime.slice(0, 5)}`,
+        startDateTime: `${selectedDate}T${pendingSlot.startTime.slice(0, 8)}`,
+        endDateTime: `${selectedDate}T${pendingSlot.endTime.slice(0, 8)}`,
         headcount: form.headcount ? Number(form.headcount) : null,
         purpose: form.purpose,
         contactPhone: form.contactPhone,
@@ -189,6 +213,27 @@ export default function SpaceDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* 취소 확인 모달 */}
+      {cancelSlot && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-sm p-6 shadow-xl">
+            <h2 className="font-bold text-gray-900 mb-2">예약 취소</h2>
+            <p className="text-sm text-gray-600 mb-1">이 예약을 취소하시겠어요?</p>
+            <p className="text-xs text-gray-400 mb-5">
+              {selectedDate} {cancelSlot.startTime.slice(0, 5)} ~ {cancelSlot.endTime.slice(0, 5)}
+            </p>
+            <div className="flex gap-2 justify-end">
+              <button type="button" onClick={() => setCancelSlot(null)}
+                className="px-4 py-2 text-sm border border-gray-300 rounded-xl hover:bg-gray-50">닫기</button>
+              <button type="button" onClick={handleCancel} disabled={cancelling}
+                className="px-4 py-2 text-sm bg-red-500 text-white rounded-xl font-semibold hover:bg-red-600 disabled:opacity-50">
+                {cancelling ? '취소 중...' : '취소하기'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 신청 모달 */}
       {pendingSlot && (

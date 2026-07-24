@@ -108,6 +108,7 @@ export interface SlotInfo {
   startTime: string;  // "HH:mm:ss"
   endTime: string;    // "HH:mm:ss"
   status: 'AVAILABLE' | 'TAKEN' | 'MY_PENDING' | 'MY_APPROVED';
+  rentalId?: number | null;
 }
 
 export interface SpaceRental {
