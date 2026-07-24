@@ -1,1 +1,0 @@
-ALTER TABLE events ADD COLUMN church_id BIGINT REFERENCES churches(id) ON DELETE SET NULL;
