@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 public class SpaceDto {
 
@@ -19,6 +20,9 @@ public class SpaceDto {
         private String description;
         private String usageTypes;
         private Integer capacity;
+        private LocalTime openTime;
+        private LocalTime closeTime;
+        private int slotMinutes = 60;
     }
 
     @Getter
@@ -29,6 +33,9 @@ public class SpaceDto {
         private String usageTypes;
         private Integer capacity;
         private boolean available = true;
+        private LocalTime openTime;
+        private LocalTime closeTime;
+        private int slotMinutes = 60;
     }
 
     @Getter
@@ -56,6 +63,9 @@ public class SpaceDto {
         private String usageTypes;
         private Integer capacity;
         private boolean available;
+        private LocalTime openTime;
+        private LocalTime closeTime;
+        private int slotMinutes;
 
         public static Response from(Space s) {
             return Response.builder()
@@ -67,6 +77,9 @@ public class SpaceDto {
                     .usageTypes(s.getUsageTypes())
                     .capacity(s.getCapacity())
                     .available(s.isAvailable())
+                    .openTime(s.getOpenTime())
+                    .closeTime(s.getCloseTime())
+                    .slotMinutes(s.getSlotMinutes())
                     .build();
         }
     }

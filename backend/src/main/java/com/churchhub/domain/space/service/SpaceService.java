@@ -83,7 +83,9 @@ public class SpaceService {
         Church church = resolveChurchForAdmin(req.getChurchId(), caller);
         Space space = Space.builder()
                 .church(church).name(req.getName()).description(req.getDescription())
-                .usageTypes(req.getUsageTypes()).capacity(req.getCapacity()).build();
+                .usageTypes(req.getUsageTypes()).capacity(req.getCapacity())
+                .openTime(req.getOpenTime()).closeTime(req.getCloseTime()).slotMinutes(req.getSlotMinutes())
+                .build();
         return SpaceDto.Response.from(spaceRepository.save(space));
     }
 
@@ -93,7 +95,8 @@ public class SpaceService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.SPACE_NOT_FOUND));
         User caller = getCallerUser(callerId);
         verifySpaceOwnership(space, caller);
-        space.update(req.getName(), req.getDescription(), req.getUsageTypes(), req.getCapacity(), req.isAvailable());
+        space.update(req.getName(), req.getDescription(), req.getUsageTypes(), req.getCapacity(),
+                req.isAvailable(), req.getOpenTime(), req.getCloseTime(), req.getSlotMinutes());
         if (caller.getRole() != UserRole.CHURCH_MANAGER) {
             if (req.getChurchId() == null) throw new BusinessException(ErrorCode.CHURCH_NOT_FOUND);
             Church church = churchRepository.findById(req.getChurchId())
@@ -134,7 +137,9 @@ public class SpaceService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.CHURCH_NOT_FOUND));
         Space space = Space.builder()
                 .church(church).name(req.getName()).description(req.getDescription())
-                .usageTypes(req.getUsageTypes()).capacity(req.getCapacity()).build();
+                .usageTypes(req.getUsageTypes()).capacity(req.getCapacity())
+                .openTime(req.getOpenTime()).closeTime(req.getCloseTime()).slotMinutes(req.getSlotMinutes())
+                .build();
         return SpaceDto.Response.from(spaceRepository.save(space));
     }
 
