@@ -3,49 +3,98 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import api from '@/lib/api';
-import { Event } from '@/types';
+import type { Event, PageResponse } from '@/types';
+
+const STATUS_LABEL: Record<string, string> = {
+  UPCOMING: '모집 중',
+  ONGOING: '진행 중',
+  ENDED: '종료',
+  CANCELLED: '취소',
+};
+
+const STATUS_COLOR: Record<string, string> = {
+  UPCOMING: 'bg-green-50 text-green-700 border-green-100',
+  ONGOING: 'bg-blue-50 text-blue-600 border-blue-100',
+  ENDED: 'bg-gray-100 text-gray-400 border-gray-200',
+  CANCELLED: 'bg-red-50 text-red-400 border-red-100',
+};
 
 export default function ServicePage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get('/events?category=SERVICE&size=20')
-      .then(r => setEvents(r.data.data?.content ?? []))
+    api.get('/events', { params: { category: 'SERVICE', size: 20, sort: 'startDate,asc' } })
+      .then(r => {
+        const data: PageResponse<Event> = r.data.data;
+        setEvents(data.content);
+      })
       .finally(() => setLoading(false));
   }, []);
-
-  if (loading) return <div className="min-h-screen flex items-center justify-center text-gray-400">불러오는 중...</div>;
 
   return (
     <main className="min-h-screen bg-[#f4f6f8] py-10 px-4">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-2xl font-bold text-[#003478] mb-2">지역 섬김 🤝</h1>
-        <p className="text-gray-600 mb-8">염리동에서 함께 섬기는 봉사 기회들을 모아뒀어요.</p>
+        <p className="text-gray-600 mb-8">염리동에서 함께 섬기는 봉사 기회들을 모아뒀어요. 참여 신청하고 이웃과 함께해요.</p>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-8">
-          {['복지관 연계 봉사', '청년주택 환대', '독거 어르신 도시락',
-            '환경 정화', '여름성경학교 지원', '지역 축제 스태프'].map(label => (
-            <div key={label} className="p-3 bg-white border border-[#EDEFF1] rounded-xl text-sm text-gray-600 text-center">
-              {label}
-            </div>
-          ))}
-        </div>
-
-        {events.length === 0 ? (
-          <div className="text-center py-12 text-gray-400">
-            <p className="mb-4">현재 모집 중인 봉사가 없어요.</p>
-            <Link href="/community" className="text-[#003478] underline text-sm">
+        {loading ? (
+          <div className="grid md:grid-cols-2 gap-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="bg-white rounded-2xl border border-[#EDEFF1] overflow-hidden animate-pulse">
+                <div className="h-40 bg-gray-100" />
+                <div className="p-5 space-y-2">
+                  <div className="h-4 bg-gray-100 rounded w-2/3" />
+                  <div className="h-3 bg-gray-50 rounded w-1/2" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : events.length === 0 ? (
+          <div className="bg-white rounded-2xl border border-[#EDEFF1] py-20 text-center">
+            <div className="text-4xl mb-3">🤝</div>
+            <p className="text-gray-500 font-medium mb-1">현재 모집 중인 봉사가 없어요.</p>
+            <p className="text-sm text-gray-400 mb-5">봉사 소식은 커뮤니티 게시판에서도 확인할 수 있어요.</p>
+            <Link href="/community" className="inline-block text-sm text-[#003478] border border-blue-200 px-4 py-2 rounded-xl hover:bg-blue-50 transition">
               커뮤니티 게시판 보기 →
             </Link>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="grid md:grid-cols-2 gap-4">
             {events.map(event => (
-              <Link key={event.id} href={`/events/${event.id}`}
-                className="block bg-white rounded-xl border border-[#EDEFF1] p-4 hover:border-[#003478] transition-colors">
-                <div className="font-semibold text-gray-800">{event.title}</div>
-                <div className="text-xs text-gray-400 mt-1">{new Date(event.startDate).toLocaleDateString()}</div>
+              <Link
+                key={event.id}
+                href={`/service/${event.id}`}
+                className="bg-white rounded-2xl border border-[#EDEFF1] overflow-hidden hover:border-[#003478] hover:shadow-sm transition-all block"
+              >
+                {event.thumbnailUrl ? (
+                  <img src={event.thumbnailUrl} alt={event.title} className="w-full h-44 object-cover" />
+                ) : (
+                  <div className="w-full h-24 bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center text-3xl">
+                    🤝
+                  </div>
+                )}
+                <div className="p-5">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className={`text-xs px-2 py-0.5 rounded border font-medium ${STATUS_COLOR[event.status] ?? ''}`}>
+                      {STATUS_LABEL[event.status] ?? event.status}
+                    </span>
+                  </div>
+                  <h2 className="font-bold text-gray-900 mb-2 line-clamp-2">{event.title}</h2>
+                  <div className="space-y-1 text-xs text-gray-500">
+                    <div>📍 {event.location}</div>
+                    <div>📅 {new Date(event.startDate).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' })}</div>
+                    {event.maxParticipants !== null && (
+                      <div className="flex items-center gap-1">
+                        <span>👥</span>
+                        <span>{event.currentParticipants} / {event.maxParticipants}명 신청</span>
+                        {event.currentParticipants >= event.maxParticipants && (
+                          <span className="bg-red-50 text-red-400 text-[10px] px-1.5 py-0.5 rounded ml-1">마감</span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
               </Link>
             ))}
           </div>
