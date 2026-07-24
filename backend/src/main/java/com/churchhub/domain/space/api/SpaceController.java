@@ -40,48 +40,58 @@ public class SpaceController {
 
     @GetMapping("/admin/spaces")
     @PreAuthorize("hasAnyRole('CHURCH_MANAGER', 'SUPER_ADMIN')")
-    public ApiResponse<List<SpaceDto.Response>> getAdminSpaces() {
-        return ApiResponse.success(spaceService.getAdminSpaces());
+    public ApiResponse<List<SpaceDto.Response>> getAdminSpaces(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ApiResponse.success(spaceService.getAdminSpaces(userDetails.getUserId()));
     }
 
     @PostMapping("/admin/spaces")
     @PreAuthorize("hasAnyRole('CHURCH_MANAGER', 'SUPER_ADMIN')")
-    public ApiResponse<SpaceDto.Response> createSpace(@Valid @RequestBody SpaceDto.CreateRequest req) {
-        return ApiResponse.success(spaceService.createSpace(req));
+    public ApiResponse<SpaceDto.Response> createSpace(
+            @Valid @RequestBody SpaceDto.CreateRequest req,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ApiResponse.success(spaceService.createSpace(req, userDetails.getUserId()));
     }
 
     @PutMapping("/admin/spaces/{id}")
     @PreAuthorize("hasAnyRole('CHURCH_MANAGER', 'SUPER_ADMIN')")
     public ApiResponse<SpaceDto.Response> updateSpace(
             @PathVariable Long id,
-            @Valid @RequestBody SpaceDto.UpdateRequest req) {
-        return ApiResponse.success(spaceService.updateSpace(id, req));
+            @Valid @RequestBody SpaceDto.UpdateRequest req,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ApiResponse.success(spaceService.updateSpace(id, req, userDetails.getUserId()));
     }
 
     @DeleteMapping("/admin/spaces/{id}")
     @PreAuthorize("hasAnyRole('CHURCH_MANAGER', 'SUPER_ADMIN')")
-    public ApiResponse<Void> deleteSpace(@PathVariable Long id) {
-        spaceService.deleteSpace(id);
+    public ApiResponse<Void> deleteSpace(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        spaceService.deleteSpace(id, userDetails.getUserId());
         return ApiResponse.success(null);
     }
 
     @GetMapping("/admin/spaces/rentals")
     @PreAuthorize("hasAnyRole('CHURCH_MANAGER', 'SUPER_ADMIN')")
-    public ApiResponse<List<SpaceDto.RentalResponse>> getAllRentals() {
-        return ApiResponse.success(spaceService.getAllRentals());
+    public ApiResponse<List<SpaceDto.RentalResponse>> getAllRentals(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ApiResponse.success(spaceService.getAllRentals(userDetails.getUserId()));
     }
 
     @PutMapping("/admin/spaces/rentals/{rentalId}/approve")
     @PreAuthorize("hasAnyRole('CHURCH_MANAGER', 'SUPER_ADMIN')")
-    public ApiResponse<SpaceDto.RentalResponse> approveRental(@PathVariable Long rentalId) {
-        return ApiResponse.success(spaceService.approveRental(rentalId));
+    public ApiResponse<SpaceDto.RentalResponse> approveRental(
+            @PathVariable Long rentalId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ApiResponse.success(spaceService.approveRental(rentalId, userDetails.getUserId()));
     }
 
     @PutMapping("/admin/spaces/rentals/{rentalId}/reject")
     @PreAuthorize("hasAnyRole('CHURCH_MANAGER', 'SUPER_ADMIN')")
     public ApiResponse<SpaceDto.RentalResponse> rejectRental(
             @PathVariable Long rentalId,
-            @RequestBody SpaceDto.RejectRequest req) {
-        return ApiResponse.success(spaceService.rejectRental(rentalId, req.getReason()));
+            @RequestBody SpaceDto.RejectRequest req,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ApiResponse.success(spaceService.rejectRental(rentalId, req.getReason(), userDetails.getUserId()));
     }
 }

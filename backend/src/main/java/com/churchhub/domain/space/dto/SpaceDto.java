@@ -14,7 +14,7 @@ public class SpaceDto {
 
     @Getter
     public static class CreateRequest {
-        @NotNull private Long churchId;
+        private Long churchId;
         @NotBlank private String name;
         private String description;
         private String usageTypes;
@@ -23,7 +23,7 @@ public class SpaceDto {
 
     @Getter
     public static class UpdateRequest {
-        @NotNull private Long churchId;
+        private Long churchId;
         @NotBlank private String name;
         private String description;
         private String usageTypes;
