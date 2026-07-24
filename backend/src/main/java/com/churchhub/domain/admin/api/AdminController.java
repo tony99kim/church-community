@@ -137,23 +137,27 @@ public class AdminController {
     @PutMapping("/events/{eventId}")
     public ResponseEntity<ApiResponse<EventDto.Response>> updateEvent(
             @PathVariable Long eventId,
-            @Valid @RequestBody EventDto.UpdateRequest request) {
-        return ResponseEntity.ok(ApiResponse.success(eventService.updateEvent(eventId, request)));
+            @Valid @RequestBody EventDto.UpdateRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(ApiResponse.success(eventService.updateEvent(eventId, request, userDetails.getUserId())));
     }
 
     @Operation(summary = "행사 상태만 변경")
     @PatchMapping("/events/{eventId}/status")
     public ResponseEntity<ApiResponse<Void>> changeEventStatus(
             @PathVariable Long eventId,
-            @RequestBody java.util.Map<String, String> body) {
-        eventService.changeEventStatus(eventId, EventStatus.valueOf(body.get("status")));
+            @RequestBody java.util.Map<String, String> body,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        eventService.changeEventStatus(eventId, EventStatus.valueOf(body.get("status")), userDetails.getUserId());
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
     @Operation(summary = "행사 삭제 (상태 CANCELLED)")
     @DeleteMapping("/events/{eventId}")
-    public ResponseEntity<ApiResponse<Void>> deleteEvent(@PathVariable Long eventId) {
-        eventService.deleteEvent(eventId);
+    public ResponseEntity<ApiResponse<Void>> deleteEvent(
+            @PathVariable Long eventId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        eventService.deleteEvent(eventId, userDetails.getUserId());
         return ResponseEntity.ok(ApiResponse.success("행사가 삭제되었습니다.", null));
     }
 

@@ -88,9 +88,22 @@ public class EventService {
         return EventDto.Response.from(eventRepository.save(event), false);
     }
 
+    private void verifyEventOwnership(Event event, User caller) {
+        if (caller.getRole() != UserRole.CHURCH_MANAGER) return;
+        Church callerChurch = caller.getChurch();
+        Church eventChurch = event.getChurch();
+        if (callerChurch == null || eventChurch == null ||
+                !callerChurch.getId().equals(eventChurch.getId())) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
+    }
+
     @Transactional
-    public EventDto.Response updateEvent(Long eventId, EventDto.UpdateRequest request) {
+    public EventDto.Response updateEvent(Long eventId, EventDto.UpdateRequest request, Long callerId) {
+        User caller = userRepository.findById(callerId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
         Event event = getEventOrThrow(eventId);
+        verifyEventOwnership(event, caller);
         event.update(request.getTitle(), request.getDescription(), request.getLocation(),
                 request.getStartDate(), request.getEndDate(),
                 request.getMaxParticipants(), request.getThumbnailUrl(), request.getCategory());
@@ -99,13 +112,21 @@ public class EventService {
     }
 
     @Transactional
-    public void deleteEvent(Long eventId) {
-        getEventOrThrow(eventId).changeStatus(EventStatus.CANCELLED);
+    public void deleteEvent(Long eventId, Long callerId) {
+        User caller = userRepository.findById(callerId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        Event event = getEventOrThrow(eventId);
+        verifyEventOwnership(event, caller);
+        event.changeStatus(EventStatus.CANCELLED);
     }
 
     @Transactional
-    public void changeEventStatus(Long eventId, EventStatus status) {
-        getEventOrThrow(eventId).changeStatus(status);
+    public void changeEventStatus(Long eventId, EventStatus status, Long callerId) {
+        User caller = userRepository.findById(callerId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        Event event = getEventOrThrow(eventId);
+        verifyEventOwnership(event, caller);
+        event.changeStatus(status);
     }
 
     @Transactional
