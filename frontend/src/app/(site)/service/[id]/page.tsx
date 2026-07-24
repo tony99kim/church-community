@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import api from '@/lib/api';
+import { sanitizeHtml } from '@/lib/sanitize';
 import { useAuthStore } from '@/store/authStore';
 import type { Event } from '@/types';
 
@@ -146,7 +147,7 @@ export default function ServiceDetailPage() {
               <div className="border-t border-[#EDEFF1] pt-5 mb-6">
                 <div
                   className="prose prose-sm max-w-none text-gray-700 leading-relaxed"
-                  dangerouslySetInnerHTML={{ __html: event.description }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(event.description) }}
                 />
               </div>
             )}
