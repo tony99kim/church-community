@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface PrayerRequestRepository extends JpaRepository<PrayerRequest, Long> {
     List<PrayerRequest> findAllByPublicVisibleTrueOrderByCreatedAtDesc();
+    List<PrayerRequest> findAllByOrderByCreatedAtDesc();
+    List<PrayerRequest> findAllByAuthorIdOrderByCreatedAtDesc(Long authorId);
 }

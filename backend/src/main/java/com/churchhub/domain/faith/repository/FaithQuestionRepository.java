@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface FaithQuestionRepository extends JpaRepository<FaithQuestion, Long> {
     List<FaithQuestion> findAllByPublicVisibleTrueOrderByCreatedAtDesc();
+    List<FaithQuestion> findAllByOrderByCreatedAtDesc();
+    List<FaithQuestion> findAllByAuthorIdOrderByCreatedAtDesc(Long authorId);
 }

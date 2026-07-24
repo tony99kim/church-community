@@ -1,5 +1,6 @@
 package com.churchhub.domain.welcome.entity;
 
+import com.churchhub.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -18,6 +19,10 @@ public class WelcomeKit {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+
     @Column(nullable = false, length = 50)
     private String name;
 
@@ -30,6 +35,9 @@ public class WelcomeKit {
     @Column(length = 300)
     private String message;
 
+    @Column(length = 500)
+    private String adminMessage;
+
     private boolean processed = false;
 
     @CreatedDate
@@ -37,7 +45,8 @@ public class WelcomeKit {
     private LocalDateTime createdAt;
 
     @Builder
-    public WelcomeKit(String name, String phone, String address, String message) {
+    public WelcomeKit(User user, String name, String phone, String address, String message) {
+        this.user = user;
         this.name = name;
         this.phone = phone;
         this.address = address;
@@ -45,4 +54,5 @@ public class WelcomeKit {
     }
 
     public void markProcessed() { this.processed = true; }
+    public void setAdminMessage(String msg) { this.adminMessage = msg; }
 }

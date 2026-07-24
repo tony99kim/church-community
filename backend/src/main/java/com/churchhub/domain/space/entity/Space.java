@@ -47,6 +47,9 @@ public class Space {
     @Column(nullable = false)
     private int slotMinutes = 60;
 
+    @Column(length = 500)
+    private String imageUrl;
+
     @CreatedDate
     @Column(updatable = false)
     private LocalDateTime createdAt;
@@ -56,7 +59,7 @@ public class Space {
 
     @Builder
     public Space(Church church, String name, String description, String usageTypes,
-                 Integer capacity, LocalTime openTime, LocalTime closeTime, int slotMinutes) {
+                 Integer capacity, LocalTime openTime, LocalTime closeTime, int slotMinutes, String imageUrl) {
         this.church = church;
         this.name = name;
         this.description = description;
@@ -65,10 +68,11 @@ public class Space {
         if (openTime != null) this.openTime = openTime;
         if (closeTime != null) this.closeTime = closeTime;
         if (slotMinutes > 0) this.slotMinutes = slotMinutes;
+        this.imageUrl = imageUrl;
     }
 
     public void update(String name, String description, String usageTypes, Integer capacity,
-                       boolean available, LocalTime openTime, LocalTime closeTime, int slotMinutes) {
+                       boolean available, LocalTime openTime, LocalTime closeTime, int slotMinutes, String imageUrl) {
         this.name = name;
         this.description = description;
         this.usageTypes = usageTypes;
@@ -77,6 +81,7 @@ public class Space {
         if (openTime != null) this.openTime = openTime;
         if (closeTime != null) this.closeTime = closeTime;
         if (slotMinutes > 0) this.slotMinutes = slotMinutes;
+        this.imageUrl = imageUrl;
     }
 
     public void updateChurch(Church church) {
