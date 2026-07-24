@@ -28,7 +28,7 @@ public interface SpaceRentalRepository extends JpaRepository<SpaceRental, Long> 
     @Query("SELECT r FROM SpaceRental r WHERE r.space.id = :spaceId " +
            "AND r.status IN (com.churchhub.domain.space.entity.RentalStatus.PENDING, " +
            "com.churchhub.domain.space.entity.RentalStatus.APPROVED) " +
-           "AND r.startDateTime >= :dayStart AND r.startDateTime < :dayEnd")
+           "AND r.startDateTime < :dayEnd AND r.endDateTime > :dayStart")
     List<SpaceRental> findActiveBySpaceAndDate(@Param("spaceId") Long spaceId,
                                                @Param("dayStart") LocalDateTime dayStart,
                                                @Param("dayEnd") LocalDateTime dayEnd);

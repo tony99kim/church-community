@@ -65,7 +65,7 @@ export default function SpaceDetailPage() {
 
   const handleDayClick = (day: number) => {
     const dateStr = toDateStr(calYear, calMonth, day);
-    const today = new Date().toISOString().slice(0, 10);
+    const today = new Date().toLocaleDateString('en-CA');
     if (dateStr < today) return; // 과거 날짜 선택 불가
     setSelectedDate(dateStr);
     setSlots([]);
@@ -123,7 +123,7 @@ export default function SpaceDetailPage() {
   };
 
   const { firstDay, daysInMonth } = getMonthDays(calYear, calMonth);
-  const today = new Date().toISOString().slice(0, 10);
+  const today = new Date().toLocaleDateString('en-CA');
 
   if (!space) return <div className="min-h-screen flex items-center justify-center text-gray-400">불러오는 중...</div>;
 

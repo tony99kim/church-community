@@ -173,13 +173,17 @@ public class SpaceService {
         if (!rental.getApplicant().getId().equals(caller.getId())) {
             throw new BusinessException(ErrorCode.FORBIDDEN);
         }
-        if (rental.getStatus() != RentalStatus.PENDING) {
+        if (rental.getStatus() == RentalStatus.APPROVED) {
             throw new BusinessException(ErrorCode.SPACE_RENTAL_ALREADY_APPROVED);
+        }
+        if (rental.getStatus() != RentalStatus.PENDING) {
+            throw new BusinessException(ErrorCode.SPACE_RENTAL_NOT_CANCELLABLE);
         }
         rental.cancel();
         return SpaceDto.RentalResponse.from(rental);
     }
 
+    @Transactional(readOnly = true)
     public List<SpaceDto.SlotResponse> getSlots(Long spaceId, LocalDate date, Long callerId) {
         Space space = spaceRepository.findById(spaceId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.SPACE_NOT_FOUND));
@@ -188,6 +192,7 @@ public class SpaceService {
         List<SpaceRental> activeRentals = spaceRentalRepository.findActiveBySpaceAndDate(spaceId, dayStart, dayEnd);
 
         List<SpaceDto.SlotResponse> slots = new ArrayList<>();
+        if (space.getSlotMinutes() <= 0) return slots;
         java.time.LocalTime cursor = space.getOpenTime();
         while (cursor.plusMinutes(space.getSlotMinutes()).compareTo(space.getCloseTime()) <= 0) {
             java.time.LocalTime slotEnd = cursor.plusMinutes(space.getSlotMinutes());

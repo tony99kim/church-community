@@ -39,7 +39,7 @@ export default function AdminSpacesPage() {
       api.get('/admin/spaces').then(r => setSpaces(r.data.data ?? [])),
       api.get('/admin/spaces/rentals').then(r => setRentals(r.data.data ?? [])),
       api.get('/churches').then(r => setChurches(r.data.data ?? [])),
-    ]).finally(() => setLoading(false));
+    ]).catch(() => {}).finally(() => setLoading(false));
   };
 
   useEffect(() => { fetchAll(); }, []);

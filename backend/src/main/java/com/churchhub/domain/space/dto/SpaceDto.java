@@ -3,6 +3,7 @@ package com.churchhub.domain.space.dto;
 import com.churchhub.domain.space.entity.RentalStatus;
 import com.churchhub.domain.space.entity.Space;
 import com.churchhub.domain.space.entity.SpaceRental;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
@@ -22,6 +23,7 @@ public class SpaceDto {
         private Integer capacity;
         private LocalTime openTime;
         private LocalTime closeTime;
+        @Min(1)
         private int slotMinutes = 60;
     }
 
@@ -35,6 +37,7 @@ public class SpaceDto {
         private boolean available = true;
         private LocalTime openTime;
         private LocalTime closeTime;
+        @Min(1)
         private int slotMinutes = 60;
     }
 
