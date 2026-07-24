@@ -10,7 +10,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
+import org.springframework.format.annotation.DateTimeFormat;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -30,6 +32,22 @@ public class SpaceController {
             @Valid @RequestBody SpaceDto.RentalRequest req,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         return ApiResponse.success(spaceService.applyRental(id, userDetails.getUserId(), req));
+    }
+
+    @GetMapping("/spaces/{id}/slots")
+    public ApiResponse<List<SpaceDto.SlotResponse>> getSlots(
+            @PathVariable Long id,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long callerId = userDetails != null ? userDetails.getUserId() : null;
+        return ApiResponse.success(spaceService.getSlots(id, date, callerId));
+    }
+
+    @PutMapping("/spaces/rentals/{rentalId}/cancel")
+    public ApiResponse<SpaceDto.RentalResponse> cancelRental(
+            @PathVariable Long rentalId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ApiResponse.success(spaceService.cancelRental(rentalId, userDetails.getUserId()));
     }
 
     @GetMapping("/spaces/rentals/my")

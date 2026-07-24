@@ -52,6 +52,8 @@ public enum ErrorCode {
     SPACE_RENTAL_NOT_FOUND(HttpStatus.NOT_FOUND, "대여 신청을 찾을 수 없습니다."),
     SPACE_NOT_AVAILABLE(HttpStatus.BAD_REQUEST, "현재 대여 불가능한 공간입니다."),
     SPACE_HAS_RENTALS(HttpStatus.BAD_REQUEST, "대여 신청이 있는 공간은 삭제할 수 없습니다."),
+    SPACE_SLOT_TAKEN(HttpStatus.CONFLICT, "이미 예약된 시간대입니다."),
+    SPACE_RENTAL_ALREADY_APPROVED(HttpStatus.BAD_REQUEST, "승인된 예약은 취소할 수 없습니다."),
 
     // Event
     EVENT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 행사입니다."),

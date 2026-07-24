@@ -6,6 +6,7 @@ import com.churchhub.domain.notification.entity.NotificationType;
 import com.churchhub.domain.notification.entity.RelatedType;
 import com.churchhub.domain.notification.service.NotificationService;
 import com.churchhub.domain.space.dto.SpaceDto;
+import com.churchhub.domain.space.entity.RentalStatus;
 import com.churchhub.domain.space.entity.Space;
 import com.churchhub.domain.space.entity.SpaceRental;
 import com.churchhub.domain.space.repository.SpaceRentalRepository;
@@ -19,6 +20,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -148,6 +152,9 @@ public class SpaceService {
         Space space = spaceRepository.findById(spaceId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.SPACE_NOT_FOUND));
         if (!space.isAvailable()) throw new BusinessException(ErrorCode.SPACE_NOT_AVAILABLE);
+        List<SpaceRental> conflicts = spaceRentalRepository.findConflicting(
+                spaceId, req.getStartDateTime(), req.getEndDateTime());
+        if (!conflicts.isEmpty()) throw new BusinessException(ErrorCode.SPACE_SLOT_TAKEN);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
         SpaceRental rental = SpaceRental.builder()
@@ -156,6 +163,53 @@ public class SpaceService {
                 .headcount(req.getHeadcount()).purpose(req.getPurpose())
                 .contactPhone(req.getContactPhone()).build();
         return SpaceDto.RentalResponse.from(spaceRentalRepository.save(rental));
+    }
+
+    @Transactional
+    public SpaceDto.RentalResponse cancelRental(Long rentalId, Long callerId) {
+        SpaceRental rental = spaceRentalRepository.findById(rentalId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.SPACE_RENTAL_NOT_FOUND));
+        User caller = getCallerUser(callerId);
+        if (!rental.getApplicant().getId().equals(caller.getId())) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
+        if (rental.getStatus() == RentalStatus.APPROVED) {
+            throw new BusinessException(ErrorCode.SPACE_RENTAL_ALREADY_APPROVED);
+        }
+        rental.cancel();
+        return SpaceDto.RentalResponse.from(rental);
+    }
+
+    public List<SpaceDto.SlotResponse> getSlots(Long spaceId, LocalDate date, Long callerId) {
+        Space space = spaceRepository.findById(spaceId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.SPACE_NOT_FOUND));
+        LocalDateTime dayStart = date.atStartOfDay();
+        LocalDateTime dayEnd = date.plusDays(1).atStartOfDay();
+        List<SpaceRental> activeRentals = spaceRentalRepository.findActiveBySpaceAndDate(spaceId, dayStart, dayEnd);
+
+        List<SpaceDto.SlotResponse> slots = new ArrayList<>();
+        java.time.LocalTime cursor = space.getOpenTime();
+        while (cursor.plusMinutes(space.getSlotMinutes()).compareTo(space.getCloseTime()) <= 0) {
+            java.time.LocalTime slotEnd = cursor.plusMinutes(space.getSlotMinutes());
+            LocalDateTime slotStart = date.atTime(cursor);
+            LocalDateTime slotEndDt = date.atTime(slotEnd);
+
+            String status = "AVAILABLE";
+            for (SpaceRental r : activeRentals) {
+                if (r.getStartDateTime().isBefore(slotEndDt) && r.getEndDateTime().isAfter(slotStart)) {
+                    if (callerId != null && r.getApplicant().getId().equals(callerId)) {
+                        status = r.getStatus() == RentalStatus.PENDING ? "MY_PENDING" : "MY_APPROVED";
+                    } else {
+                        status = "TAKEN";
+                    }
+                    break;
+                }
+            }
+            slots.add(SpaceDto.SlotResponse.builder()
+                    .startTime(cursor).endTime(slotEnd).status(status).build());
+            cursor = slotEnd;
+        }
+        return slots;
     }
 
     @Transactional

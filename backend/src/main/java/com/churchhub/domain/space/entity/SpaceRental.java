@@ -69,4 +69,5 @@ public class SpaceRental {
         this.status = RentalStatus.REJECTED;
         this.rejectReason = reason;
     }
+    public void cancel() { this.status = RentalStatus.CANCELLED; }
 }

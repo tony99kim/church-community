@@ -86,6 +86,14 @@ public class SpaceDto {
 
     @Getter
     @Builder
+    public static class SlotResponse {
+        private LocalTime startTime;
+        private LocalTime endTime;
+        private String status; // AVAILABLE, TAKEN, MY_PENDING, MY_APPROVED
+    }
+
+    @Getter
+    @Builder
     public static class RentalResponse {
         private Long id;
         private Long spaceId;
