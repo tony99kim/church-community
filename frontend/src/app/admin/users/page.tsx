@@ -22,40 +22,74 @@ const ROLE_LABELS: Record<string, string> = {
   SUPER_ADMIN: '최고관리자',
 };
 
-const ROLE_DESCRIPTIONS: Record<string, { desc: string; permissions: string[] }> = {
-  USER: {
+const ROLES_INFO = [
+  {
+    key: 'USER',
+    label: '일반',
+    color: 'text-gray-600 bg-gray-50 border-gray-200',
+    dot: 'bg-gray-400',
     desc: '일반 회원',
     permissions: ['게시글 작성 및 댓글', '공간·물품 대여 신청', '행사 참여 신청', '신앙 Q&A 열람 및 기도 요청'],
   },
-  CHURCH_MANAGER: {
-    desc: '교회 관리자 (특정 교회 소속)',
+  {
+    key: 'CHURCH_MANAGER',
+    label: '교회관리자',
+    color: 'text-emerald-700 bg-emerald-50 border-emerald-200',
+    dot: 'bg-emerald-500',
+    desc: '특정 교회 소속 관리자',
     permissions: ['일반 회원의 모든 권한', '소속 교회 공간·물품 관리', '소속 교회 행사 등록·관리', '대여 신청 승인/거절'],
   },
-  PASTOR: {
+  {
+    key: 'PASTOR',
+    label: '목사',
+    color: 'text-violet-700 bg-violet-50 border-violet-200',
+    dot: 'bg-violet-500',
     desc: '목사·사역자',
-    permissions: ['일반 회원의 모든 권한', '신앙 질문 답변 작성', '기도 요청 기도 완료 처리', '관리자 패널 신앙 Q&A 탭 접근'],
+    permissions: ['일반 회원의 모든 권한', '신앙 질문 답변 작성', '기도 요청 완료 처리', '관리자 패널 신앙 Q&A 탭 접근'],
   },
-  SUPER_ADMIN: {
-    desc: '최고 관리자',
+  {
+    key: 'SUPER_ADMIN',
+    label: '최고관리자',
+    color: 'text-blue-700 bg-blue-50 border-blue-200',
+    dot: 'bg-[#003478]',
+    desc: '전체 시스템 관리자',
     permissions: ['모든 권한', '회원 상태·역할 변경', '교회·카테고리·공간·물품 전체 관리', '웰컴키트 및 모든 신청 관리'],
   },
-};
+];
 
-function RoleTooltip({ role }: { role: string }) {
-  const info = ROLE_DESCRIPTIONS[role];
-  if (!info) return null;
+function RoleGuideTooltip() {
   return (
-    <div className="absolute z-50 left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 bg-gray-900 text-white rounded-xl p-3 shadow-xl text-left pointer-events-none">
-      <div className="text-xs font-semibold mb-1 text-blue-300">{ROLE_LABELS[role]}</div>
-      <div className="text-[11px] text-gray-300 mb-2">{info.desc}</div>
-      <ul className="space-y-1">
-        {info.permissions.map((p) => (
-          <li key={p} className="text-[11px] text-gray-200 flex items-start gap-1.5">
-            <span className="text-blue-400 shrink-0 mt-0.5">•</span>{p}
-          </li>
-        ))}
-      </ul>
-      <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-gray-900" />
+    <div className="group/guide relative inline-flex items-center">
+      <button
+        type="button"
+        className="w-5 h-5 rounded-full bg-gray-100 hover:bg-blue-100 text-gray-400 hover:text-[#003478] text-[11px] font-bold flex items-center justify-center transition-colors"
+        tabIndex={-1}
+      >
+        ?
+      </button>
+      <div className="hidden group-hover/guide:block absolute left-0 top-full mt-2 z-50 w-[480px]">
+        <div className="bg-gray-900 text-white rounded-2xl p-4 shadow-2xl">
+          <p className="text-xs font-semibold text-gray-300 mb-3">권한별 역할 안내</p>
+          <div className="grid grid-cols-2 gap-3">
+            {ROLES_INFO.map((r) => (
+              <div key={r.key} className="bg-gray-800 rounded-xl p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className={`w-2 h-2 rounded-full shrink-0 ${r.dot}`} />
+                  <span className="text-xs font-semibold text-white">{r.label}</span>
+                  <span className="text-[10px] text-gray-400">— {r.desc}</span>
+                </div>
+                <ul className="space-y-1">
+                  {r.permissions.map((p) => (
+                    <li key={p} className="text-[11px] text-gray-300 flex items-start gap-1.5">
+                      <span className="text-blue-400 shrink-0 mt-0.5">·</span>{p}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -162,7 +196,10 @@ export default function AdminUsersPage() {
     <div className="p-8">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">회원 관리</h1>
-        <p className="text-sm text-gray-500 mt-1">회원 목록을 조회하고 상태를 관리할 수 있습니다</p>
+        <div className="flex items-center gap-2 mt-1">
+          <p className="text-sm text-gray-500">회원 목록을 조회하고 상태를 관리할 수 있습니다</p>
+          <RoleGuideTooltip />
+        </div>
       </div>
 
       {/* 검색 */}
@@ -237,37 +274,25 @@ export default function AdminUsersPage() {
                   <div className="text-center">
                     {isSuperAdmin && u.id !== me?.id ? (
                       <>
-                        <div className="relative inline-flex items-center gap-1 group/role">
-                          <select
-                            value={u.role}
-                            onChange={(e) => handleRoleChange(u, e.target.value)}
-                            className="text-xs border border-gray-200 rounded-lg px-2 py-1 bg-white focus:outline-none focus:ring-1 focus:ring-[#003478]"
-                          >
-                            <option value="USER">일반</option>
-                            <option value="CHURCH_MANAGER">교회관리자</option>
-                            <option value="PASTOR">목사</option>
-                            <option value="SUPER_ADMIN">최고관리자</option>
-                          </select>
-                          <span className="w-4 h-4 rounded-full bg-gray-100 text-gray-400 text-[10px] font-bold flex items-center justify-center cursor-default shrink-0">?</span>
-                          <div className="hidden group-hover/role:block">
-                            <RoleTooltip role={u.role} />
-                          </div>
-                        </div>
+                        <select
+                          value={u.role}
+                          onChange={(e) => handleRoleChange(u, e.target.value)}
+                          className="text-xs border border-gray-200 rounded-lg px-2 py-1 bg-white focus:outline-none focus:ring-1 focus:ring-[#003478]"
+                        >
+                          <option value="USER">일반</option>
+                          <option value="CHURCH_MANAGER">교회관리자</option>
+                          <option value="PASTOR">목사</option>
+                          <option value="SUPER_ADMIN">최고관리자</option>
+                        </select>
                         {u.churchName && (
                           <div className="text-xs text-gray-400 mt-0.5 text-center">{u.churchName}</div>
                         )}
                       </>
                     ) : (
                       <div className="text-center">
-                        <div className="relative inline-flex items-center gap-1 group/role">
-                          <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">
-                            {ROLE_LABELS[u.role] ?? u.role}
-                          </span>
-                          <span className="w-4 h-4 rounded-full bg-gray-100 text-gray-400 text-[10px] font-bold flex items-center justify-center cursor-default shrink-0">?</span>
-                          <div className="hidden group-hover/role:block">
-                            <RoleTooltip role={u.role} />
-                          </div>
-                        </div>
+                        <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">
+                          {ROLE_LABELS[u.role] ?? u.role}
+                        </span>
                         {u.churchName && (
                           <div className="text-xs text-gray-400 mt-0.5">{u.churchName}</div>
                         )}
