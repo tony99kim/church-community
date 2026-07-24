@@ -39,14 +39,14 @@ public class ItemController {
     }
 
     @GetMapping("/admin/items")
-    @PreAuthorize("hasAnyRole('CHURCH_MANAGER', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('PASTOR', 'CHURCH_MANAGER', 'SUPER_ADMIN')")
     public ApiResponse<List<ItemDto.Response>> getAdminItems(
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         return ApiResponse.success(itemService.getAdminItems(userDetails.getUserId()));
     }
 
     @PostMapping("/admin/items")
-    @PreAuthorize("hasAnyRole('CHURCH_MANAGER', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('PASTOR', 'CHURCH_MANAGER', 'SUPER_ADMIN')")
     public ApiResponse<ItemDto.Response> createItem(
             @Valid @RequestBody ItemDto.CreateRequest req,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -54,7 +54,7 @@ public class ItemController {
     }
 
     @PutMapping("/admin/items/{id}")
-    @PreAuthorize("hasAnyRole('CHURCH_MANAGER', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('PASTOR', 'CHURCH_MANAGER', 'SUPER_ADMIN')")
     public ApiResponse<ItemDto.Response> updateItem(
             @PathVariable Long id,
             @Valid @RequestBody ItemDto.UpdateRequest req,
@@ -63,7 +63,7 @@ public class ItemController {
     }
 
     @DeleteMapping("/admin/items/{id}")
-    @PreAuthorize("hasAnyRole('CHURCH_MANAGER', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('PASTOR', 'CHURCH_MANAGER', 'SUPER_ADMIN')")
     public ApiResponse<Void> deleteItem(
             @PathVariable Long id,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -72,14 +72,14 @@ public class ItemController {
     }
 
     @GetMapping("/admin/items/rentals")
-    @PreAuthorize("hasAnyRole('CHURCH_MANAGER', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('PASTOR', 'CHURCH_MANAGER', 'SUPER_ADMIN')")
     public ApiResponse<List<ItemDto.RentalResponse>> getAllRentals(
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         return ApiResponse.success(itemService.getAllRentals(userDetails.getUserId()));
     }
 
     @PutMapping("/admin/items/rentals/{rentalId}/approve")
-    @PreAuthorize("hasAnyRole('CHURCH_MANAGER', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('PASTOR', 'CHURCH_MANAGER', 'SUPER_ADMIN')")
     public ApiResponse<ItemDto.RentalResponse> approveRental(
             @PathVariable Long rentalId,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -87,7 +87,7 @@ public class ItemController {
     }
 
     @PutMapping("/admin/items/rentals/{rentalId}/reject")
-    @PreAuthorize("hasAnyRole('CHURCH_MANAGER', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('PASTOR', 'CHURCH_MANAGER', 'SUPER_ADMIN')")
     public ApiResponse<ItemDto.RentalResponse> rejectRental(
             @PathVariable Long rentalId,
             @RequestBody ItemDto.RejectRequest req,

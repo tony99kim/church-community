@@ -84,7 +84,7 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
   const roleLabel: Record<string, string> = {
     SUPER_ADMIN: '최고관리자',
     CHURCH_MANAGER: '교회관리자',
-    PASTOR: '목사',
+    PASTOR: '목사/전도사',
   };
 
   return (

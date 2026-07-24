@@ -18,7 +18,7 @@ interface User {
 const ROLE_LABELS: Record<string, string> = {
   USER: '일반',
   CHURCH_MANAGER: '교회관리자',
-  PASTOR: '목사',
+  PASTOR: '목사/전도사',
   SUPER_ADMIN: '최고관리자',
 };
 
@@ -37,15 +37,15 @@ const ROLES_INFO = [
     color: 'text-emerald-700 bg-emerald-50 border-emerald-200',
     dot: 'bg-emerald-500',
     desc: '특정 교회 소속 관리자',
-    permissions: ['일반 회원의 모든 권한', '소속 교회 공간·물품 관리', '소속 교회 행사 등록·관리', '대여 신청 승인/거절'],
+    permissions: ['일반 회원의 모든 권한', '소속 교회 공간·물품 관리', '소속 교회 행사 등록·관리', '대여 신청 승인/거절', '웰컴키트 신청 관리'],
   },
   {
     key: 'PASTOR',
-    label: '목사',
+    label: '목사/전도사',
     color: 'text-violet-700 bg-violet-50 border-violet-200',
     dot: 'bg-violet-500',
-    desc: '목사·사역자',
-    permissions: ['일반 회원의 모든 권한', '신앙 질문 답변 작성', '기도 요청 완료 처리', '관리자 패널 신앙 Q&A 탭 접근'],
+    desc: '목사·전도사·사역자',
+    permissions: ['일반 회원의 모든 권한', '신앙 질문 답변 작성', '기도 요청 완료 처리', '소속 교회 공간·물품 관리', '웰컴키트 신청 관리'],
   },
   {
     key: 'SUPER_ADMIN',

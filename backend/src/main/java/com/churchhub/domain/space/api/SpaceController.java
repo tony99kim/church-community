@@ -62,14 +62,14 @@ public class SpaceController {
     }
 
     @GetMapping("/admin/spaces")
-    @PreAuthorize("hasAnyRole('CHURCH_MANAGER', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('PASTOR', 'CHURCH_MANAGER', 'SUPER_ADMIN')")
     public ApiResponse<List<SpaceDto.Response>> getAdminSpaces(
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         return ApiResponse.success(spaceService.getAdminSpaces(userDetails.getUserId()));
     }
 
     @PostMapping("/admin/spaces")
-    @PreAuthorize("hasAnyRole('CHURCH_MANAGER', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('PASTOR', 'CHURCH_MANAGER', 'SUPER_ADMIN')")
     public ApiResponse<SpaceDto.Response> createSpace(
             @Valid @RequestBody SpaceDto.CreateRequest req,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -77,7 +77,7 @@ public class SpaceController {
     }
 
     @PutMapping("/admin/spaces/{id}")
-    @PreAuthorize("hasAnyRole('CHURCH_MANAGER', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('PASTOR', 'CHURCH_MANAGER', 'SUPER_ADMIN')")
     public ApiResponse<SpaceDto.Response> updateSpace(
             @PathVariable Long id,
             @Valid @RequestBody SpaceDto.UpdateRequest req,
@@ -86,7 +86,7 @@ public class SpaceController {
     }
 
     @DeleteMapping("/admin/spaces/{id}")
-    @PreAuthorize("hasAnyRole('CHURCH_MANAGER', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('PASTOR', 'CHURCH_MANAGER', 'SUPER_ADMIN')")
     public ApiResponse<Void> deleteSpace(
             @PathVariable Long id,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -95,14 +95,14 @@ public class SpaceController {
     }
 
     @GetMapping("/admin/spaces/{id}/blocks")
-    @PreAuthorize("hasAnyRole('CHURCH_MANAGER', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('PASTOR', 'CHURCH_MANAGER', 'SUPER_ADMIN')")
     public ApiResponse<List<SpaceDto.BlockResponse>> getBlocks(
             @PathVariable Long id) {
         return ApiResponse.success(spaceService.getBlocks(id));
     }
 
     @PostMapping("/admin/spaces/{id}/blocks")
-    @PreAuthorize("hasAnyRole('CHURCH_MANAGER', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('PASTOR', 'CHURCH_MANAGER', 'SUPER_ADMIN')")
     public ApiResponse<SpaceDto.BlockResponse> createBlock(
             @PathVariable Long id,
             @Valid @RequestBody SpaceDto.BlockRequest req,
@@ -111,7 +111,7 @@ public class SpaceController {
     }
 
     @DeleteMapping("/admin/spaces/blocks/{blockId}")
-    @PreAuthorize("hasAnyRole('CHURCH_MANAGER', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('PASTOR', 'CHURCH_MANAGER', 'SUPER_ADMIN')")
     public ApiResponse<Void> deleteBlock(
             @PathVariable Long blockId,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -120,7 +120,7 @@ public class SpaceController {
     }
 
     @PutMapping("/admin/spaces/rentals/{rentalId}/message")
-    @PreAuthorize("hasAnyRole('CHURCH_MANAGER', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('PASTOR', 'CHURCH_MANAGER', 'SUPER_ADMIN')")
     public ApiResponse<SpaceDto.RentalResponse> setRentalMessage(
             @PathVariable Long rentalId,
             @RequestBody SpaceDto.RentalMessageRequest req,
@@ -129,14 +129,14 @@ public class SpaceController {
     }
 
     @GetMapping("/admin/spaces/rentals")
-    @PreAuthorize("hasAnyRole('CHURCH_MANAGER', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('PASTOR', 'CHURCH_MANAGER', 'SUPER_ADMIN')")
     public ApiResponse<List<SpaceDto.RentalResponse>> getAllRentals(
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         return ApiResponse.success(spaceService.getAllRentals(userDetails.getUserId()));
     }
 
     @PutMapping("/admin/spaces/rentals/{rentalId}/approve")
-    @PreAuthorize("hasAnyRole('CHURCH_MANAGER', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('PASTOR', 'CHURCH_MANAGER', 'SUPER_ADMIN')")
     public ApiResponse<SpaceDto.RentalResponse> approveRental(
             @PathVariable Long rentalId,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -144,7 +144,7 @@ public class SpaceController {
     }
 
     @PutMapping("/admin/spaces/rentals/{rentalId}/reject")
-    @PreAuthorize("hasAnyRole('CHURCH_MANAGER', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('PASTOR', 'CHURCH_MANAGER', 'SUPER_ADMIN')")
     public ApiResponse<SpaceDto.RentalResponse> rejectRental(
             @PathVariable Long rentalId,
             @RequestBody SpaceDto.RejectRequest req,
