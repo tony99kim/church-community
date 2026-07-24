@@ -29,3 +29,6 @@ Thumbs.db
 
 .vercel
 .env*.local
+
+# Personal notes (not for repo)
+DEV_NOTES.md
