@@ -16,6 +16,9 @@ spring:
       password: ${REDIS_PASSWORD:}
       ssl:
         enabled: ${REDIS_SSL:false}
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
   servlet:
     multipart:
       max-file-size: 5MB
