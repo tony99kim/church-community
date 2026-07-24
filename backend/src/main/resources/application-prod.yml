@@ -9,8 +9,6 @@ spring:
     hibernate:
       ddl-auto: none
     show-sql: false
-  flyway:
-    ignore-migration-patterns: "*:failed"
   data:
     redis:
       ssl:
