@@ -22,6 +22,7 @@ public class EventDto {
         private Integer maxParticipants;
         private String thumbnailUrl;
         private EventCategory category;
+        private Long churchId;
     }
 
     @Getter
@@ -35,6 +36,7 @@ public class EventDto {
         private String thumbnailUrl;
         private EventStatus status;
         private EventCategory category;
+        private Long churchId;
     }
 
     @Getter
@@ -52,6 +54,8 @@ public class EventDto {
         private EventCategory category;
         private EventStatus status;
         private String authorNickname;
+        private Long churchId;
+        private String churchName;
         private boolean joined;
         private LocalDateTime createdAt;
 
@@ -69,6 +73,8 @@ public class EventDto {
                     .category(event.getCategory())
                     .status(event.getStatus())
                     .authorNickname(event.getAuthor().getNickname())
+                    .churchId(event.getChurch() != null ? event.getChurch().getId() : null)
+                    .churchName(event.getChurch() != null ? event.getChurch().getName() : null)
                     .joined(joined)
                     .createdAt(event.getCreatedAt())
                     .build();

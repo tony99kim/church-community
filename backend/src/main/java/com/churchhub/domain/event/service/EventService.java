@@ -1,5 +1,7 @@
 package com.churchhub.domain.event.service;
 
+import com.churchhub.domain.church.entity.Church;
+import com.churchhub.domain.church.repository.ChurchRepository;
 import com.churchhub.domain.event.dto.EventDto;
 import com.churchhub.domain.event.entity.Event;
 import com.churchhub.domain.event.entity.EventCategory;
@@ -9,6 +11,7 @@ import com.churchhub.domain.event.entity.EventStatus;
 import com.churchhub.domain.event.repository.EventParticipantRepository;
 import com.churchhub.domain.event.repository.EventRepository;
 import com.churchhub.domain.user.entity.User;
+import com.churchhub.domain.user.entity.UserRole;
 import com.churchhub.domain.user.repository.UserRepository;
 import com.churchhub.exception.BusinessException;
 import com.churchhub.exception.ErrorCode;
@@ -27,8 +30,16 @@ public class EventService {
     private final EventRepository eventRepository;
     private final EventParticipantRepository participantRepository;
     private final UserRepository userRepository;
+    private final ChurchRepository churchRepository;
 
-    public Page<EventDto.Response> getAllEventsForAdmin(Pageable pageable) {
+    public Page<EventDto.Response> getAllEventsForAdmin(Long callerId, Pageable pageable) {
+        User caller = userRepository.findById(callerId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        if (caller.getRole() == UserRole.CHURCH_MANAGER) {
+            if (caller.getChurch() == null) return Page.empty(pageable);
+            return eventRepository.findByChurchId(caller.getChurch().getId(), pageable)
+                    .map(e -> EventDto.Response.from(e, false));
+        }
         return eventRepository.findAll(pageable)
                 .map(e -> EventDto.Response.from(e, false));
     }
@@ -55,6 +66,13 @@ public class EventService {
     public EventDto.Response createEvent(EventDto.CreateRequest request, Long userId) {
         User author = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        Church church = null;
+        if (author.getRole() == UserRole.CHURCH_MANAGER) {
+            church = author.getChurch();
+        } else if (request.getChurchId() != null) {
+            church = churchRepository.findById(request.getChurchId())
+                    .orElseThrow(() -> new BusinessException(ErrorCode.CHURCH_NOT_FOUND));
+        }
         Event event = Event.builder()
                 .author(author)
                 .title(request.getTitle())
@@ -65,6 +83,7 @@ public class EventService {
                 .maxParticipants(request.getMaxParticipants())
                 .thumbnailUrl(request.getThumbnailUrl())
                 .category(request.getCategory())
+                .church(church)
                 .build();
         return EventDto.Response.from(eventRepository.save(event), false);
     }

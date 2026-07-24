@@ -118,8 +118,10 @@ public class AdminController {
     @Operation(summary = "행사 목록 조회 (관리자 - DRAFT 포함)")
     @GetMapping("/events")
     public ResponseEntity<ApiResponse<Page<EventDto.Response>>> getAdminEvents(
-            @PageableDefault(size = 50, sort = "createdAt", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable) {
-        return ResponseEntity.ok(ApiResponse.success(eventService.getAllEventsForAdmin(pageable)));
+            @PageableDefault(size = 50, sort = "createdAt", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(ApiResponse.success(
+                eventService.getAllEventsForAdmin(userDetails.getUserId(), pageable)));
     }
 
     @Operation(summary = "행사 생성")

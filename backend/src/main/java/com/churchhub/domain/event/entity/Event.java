@@ -1,5 +1,6 @@
 package com.churchhub.domain.event.entity;
 
+import com.churchhub.domain.church.entity.Church;
 import com.churchhub.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -49,6 +50,10 @@ public class Event {
     @Column(length = 30)
     private EventCategory category = EventCategory.CHURCH;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "church_id")
+    private Church church;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private EventStatus status = EventStatus.UPCOMING;
@@ -63,7 +68,7 @@ public class Event {
     @Builder
     public Event(User author, String title, String description, String location,
                  LocalDateTime startDate, LocalDateTime endDate,
-                 Integer maxParticipants, String thumbnailUrl, EventCategory category) {
+                 Integer maxParticipants, String thumbnailUrl, EventCategory category, Church church) {
         this.author = author;
         this.title = title;
         this.description = description;
@@ -73,6 +78,7 @@ public class Event {
         this.maxParticipants = maxParticipants;
         this.thumbnailUrl = thumbnailUrl;
         this.category = category != null ? category : EventCategory.CHURCH;
+        this.church = church;
     }
 
     public void update(String title, String description, String location,

@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface EventRepository extends JpaRepository<Event, Long> {
     Page<Event> findAllByStatusNotIn(java.util.List<EventStatus> statuses, Pageable pageable);
+    Page<Event> findByChurchId(Long churchId, Pageable pageable);
     Page<Event> findAllByCategoryOrderByStartDateDesc(EventCategory category, Pageable pageable);
     java.util.List<Event> findAllByCategoryOrderByStartDateDesc(EventCategory category);
     long countByStatus(EventStatus status);
