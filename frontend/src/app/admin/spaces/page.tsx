@@ -6,7 +6,12 @@ import { Space, SpaceRental, Church } from '@/types';
 import { useAuthStore } from '@/store/authStore';
 
 const STATUS_LABEL: Record<string, string> = { PENDING: '대기중', APPROVED: '승인', REJECTED: '거절', CANCELLED: '취소' };
-const STATUS_COLOR: Record<string, string> = { PENDING: 'text-amber-500', APPROVED: 'text-green-600', REJECTED: 'text-red-500', CANCELLED: 'text-gray-400' };
+const STATUS_BADGE: Record<string, string> = {
+  PENDING: 'bg-amber-50 text-amber-600',
+  APPROVED: 'bg-green-50 text-green-600',
+  REJECTED: 'bg-red-50 text-red-500',
+  CANCELLED: 'bg-gray-100 text-gray-400',
+};
 
 const EMPTY_FORM = { churchId: '', name: '', description: '', usageTypes: '', capacity: '', available: true };
 
@@ -20,6 +25,14 @@ export default function AdminSpacesPage() {
   const [editId, setEditId] = useState<number | null>(null);
   const [form, setForm] = useState({ ...EMPTY_FORM });
   const [loading, setLoading] = useState(true);
+
+  // 예약 현황 필터
+  const [rentalDate, setRentalDate] = useState(new Date().toISOString().slice(0, 10));
+  const [statusFilter, setStatusFilter] = useState<string>('ALL');
+
+  // 거절 모달
+  const [rejectId, setRejectId] = useState<number | null>(null);
+  const [rejectReason, setRejectReason] = useState('');
 
   const fetchAll = () => {
     Promise.all([
@@ -73,10 +86,11 @@ export default function AdminSpacesPage() {
   };
 
   const approve = async (id: number) => { await api.put(`/admin/spaces/rentals/${id}/approve`); fetchAll(); };
-  const reject = async (id: number) => {
-    const reason = prompt('거절 사유를 입력하세요');
-    if (reason === null) return;
-    await api.put(`/admin/spaces/rentals/${id}/reject`, { reason });
+  const openReject = (id: number) => { setRejectId(id); setRejectReason(''); };
+  const confirmReject = async () => {
+    if (rejectId === null) return;
+    await api.put(`/admin/spaces/rentals/${rejectId}/reject`, { reason: rejectReason });
+    setRejectId(null);
     fetchAll();
   };
 
@@ -98,7 +112,7 @@ export default function AdminSpacesPage() {
         {(['spaces', 'rentals'] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
             className={`px-4 py-1.5 rounded-lg text-sm font-medium transition ${tab === t ? 'bg-white text-[#003478] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
-            {t === 'spaces' ? `공간 목록 (${spaces.length})` : `신청 관리 (${rentals.filter(r => r.status === 'PENDING').length})`}
+            {t === 'spaces' ? `공간 목록 (${spaces.length})` : `예약 현황 (${rentals.filter(r => r.status === 'PENDING').length})`}
           </button>
         ))}
       </div>
@@ -131,30 +145,97 @@ export default function AdminSpacesPage() {
         </div>
       )}
 
-      {/* 신청 관리 탭 */}
+      {/* 예약 현황 탭 */}
       {tab === 'rentals' && (
-        <div className="space-y-3">
-          {rentals.length === 0 ? (
-            <div className="bg-white border border-[#EDEFF1] rounded-xl py-16 text-center text-gray-400 text-sm">신청 내역이 없습니다.</div>
-          ) : rentals.map(r => (
-            <div key={r.id} className="bg-white border border-[#EDEFF1] rounded-xl p-4">
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="font-medium text-sm">{r.spaceName}</div>
-                  <div className="text-xs text-gray-400 mt-0.5">{r.applicantNickname} · {r.contactPhone}</div>
-                  <div className="text-xs text-gray-500 mt-1">목적: {r.purpose}</div>
-                  <div className="text-xs text-gray-500">{r.startDateTime} ~ {r.endDateTime}</div>
-                </div>
-                <span className={`text-xs font-medium ${STATUS_COLOR[r.status]}`}>{STATUS_LABEL[r.status]}</span>
-              </div>
-              {r.status === 'PENDING' && (
-                <div className="flex gap-2 mt-3">
-                  <button onClick={() => approve(r.id)} className="px-3 py-1.5 bg-green-500 text-white rounded-lg text-xs font-medium hover:bg-green-600">승인</button>
-                  <button onClick={() => reject(r.id)} className="px-3 py-1.5 bg-red-500 text-white rounded-lg text-xs font-medium hover:bg-red-600">거절</button>
-                </div>
-              )}
+        <div>
+          {/* 필터 */}
+          <div className="flex flex-wrap items-center gap-3 mb-4">
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-medium text-gray-700">날짜</label>
+              <input type="date" value={rentalDate}
+                onChange={e => setRentalDate(e.target.value)}
+                className="border border-gray-300 rounded-xl px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]" />
             </div>
-          ))}
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-medium text-gray-700">상태</label>
+              <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
+                className="border border-gray-300 rounded-xl px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]">
+                <option value="ALL">전체</option>
+                <option value="PENDING">대기중</option>
+                <option value="APPROVED">승인</option>
+                <option value="REJECTED">거절</option>
+                <option value="CANCELLED">취소</option>
+              </select>
+            </div>
+          </div>
+
+          {/* 테이블 */}
+          <div className="bg-white border border-[#EDEFF1] rounded-xl overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-[#f4f6f8] border-b border-[#EDEFF1]">
+                <tr>
+                  {['공간명','신청자','날짜/시간','인원','목적','연락처','상태','액션'].map(h => (
+                    <th key={h} className="px-3 py-2 text-left text-xs font-semibold text-gray-600 whitespace-nowrap">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#EDEFF1]">
+                {rentals
+                  .filter(r => r.startDateTime.startsWith(rentalDate))
+                  .filter(r => statusFilter === 'ALL' || r.status === statusFilter)
+                  .map(r => (
+                    <tr key={r.id} className="hover:bg-gray-50">
+                      <td className="px-3 py-2 font-medium text-gray-800 whitespace-nowrap">{r.spaceName}</td>
+                      <td className="px-3 py-2 text-gray-600 whitespace-nowrap">{r.applicantNickname}</td>
+                      <td className="px-3 py-2 text-gray-600 whitespace-nowrap text-xs">
+                        {r.startDateTime.slice(0,10)}<br/>
+                        {r.startDateTime.slice(11,16)} ~ {r.endDateTime.slice(11,16)}
+                      </td>
+                      <td className="px-3 py-2 text-gray-600 whitespace-nowrap">{r.headcount ?? '-'}</td>
+                      <td className="px-3 py-2 text-gray-600 max-w-[140px] truncate">{r.purpose}</td>
+                      <td className="px-3 py-2 text-gray-600 whitespace-nowrap">{r.contactPhone}</td>
+                      <td className="px-3 py-2">
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_BADGE[r.status]}`}>
+                          {STATUS_LABEL[r.status]}
+                        </span>
+                      </td>
+                      <td className="px-3 py-2">
+                        {r.status === 'PENDING' && (
+                          <div className="flex gap-1">
+                            <button onClick={() => approve(r.id)}
+                              className="px-2 py-1 text-xs bg-[#003478] text-white rounded-lg hover:bg-blue-900 whitespace-nowrap">승인</button>
+                            <button onClick={() => openReject(r.id)}
+                              className="px-2 py-1 text-xs border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-600 whitespace-nowrap">거절</button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                {rentals.filter(r => r.startDateTime.startsWith(rentalDate)).filter(r => statusFilter === 'ALL' || r.status === statusFilter).length === 0 && (
+                  <tr><td colSpan={8} className="py-12 text-center text-gray-400 text-sm">해당 날짜에 예약이 없습니다.</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* 거절 모달 */}
+      {rejectId !== null && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-sm p-6 shadow-xl">
+            <h2 className="font-bold text-gray-900 mb-3">거절 사유</h2>
+            <textarea rows={3} value={rejectReason}
+              onChange={e => setRejectReason(e.target.value)}
+              placeholder="거절 사유를 입력하세요"
+              className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478] resize-none mb-4" />
+            <div className="flex gap-2 justify-end">
+              <button onClick={() => setRejectId(null)}
+                className="px-4 py-2 text-sm border border-gray-300 rounded-xl hover:bg-gray-50">취소</button>
+              <button onClick={confirmReject} disabled={!rejectReason.trim()}
+                className="px-4 py-2 text-sm bg-red-500 text-white rounded-xl font-semibold hover:bg-red-600 disabled:opacity-50">거절 확인</button>
+            </div>
+          </div>
         </div>
       )}
 
