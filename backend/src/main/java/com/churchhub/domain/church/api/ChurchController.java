@@ -22,6 +22,12 @@ public class ChurchController {
         return ApiResponse.success(churchService.getChurches());
     }
 
+    @GetMapping("/admin/churches")
+    @PreAuthorize("hasAnyRole('CHURCH_MANAGER', 'SUPER_ADMIN')")
+    public ApiResponse<List<ChurchDto.Response>> getAllChurches() {
+        return ApiResponse.success(churchService.getAllChurches());
+    }
+
     @GetMapping("/churches/{id}")
     public ApiResponse<ChurchDto.Response> getChurch(@PathVariable Long id) {
         return ApiResponse.success(churchService.getChurch(id));

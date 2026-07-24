@@ -141,7 +141,7 @@ export default function MyPage() {
 
   const TABS: { key: Tab; label: string }[] = [
     { key: 'info', label: '내 정보' },
-    { key: 'posts', label: '쓴 글' },
+    { key: 'posts', label: '작성글' },
     { key: 'spaceRentals', label: '공간 신청' },
     { key: 'itemRentals', label: '물품 신청' },
     { key: 'welcomeKits', label: '웰컴키트' },

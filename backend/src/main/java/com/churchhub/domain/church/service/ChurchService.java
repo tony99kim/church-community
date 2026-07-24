@@ -23,6 +23,10 @@ public class ChurchService {
                 .stream().map(ChurchDto.Response::from).toList();
     }
 
+    public List<ChurchDto.Response> getAllChurches() {
+        return churchRepository.findAll().stream().map(ChurchDto.Response::from).toList();
+    }
+
     public ChurchDto.Response getChurch(Long id) {
         Church church = churchRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.CHURCH_NOT_FOUND));
@@ -43,6 +47,7 @@ public class ChurchService {
                 .introduction(req.getIntroduction())
                 .websiteUrl(req.getWebsiteUrl())
                 .instagramUrl(req.getInstagramUrl())
+                .imageUrl(req.getImageUrl())
                 .build();
         return ChurchDto.Response.from(churchRepository.save(church));
     }
@@ -53,7 +58,7 @@ public class ChurchService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.CHURCH_NOT_FOUND));
         church.update(req.getName(), req.getAddress(), req.getSundayServiceTime(),
                 req.isHasYouthGroup(), req.getContactInfo(), req.getIntroduction(),
-                req.getWebsiteUrl(), req.getInstagramUrl(), req.isVisible());
+                req.getWebsiteUrl(), req.getInstagramUrl(), req.getImageUrl(), req.isVisible());
         return ChurchDto.Response.from(church);
     }
 

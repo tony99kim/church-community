@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import api from '@/lib/api';
 import { Church } from '@/types';
 
@@ -27,38 +28,29 @@ export default function ChurchesPage() {
         ) : (
           <div className="grid md:grid-cols-2 gap-4">
             {churches.map(church => (
-              <div key={church.id} className="bg-white rounded-2xl border border-[#EDEFF1] p-5 hover:border-[#003478] transition-colors">
-                <div className="flex items-start justify-between mb-3">
-                  <h2 className="text-lg font-bold text-gray-800">{church.name}</h2>
-                  {church.hasYouthGroup && (
-                    <span className="px-2 py-0.5 bg-blue-50 text-[#003478] text-xs rounded-full shrink-0 ml-2">청년부</span>
-                  )}
-                </div>
-                {church.introduction && (
-                  <p className="text-sm text-gray-600 mb-3">{church.introduction}</p>
+              <Link key={church.id} href={`/churches/${church.id}`}
+                className="bg-white rounded-2xl border border-[#EDEFF1] hover:border-[#003478] hover:shadow-sm transition-all block">
+                {church.imageUrl && (
+                  <img src={church.imageUrl} alt={church.name}
+                    className="w-full h-40 object-cover rounded-t-2xl" />
                 )}
-                <div className="space-y-1.5 text-xs text-gray-500">
-                  <div>📍 {church.address}</div>
-                  {church.sundayServiceTime && <div>🕐 주일예배 {church.sundayServiceTime}</div>}
-                  {church.contactInfo && <div>📞 {church.contactInfo}</div>}
-                </div>
-                {(church.websiteUrl || church.instagramUrl) && (
-                  <div className="flex gap-2 mt-3">
-                    {church.websiteUrl && (
-                      <a href={church.websiteUrl} target="_blank" rel="noopener noreferrer"
-                        className="text-xs px-3 py-1 border border-[#EDEFF1] rounded-full hover:border-[#003478] transition-colors">
-                        홈페이지
-                      </a>
-                    )}
-                    {church.instagramUrl && (
-                      <a href={church.instagramUrl} target="_blank" rel="noopener noreferrer"
-                        className="text-xs px-3 py-1 border border-[#EDEFF1] rounded-full hover:border-[#003478] transition-colors">
-                        인스타그램
-                      </a>
+                <div className="p-5">
+                  <div className="flex items-start justify-between mb-3">
+                    <h2 className="text-lg font-bold text-gray-800">{church.name}</h2>
+                    {church.hasYouthGroup && (
+                      <span className="px-2 py-0.5 bg-blue-50 text-[#003478] text-xs rounded-full shrink-0 ml-2">청년부</span>
                     )}
                   </div>
-                )}
-              </div>
+                  {church.introduction && (
+                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">{church.introduction}</p>
+                  )}
+                  <div className="space-y-1.5 text-xs text-gray-500">
+                    <div>📍 {church.address}</div>
+                    {church.sundayServiceTime && <div>🕐 주일예배 {church.sundayServiceTime}</div>}
+                    {church.contactInfo && <div>📞 {church.contactInfo}</div>}
+                  </div>
+                </div>
+              </Link>
             ))}
           </div>
         )}

@@ -19,6 +19,7 @@ public class ChurchDto {
         private String introduction;
         private String websiteUrl;
         private String instagramUrl;
+        private String imageUrl;
     }
 
     @Getter
@@ -31,6 +32,7 @@ public class ChurchDto {
         private String introduction;
         private String websiteUrl;
         private String instagramUrl;
+        private String imageUrl;
         private boolean visible;
     }
 
@@ -46,6 +48,7 @@ public class ChurchDto {
         private String introduction;
         private String websiteUrl;
         private String instagramUrl;
+        private String imageUrl;
         private boolean visible;
         private LocalDateTime createdAt;
 
@@ -60,6 +63,7 @@ public class ChurchDto {
                     .introduction(church.getIntroduction())
                     .websiteUrl(church.getWebsiteUrl())
                     .instagramUrl(church.getInstagramUrl())
+                    .imageUrl(church.getImageUrl())
                     .visible(church.isVisible())
                     .createdAt(church.getCreatedAt())
                     .build();

@@ -42,6 +42,9 @@ public class Church {
     @Column(length = 200)
     private String instagramUrl;
 
+    @Column(length = 300)
+    private String imageUrl;
+
     private boolean visible = true;
 
     @CreatedDate
@@ -54,7 +57,7 @@ public class Church {
     @Builder
     public Church(String name, String address, String sundayServiceTime,
                   boolean hasYouthGroup, String contactInfo, String introduction,
-                  String websiteUrl, String instagramUrl) {
+                  String websiteUrl, String instagramUrl, String imageUrl) {
         this.name = name;
         this.address = address;
         this.sundayServiceTime = sundayServiceTime;
@@ -63,11 +66,12 @@ public class Church {
         this.introduction = introduction;
         this.websiteUrl = websiteUrl;
         this.instagramUrl = instagramUrl;
+        this.imageUrl = imageUrl;
     }
 
     public void update(String name, String address, String sundayServiceTime,
                        boolean hasYouthGroup, String contactInfo, String introduction,
-                       String websiteUrl, String instagramUrl, boolean visible) {
+                       String websiteUrl, String instagramUrl, String imageUrl, boolean visible) {
         this.name = name;
         this.address = address;
         this.sundayServiceTime = sundayServiceTime;
@@ -76,6 +80,7 @@ public class Church {
         this.introduction = introduction;
         this.websiteUrl = websiteUrl;
         this.instagramUrl = instagramUrl;
+        this.imageUrl = imageUrl;
         this.visible = visible;
     }
 }

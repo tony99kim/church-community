@@ -83,6 +83,7 @@ export interface Church {
   introduction: string | null;
   websiteUrl: string | null;
   instagramUrl: string | null;
+  imageUrl: string | null;
   visible: boolean;
   createdAt: string;
 }
