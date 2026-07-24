@@ -26,9 +26,13 @@ export default function CommunityPage() {
   useEffect(() => {
     if (!activeCategory) return;
     setLoading(true);
-    api.get(`/posts?categoryId=${activeCategory}&size=20`)
+    setPosts([]);
+    const controller = new AbortController();
+    api.get(`/posts?categoryId=${activeCategory}&size=20`, { signal: controller.signal })
       .then(r => setPosts(r.data.data?.content ?? []))
+      .catch(err => { if (err.code !== 'ERR_CANCELED') throw err; })
       .finally(() => setLoading(false));
+    return () => controller.abort();
   }, [activeCategory]);
 
   return (
