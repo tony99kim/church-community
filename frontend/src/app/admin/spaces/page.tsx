@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import api from '@/lib/api';
+import { uploadImage } from '@/lib/supabase';
 import { Space, SpaceRental, Church, SpaceBlock } from '@/types';
 import { useAuthStore } from '@/store/authStore';
 
@@ -46,6 +47,19 @@ export default function AdminSpacesPage() {
   const [blockSpaceId, setBlockSpaceId] = useState<number | null>(null);
   const [blocks, setBlocks] = useState<SpaceBlock[]>([]);
   const [blockForm, setBlockForm] = useState({ ...EMPTY_BLOCK });
+  const [thumbUploading, setThumbUploading] = useState(false);
+  const thumbRef = useRef<HTMLInputElement>(null);
+
+  const handleThumb = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setThumbUploading(true);
+    try {
+      const url = await uploadImage(file);
+      setForm(p => ({ ...p, imageUrl: url }));
+    } catch { alert('이미지 업로드에 실패했습니다.'); }
+    finally { setThumbUploading(false); e.target.value = ''; }
+  };
 
   const fetchAll = () => {
     Promise.all([
@@ -372,9 +386,22 @@ export default function AdminSpacesPage() {
                   className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478] resize-none" placeholder="예: 프로젝터, 테이블 8개 구비, 냉난방 완비" />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">이미지 URL</label>
-                <input value={form.imageUrl} onChange={e => setForm(p => ({ ...p, imageUrl: e.target.value }))}
-                  className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]" placeholder="https://..." />
+                <label className="block text-xs font-semibold text-gray-700 mb-1">공간 이미지</label>
+                <div className="flex items-center gap-3">
+                  {form.imageUrl && (
+                    <div className="relative w-20 h-14 rounded-lg overflow-hidden border border-gray-200 shrink-0">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={form.imageUrl} alt="공간 이미지" className="w-full h-full object-cover" />
+                      <button type="button" onClick={() => setForm(p => ({ ...p, imageUrl: '' }))}
+                        className="absolute top-0.5 right-0.5 w-4 h-4 bg-black/50 text-white rounded-full text-[10px] flex items-center justify-center">×</button>
+                    </div>
+                  )}
+                  <button type="button" onClick={() => thumbRef.current?.click()} disabled={thumbUploading}
+                    className="text-xs text-gray-500 border border-dashed border-gray-300 rounded-lg px-3 py-2 hover:border-[#003478] hover:text-[#003478] transition disabled:opacity-50">
+                    {thumbUploading ? '업로드 중...' : '+ 이미지 선택'}
+                  </button>
+                  <input ref={thumbRef} type="file" accept="image/*" className="hidden" onChange={handleThumb} />
+                </div>
               </div>
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">사용 용도</label>
