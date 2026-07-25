@@ -3,15 +3,17 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import api from '@/lib/api';
-import { Church, Event } from '@/types';
+import { Church, Event, Post } from '@/types';
 
 export default function HomePage() {
   const [churches, setChurches] = useState<Church[]>([]);
   const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
+  const [popularPosts, setPopularPosts] = useState<Post[]>([]);
 
   useEffect(() => {
     api.get('/churches').then(r => setChurches(r.data.data?.slice(0, 4) ?? [])).catch(() => {});
     api.get('/events?size=3').then(r => setUpcomingEvents(r.data.data?.content ?? [])).catch(() => {});
+    api.get('/posts?size=5&sort=likeCount,desc').then(r => setPopularPosts(r.data.data?.content ?? [])).catch(() => {});
   }, []);
 
   return (
@@ -90,6 +92,38 @@ export default function HomePage() {
                 <div className="text-xs text-gray-500 mt-1">
                   📍 {e.location} · {new Date(e.startDate).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })}
                 </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* 오늘의 인기글 */}
+      {popularPosts.length > 0 && (
+        <section className="max-w-5xl mx-auto py-8 px-4">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-bold text-gray-800">오늘의 인기글 🔥</h2>
+            <Link href="/community" className="text-sm text-[#003478] hover:underline">더 보기 →</Link>
+          </div>
+          <div className="bg-white rounded-xl border border-[#EDEFF1] divide-y divide-[#EDEFF1]">
+            {popularPosts.map((post, idx) => (
+              <Link key={post.id} href={`/posts/${post.id}`}
+                className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
+                <span className={`text-lg font-bold w-6 text-center shrink-0 ${idx === 0 ? 'text-[#003478]' : 'text-gray-300'}`}>
+                  {idx + 1}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1 min-w-0">
+                    <span className="text-sm font-medium text-gray-800 truncate">{post.title}</span>
+                    {post.commentCount > 0 && (
+                      <span className="text-xs text-[#003478] font-bold shrink-0">[{post.commentCount}]</span>
+                    )}
+                  </div>
+                  <div className="text-xs text-gray-400 mt-0.5">{post.authorNickname} · {post.categoryName}</div>
+                </div>
+                {post.likeCount > 0 && (
+                  <span className="text-xs text-gray-400 shrink-0">❤ {post.likeCount}</span>
+                )}
               </Link>
             ))}
           </div>

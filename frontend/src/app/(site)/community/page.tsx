@@ -78,11 +78,16 @@ export default function CommunityPage() {
               <Link key={post.id} href={`/posts/${post.id}`}
                 className="flex items-center justify-between bg-white rounded-xl border border-[#EDEFF1] px-4 py-3 hover:border-[#003478] transition-colors">
                 <div className="min-w-0 flex-1 mr-2">
-                  <div className="text-sm font-medium text-gray-800 truncate">{post.title}</div>
+                  <div className="flex items-center gap-1 min-w-0">
+                    <span className="text-sm font-medium text-gray-800 truncate">{post.title}</span>
+                    {post.commentCount > 0 && (
+                      <span className="text-xs text-[#003478] font-bold shrink-0">[{post.commentCount}]</span>
+                    )}
+                  </div>
                   <div className="text-xs text-gray-400 mt-0.5">{post.authorNickname} · {new Date(post.createdAt).toLocaleDateString()}</div>
                 </div>
-                {post.commentCount > 0 && (
-                  <span className="text-xs text-gray-400 shrink-0">[{post.commentCount}]</span>
+                {post.likeCount > 0 && (
+                  <span className="text-xs text-gray-400 shrink-0">❤ {post.likeCount}</span>
                 )}
               </Link>
             ))}
