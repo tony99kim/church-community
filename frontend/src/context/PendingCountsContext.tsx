@@ -8,9 +8,10 @@ interface PendingCounts {
   itemRentals: number;
   welcomeKits: number;
   faithQuestions: number;
+  reports: number;
 }
 
-const ZERO: PendingCounts = { spaceRentals: 0, itemRentals: 0, welcomeKits: 0, faithQuestions: 0 };
+const ZERO: PendingCounts = { spaceRentals: 0, itemRentals: 0, welcomeKits: 0, faithQuestions: 0, reports: 0 };
 
 const Ctx = createContext<{ counts: PendingCounts; refresh: () => void }>({ counts: ZERO, refresh: () => {} });
 
@@ -23,8 +24,9 @@ export function PendingCountsProvider({ children }: { children: React.ReactNode 
       api.get('/admin/items/rentals').then(r => (r.data.data ?? []).filter((x: { status: string }) => x.status === 'PENDING').length).catch(() => 0),
       api.get('/admin/welcome/kits').then(r => (r.data.data ?? []).filter((x: { processed: boolean }) => !x.processed).length).catch(() => 0),
       api.get('/faith/admin/questions').then(r => (r.data.data ?? []).filter((x: { answers: unknown[] }) => x.answers.length === 0).length).catch(() => 0),
-    ]).then(([spaceRentals, itemRentals, welcomeKits, faithQuestions]) => {
-      setCounts({ spaceRentals, itemRentals, welcomeKits, faithQuestions });
+      api.get('/admin/reports', { params: { status: 'PENDING', size: 1 } }).then(r => r.data.data?.totalElements ?? 0).catch(() => 0),
+    ]).then(([spaceRentals, itemRentals, welcomeKits, faithQuestions, reports]) => {
+      setCounts({ spaceRentals, itemRentals, welcomeKits, faithQuestions, reports });
     });
   }, []);
 

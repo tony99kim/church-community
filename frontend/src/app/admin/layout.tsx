@@ -34,7 +34,7 @@ const navEntries: NavEntry[] = [
   { href: '/admin/welcome-kits', label: '웰컴 키트 신청', icon: '🎁', countKey: 'welcomeKits' },
   { href: '/admin/faith', label: '신앙 Q&A', icon: '✝️', countKey: 'faithQuestions' },
   { href: '/admin/service', label: '지역섬김 관리', icon: '🤝' },
-  { href: '/admin/reports', label: '신고 관리', icon: '🚨' },
+  { href: '/admin/reports', label: '신고 관리', icon: '🚨', countKey: 'reports' },
 ];
 
 function NavLink({ item, indent = false }: { item: NavLeaf; indent?: boolean }) {
