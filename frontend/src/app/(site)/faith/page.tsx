@@ -12,10 +12,10 @@ export default function FaithPage() {
   const [questions, setQuestions] = useState<FaithQuestion[]>([]);
   const [prayers, setPrayers] = useState<PrayerRequest[]>([]);
   const [qForm, setQForm] = useState({ content: '', anonymous: false, publicVisible: true });
-  const [pForm, setPForm] = useState({ content: '', publicVisible: true });
+  const [pForm, setPForm] = useState({ content: '', publicVisible: false });
   // qVisibility: 'public'(실명공개) | 'anonymous'(익명공개)
-  const [qVisibility, setQVisibility] = useState<'public' | 'anonymous'>('public');
-  const [pPublic, setPPublic] = useState(true);
+  const [qVisibility, setQVisibility] = useState<'public' | 'anonymous'>('anonymous');
+  const [pPublic, setPPublic] = useState(false);
   const [loading, setLoading] = useState(true);
   const { isLoggedIn } = useAuthStore();
 
