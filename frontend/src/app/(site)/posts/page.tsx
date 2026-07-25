@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import Sidebar from '@/components/Sidebar';
 import Pagination from '@/components/Pagination';
@@ -53,11 +53,27 @@ function PostsContent() {
 
   const activeCategoryName = categories.find((c) => String(c.id) === categoryId)?.name;
 
+  const router = useRouter();
+
   return (
     <div className="flex gap-6 max-w-6xl mx-auto px-4 py-5">
       <Sidebar activeCategoryId={categoryId} />
 
       <div className="flex-1 min-w-0">
+        {/* 모바일 카테고리 셀렉터 (사이드바 대체) */}
+        <div className="lg:hidden mb-3">
+          <select
+            value={categoryId ?? ''}
+            onChange={(e) => router.push(e.target.value ? `/posts?categoryId=${e.target.value}` : '/posts')}
+            className="w-full border border-[#EDEFF1] rounded-xl px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#003478]"
+          >
+            <option value="">전체 게시판</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>{cat.name}</option>
+            ))}
+          </select>
+        </div>
+
         <div className="flex items-center justify-between mb-3">
           <div>
             <h1 className="text-lg font-bold text-gray-900">

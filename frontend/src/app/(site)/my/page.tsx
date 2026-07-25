@@ -193,12 +193,12 @@ export default function MyPage() {
         </div>
 
         {/* 탭 */}
-        <div className="flex flex-wrap gap-1 bg-white rounded-xl border border-gray-200 p-1 mb-5">
+        <div className="flex overflow-x-auto gap-1 bg-white rounded-xl border border-gray-200 p-1 mb-5 scrollbar-hide">
           {TABS.map((t) => (
             <button
               key={t.key}
               onClick={() => setTab(t.key)}
-              className={`flex-1 min-w-[80px] py-2 rounded-lg text-sm font-medium transition ${tab === t.key ? 'bg-[#003478] text-white' : 'text-gray-600 hover:bg-gray-50'}`}
+              className={`shrink-0 px-3 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap ${tab === t.key ? 'bg-[#003478] text-white' : 'text-gray-600 hover:bg-gray-50'}`}
             >
               {t.label}
             </button>

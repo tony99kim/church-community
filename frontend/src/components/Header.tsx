@@ -24,7 +24,7 @@ export default function Header() {
   const [unreadCount, setUnreadCount] = useState(0);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const notiRef = useRef<HTMLDivElement>(null);
-  const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
+  const isAdmin = user?.role === 'SUPER_ADMIN' || user?.role === 'CHURCH_MANAGER' || user?.role === 'PASTOR';
 
   const fetchUnread = useCallback(() => {
     if (!isLoggedIn) return;
@@ -125,7 +125,7 @@ export default function Header() {
               </button>
 
               {notiOpen && (
-                <div className="absolute right-0 top-9 w-80 bg-white border border-[#EDEFF1] rounded-xl shadow-lg z-50 overflow-hidden">
+                <div className="absolute right-0 top-9 w-80 max-w-[calc(100vw-1rem)] bg-white border border-[#EDEFF1] rounded-xl shadow-lg z-50 overflow-hidden">
                   <div className="flex items-center justify-between px-4 py-3 border-b border-[#EDEFF1]">
                     <span className="text-sm font-bold text-gray-900">알림</span>
                     {unreadCount > 0 && (

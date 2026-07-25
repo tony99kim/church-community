@@ -100,7 +100,11 @@ function SidebarNav() {
 
 function AdminLayoutInner({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
   const { user, isLoggedIn, setUser, logout } = useAuthStore();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => { setSidebarOpen(false); }, [pathname]);
 
   useEffect(() => {
     const token = localStorage.getItem('accessToken') ?? sessionStorage.getItem('accessToken');
@@ -129,40 +133,71 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
     PASTOR: '목사/전도사',
   };
 
+  const SidebarContent = (
+    <aside className="w-60 bg-[#003478] text-white flex flex-col h-full">
+      <div className="px-5 py-6 border-b border-blue-900">
+        <Link href="/" className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
+            <span className="text-[#003478] text-sm font-bold">C</span>
+          </div>
+          <div>
+            <div className="text-sm font-bold leading-tight">ChurchHub</div>
+            <div className="text-xs text-blue-300 leading-tight">관리자</div>
+          </div>
+        </Link>
+      </div>
+
+      <SidebarNav />
+
+      <div className="px-5 py-4 border-t border-blue-900 shrink-0">
+        <div className="text-xs text-blue-300 mb-0.5">{user?.nickname}</div>
+        <div className="text-xs text-blue-400 mb-3">{roleLabel[user?.role ?? ''] ?? user?.role}</div>
+        <div className="flex gap-2">
+          <Link href="/" className="flex-1 text-center text-xs text-blue-300 hover:text-white border border-blue-700 rounded-lg py-1.5 transition">
+            사이트
+          </Link>
+          <button onClick={handleLogout} className="flex-1 text-xs text-blue-300 hover:text-white border border-blue-700 rounded-lg py-1.5 transition">
+            로그아웃
+          </button>
+        </div>
+      </div>
+    </aside>
+  );
+
   return (
     <div className="flex min-h-screen bg-gray-100">
-      <aside className="w-60 bg-[#003478] text-white flex flex-col shrink-0">
-        <div className="px-5 py-6 border-b border-blue-900">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
-              <span className="text-[#003478] text-sm font-bold">C</span>
-            </div>
-            <div>
-              <div className="text-sm font-bold leading-tight">ChurchHub</div>
-              <div className="text-xs text-blue-300 leading-tight">관리자</div>
-            </div>
-          </Link>
-        </div>
+      {/* 데스크탑 사이드바 */}
+      <div className="hidden md:flex shrink-0">
+        {SidebarContent}
+      </div>
 
-        <SidebarNav />
-
-        <div className="px-5 py-4 border-t border-blue-900 shrink-0">
-          <div className="text-xs text-blue-300 mb-0.5">{user?.nickname}</div>
-          <div className="text-xs text-blue-400 mb-3">{roleLabel[user?.role ?? ''] ?? user?.role}</div>
-          <div className="flex gap-2">
-            <Link href="/" className="flex-1 text-center text-xs text-blue-300 hover:text-white border border-blue-700 rounded-lg py-1.5 transition">
-              사이트
-            </Link>
-            <button onClick={handleLogout} className="flex-1 text-xs text-blue-300 hover:text-white border border-blue-700 rounded-lg py-1.5 transition">
-              로그아웃
-            </button>
+      {/* 모바일 사이드바 오버레이 */}
+      {sidebarOpen && (
+        <div className="md:hidden fixed inset-0 z-50 flex">
+          <div className="flex shrink-0">
+            {SidebarContent}
           </div>
+          <div className="flex-1 bg-black/40" onClick={() => setSidebarOpen(false)} />
         </div>
-      </aside>
+      )}
 
-      <main className="flex-1 overflow-auto">
-        {children}
-      </main>
+      <div className="flex-1 flex flex-col min-w-0 overflow-auto">
+        {/* 모바일 상단 바 */}
+        <div className="md:hidden flex items-center gap-3 px-4 py-3 bg-[#003478] text-white shrink-0">
+          <button onClick={() => setSidebarOpen(true)} className="p-1">
+            <div className="space-y-1">
+              <div className="w-5 h-0.5 bg-white" />
+              <div className="w-5 h-0.5 bg-white" />
+              <div className="w-5 h-0.5 bg-white" />
+            </div>
+          </button>
+          <span className="text-sm font-bold">ChurchHub 관리자</span>
+        </div>
+
+        <main className="flex-1 overflow-auto">
+          {children}
+        </main>
+      </div>
     </div>
   );
 }
