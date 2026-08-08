@@ -1,13 +1,14 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useRef, useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
 import type { Conversation, DmMessage } from '@/types';
 
-export default function MessagesPage() {
+function MessagesContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, isLoggedIn, hydrated } = useAuthStore();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -24,6 +25,13 @@ export default function MessagesPage() {
       .then(r => setConversations(r.data.data ?? []))
       .finally(() => setLoading(false));
   }, [hydrated, isLoggedIn]);
+
+  useEffect(() => {
+    const convId = searchParams.get('convId');
+    if (convId && conversations.length > 0 && !selectedId) {
+      openConversation(Number(convId));
+    }
+  }, [conversations, searchParams]);
 
   const openConversation = async (convId: number) => {
     setSelectedId(convId);
@@ -60,6 +68,7 @@ export default function MessagesPage() {
   }
 
   return (
+    <>
     <main className="min-h-screen bg-[#f4f6f8]">
       <div className="max-w-4xl mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold text-[#003478] mb-6">메시지 💬</h1>
@@ -170,5 +179,14 @@ export default function MessagesPage() {
         </div>
       </div>
     </main>
+    </>
+  );
+}
+
+export default function MessagesPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-gray-400">불러오는 중...</div>}>
+      <MessagesContent />
+    </Suspense>
   );
 }

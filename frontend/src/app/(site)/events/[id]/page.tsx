@@ -22,6 +22,7 @@ export default function EventDetailPage() {
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [toast, setToast] = useState('');
 
   const fetchEvent = () =>
     api.get(`/events/${id}`).then((r) => setEvent(r.data.data)).finally(() => setLoading(false));
@@ -34,13 +35,17 @@ export default function EventDetailPage() {
     try {
       if (event?.joined) {
         await api.delete(`/events/${id}/join`);
+        setToast('참여 신청이 취소되었습니다.');
       } else {
         await api.post(`/events/${id}/join`);
+        setToast('참여 신청이 완료되었습니다! 🎉');
       }
       await fetchEvent();
+      setTimeout(() => setToast(''), 2500);
     } catch (err: unknown) {
       const e = err as { response?: { data?: { message?: string } } };
-      alert(e.response?.data?.message || '처리에 실패했습니다.');
+      setToast(e.response?.data?.message || '처리에 실패했습니다.');
+      setTimeout(() => setToast(''), 2500);
     } finally {
       setActionLoading(false);
     }
@@ -61,6 +66,11 @@ export default function EventDetailPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-6">
+      {toast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white text-sm px-5 py-2.5 rounded-full shadow-lg">
+          {toast}
+        </div>
+      )}
       <Link href="/events" className="inline-flex items-center gap-1 text-xs text-gray-400 hover:text-[#003478] mb-4 transition">
         ← 행사 목록
       </Link>
@@ -95,9 +105,15 @@ export default function EventDetailPage() {
               </span>
             </div>
             {event.maxParticipants !== null && (
-              <div className="flex items-center gap-2 text-gray-600">
+              <div className="flex items-center gap-2 text-gray-600 sm:col-span-2">
                 <span>👥</span>
-                <span>{event.currentParticipants} / {event.maxParticipants}명</span>
+                <div className="flex-1">
+                  <span>{event.currentParticipants} / {event.maxParticipants}명</span>
+                  <div className="w-full bg-gray-100 rounded-full h-1.5 mt-1.5">
+                    <div className="bg-[#003478] h-1.5 rounded-full transition-all"
+                      style={{ width: `${Math.min(100, Math.round(event.currentParticipants / event.maxParticipants * 100))}%` }} />
+                  </div>
+                </div>
               </div>
             )}
           </div>

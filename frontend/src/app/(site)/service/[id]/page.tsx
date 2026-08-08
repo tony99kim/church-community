@@ -29,6 +29,7 @@ export default function ServiceDetailPage() {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
+  const [toast, setToast] = useState('');
 
   const fetchEvent = () =>
     api.get(`/events/${id}`)
@@ -44,14 +45,18 @@ export default function ServiceDetailPage() {
     try {
       if (event?.joined) {
         await api.delete(`/events/${id}/join`);
+        setToast('참여 신청이 취소되었습니다.');
       } else {
         await api.post(`/events/${id}/join`);
+        setToast('봉사 신청이 완료되었습니다! 🎉');
       }
       setLoading(true);
       await fetchEvent();
+      setTimeout(() => setToast(''), 2500);
     } catch (err: unknown) {
       const e = err as { response?: { data?: { message?: string } } };
-      alert(e.response?.data?.message || '처리에 실패했습니다.');
+      setToast(e.response?.data?.message || '처리에 실패했습니다.');
+      setTimeout(() => setToast(''), 2500);
     } finally {
       setActionLoading(false);
     }
@@ -87,6 +92,11 @@ export default function ServiceDetailPage() {
   return (
     <main className="min-h-screen bg-[#f4f6f8] py-10 px-4">
       <div className="max-w-2xl mx-auto">
+        {toast && (
+          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white text-sm px-5 py-2.5 rounded-full shadow-lg">
+            {toast}
+          </div>
+        )}
         <button onClick={() => router.push('/service')} className="text-sm text-gray-400 hover:text-gray-600 mb-6 flex items-center gap-1">
           ← 봉사 목록
         </button>
@@ -132,11 +142,15 @@ export default function ServiceDetailPage() {
               {event.maxParticipants !== null && (
                 <div className="flex items-start gap-3">
                   <span className="text-lg shrink-0">👥</span>
-                  <div>
+                  <div className="flex-1">
                     <div className="text-xs text-gray-400 font-medium mb-0.5">신청 현황</div>
-                    <div className="text-gray-800">
+                    <div className="text-gray-800 flex items-center gap-2">
                       {event.currentParticipants} / {event.maxParticipants}명
-                      {isFull && <span className="ml-2 text-xs text-red-400 font-semibold">마감</span>}
+                      {isFull && <span className="text-xs text-red-400 font-semibold">마감</span>}
+                    </div>
+                    <div className="w-full bg-gray-100 rounded-full h-1.5 mt-1.5">
+                      <div className="bg-[#003478] h-1.5 rounded-full transition-all"
+                        style={{ width: `${Math.min(100, Math.round(event.currentParticipants / event.maxParticipants * 100))}%` }} />
                     </div>
                   </div>
                 </div>

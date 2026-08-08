@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
@@ -10,6 +10,14 @@ export default function WelcomePage() {
   const [form, setForm] = useState({ name: '', phone: '', address: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [existingKit, setExistingKit] = useState<{ processed: boolean } | null>(null);
+
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    api.get('/welcome/kits/my').then(r => {
+      if (r.data.data) setExistingKit(r.data.data);
+    }).catch(() => {});
+  }, [isLoggedIn]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,9 +50,16 @@ export default function WelcomePage() {
                   로그인하기
                 </Link>
               </div>
-            ) : submitted ? (
-              <div className="text-center py-6 text-green-600 font-medium">
-                신청이 완료되었습니다! 담당자가 연락드릴게요 😊
+            ) : existingKit || submitted ? (
+              <div className="text-center py-6">
+                <div className="text-2xl mb-2">✅</div>
+                <p className="text-green-700 font-semibold mb-1">신청이 완료되었습니다!</p>
+                <p className="text-sm text-gray-500 mb-4">
+                  처리 상태: {(existingKit?.processed || submitted) ? (existingKit?.processed ? '처리 완료' : '처리 중') : '처리 중'}
+                </p>
+                <Link href="/my" className="inline-block px-5 py-2 border border-[#003478] text-[#003478] rounded-lg text-sm font-medium hover:bg-blue-50 transition-colors">
+                  마이페이지에서 확인하기 →
+                </Link>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-3">
@@ -112,10 +127,10 @@ export default function WelcomePage() {
           <section className="bg-blue-50 rounded-2xl border border-blue-200 p-6">
             <h2 className="text-lg font-bold text-gray-800 mb-2">⛪ 교회를 찾고 계신가요?</h2>
             <p className="text-sm text-gray-600 mb-4">부담 없이 문의해 주세요. 가까운 교회와 청년 모임을 안내해 드릴게요.</p>
-            <a href="https://discord.gg/YOUR_INVITE_CODE" target="_blank" rel="noopener noreferrer"
+            <Link href="/churches"
               className="inline-block px-5 py-2.5 bg-[#003478] text-white rounded-lg text-sm font-medium hover:bg-blue-900 transition-colors">
-              Discord로 문의하기
-            </a>
+              교회 목록 보기 →
+            </Link>
           </section>
         </div>
       </div>

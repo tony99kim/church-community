@@ -8,6 +8,8 @@ import { Church } from '@/types';
 export default function ChurchesPage() {
   const [churches, setChurches] = useState<Church[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [youthOnly, setYouthOnly] = useState(false);
 
   useEffect(() => {
     api.get('/churches')
@@ -15,24 +17,42 @@ export default function ChurchesPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  const filtered = churches.filter(c => {
+    const matchSearch = !search || c.name.includes(search) || c.address.includes(search);
+    const matchYouth = !youthOnly || c.hasYouthGroup;
+    return matchSearch && matchYouth;
+  });
+
   if (loading) return <div className="min-h-screen flex items-center justify-center text-gray-400">불러오는 중...</div>;
 
   return (
     <main className="min-h-screen bg-[#f4f6f8] py-10 px-4">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-2xl font-bold text-[#003478] mb-2">함께하는 교회 ⛪</h1>
-        <p className="text-gray-600 mb-8">염리동 교동협의회 소속 교회들을 소개합니다.</p>
+        <p className="text-gray-600 mb-4">염리동 교동협의회 소속 교회들을 소개합니다.</p>
 
-        {churches.length === 0 ? (
-          <div className="text-center py-20 text-gray-400">등록된 교회가 없습니다.</div>
+        <div className="flex gap-2 mb-6">
+          <input value={search} onChange={e => setSearch(e.target.value)}
+            placeholder="교회 이름, 주소 검색..."
+            className="flex-1 px-4 py-2 border border-[#EDEFF1] rounded-lg text-sm focus:outline-none focus:border-[#003478]" />
+          <button onClick={() => setYouthOnly(v => !v)}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${youthOnly ? 'bg-[#003478] text-white' : 'bg-white border border-[#EDEFF1] text-gray-600'}`}>
+            청년부 있음
+          </button>
+        </div>
+
+        {filtered.length === 0 ? (
+          <div className="text-center py-20 text-gray-400">검색 결과가 없습니다.</div>
         ) : (
           <div className="grid md:grid-cols-2 gap-4">
-            {churches.map(church => (
+            {filtered.map(church => (
               <Link key={church.id} href={`/churches/${church.id}`}
                 className="bg-white rounded-2xl border border-[#EDEFF1] hover:border-[#003478] hover:shadow-sm transition-all block">
-                {church.imageUrl && (
+                {church.imageUrl ? (
                   <img src={church.imageUrl} alt={church.name}
                     className="w-full h-40 object-cover rounded-t-2xl" />
+                ) : (
+                  <div className="w-full h-24 bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center text-4xl rounded-t-2xl">⛪</div>
                 )}
                 <div className="p-5">
                   <div className="flex items-start justify-between mb-3">

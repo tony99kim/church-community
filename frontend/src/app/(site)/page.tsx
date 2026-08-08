@@ -4,22 +4,32 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import { Church, Event, Post } from '@/types';
+import { useAuthStore } from '@/store/authStore';
 
 export default function HomePage() {
   const [churches, setChurches] = useState<Church[]>([]);
   const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
   const [popularPosts, setPopularPosts] = useState<Post[]>([]);
+  const [welcomeEvent, setWelcomeEvent] = useState<Event | null>(null);
+  const [loaded, setLoaded] = useState(false);
+  const { user, isLoggedIn } = useAuthStore();
 
   useEffect(() => {
-    api.get('/churches').then(r => setChurches(r.data.data?.slice(0, 4) ?? [])).catch(() => {});
-    api.get('/events?size=3').then(r => setUpcomingEvents(r.data.data?.content ?? [])).catch(() => {});
-    api.get('/posts?size=5&sort=likeCount,desc').then(r => setPopularPosts(r.data.data?.content ?? [])).catch(() => {});
+    Promise.all([
+      api.get('/churches').then(r => setChurches(r.data.data?.slice(0, 4) ?? [])).catch(() => {}),
+      api.get('/events?size=3&sort=startDate,asc').then(r => setUpcomingEvents(r.data.data?.content ?? [])).catch(() => {}),
+      api.get('/posts?size=5&sort=likeCount,desc').then(r => setPopularPosts(r.data.data?.content ?? [])).catch(() => {}),
+      api.get('/events?category=WELCOME_TABLE&size=1&sort=startDate,asc').then(r => setWelcomeEvent(r.data.data?.content?.[0] ?? null)).catch(() => {}),
+    ]).finally(() => setLoaded(true));
   }, []);
 
   return (
     <main className="min-h-screen bg-[#f4f6f8]">
       {/* 히어로 */}
       <section className="bg-[#003478] text-white py-20 px-4 text-center">
+        {isLoggedIn && user ? (
+          <p className="text-blue-300 text-sm mb-2">안녕하세요, {user.nickname}님 👋</p>
+        ) : null}
         <h1 className="text-3xl md:text-5xl font-bold mb-4">염리동 청년 커뮤니티</h1>
         <p className="text-lg md:text-xl text-blue-200 mb-8">
           염리동 12개 교회 청년들이 함께 만들어가는 따뜻한 동네 공동체
@@ -34,19 +44,23 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 웰컴 테이블 강조 배너 */}
-      <section className="bg-amber-50 border-b border-amber-200 py-6 px-4">
-        <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div>
-            <p className="text-sm text-amber-600 font-semibold mb-1">이번 달 웰컴 테이블</p>
-            <h2 className="text-xl font-bold text-gray-800">혼자 먹는 밥이 익숙한 청년들의 식탁</h2>
-            <p className="text-gray-600 text-sm mt-1">함께 요리하고, 먹고, 이야기해요 — 월 1회 소규모 공동식사</p>
+      {/* 웰컴 테이블 강조 배너 — 실제 행사 있을 때만 표시 */}
+      {welcomeEvent && (
+        <section className="bg-amber-50 border-b border-amber-200 py-6 px-4">
+          <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            <div>
+              <p className="text-sm text-amber-600 font-semibold mb-1">🍽 웰컴 테이블</p>
+              <h2 className="text-xl font-bold text-gray-800">{welcomeEvent.title}</h2>
+              <p className="text-gray-600 text-sm mt-1">
+                📍 {welcomeEvent.location} · {new Date(welcomeEvent.startDate).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })}
+              </p>
+            </div>
+            <Link href={`/events/${welcomeEvent.id}`} className="shrink-0 px-5 py-2.5 bg-amber-500 text-white rounded-lg font-medium hover:bg-amber-600 transition-colors">
+              참가 신청하기
+            </Link>
           </div>
-          <Link href="/events?category=WELCOME_TABLE" className="shrink-0 px-5 py-2.5 bg-amber-500 text-white rounded-lg font-medium hover:bg-amber-600 transition-colors">
-            참가 신청하기
-          </Link>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* 빠른 메뉴 */}
       <section className="max-w-5xl mx-auto py-12 px-4">
@@ -73,12 +87,22 @@ export default function HomePage() {
       </section>
 
       {/* 다가오는 행사 */}
-      {upcomingEvents.length > 0 && (
-        <section className="max-w-5xl mx-auto py-8 px-4">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-gray-800">다가오는 행사</h2>
-            <Link href="/events" className="text-sm text-[#003478] hover:underline">전체 보기 →</Link>
+      <section className="max-w-5xl mx-auto py-8 px-4">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold text-gray-800">다가오는 행사</h2>
+          <Link href="/events" className="text-sm text-[#003478] hover:underline">전체 보기 →</Link>
+        </div>
+        {!loaded ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="bg-white rounded-xl border border-[#EDEFF1] p-4 animate-pulse">
+                <div className="h-28 bg-gray-100 rounded-lg mb-3" />
+                <div className="h-4 bg-gray-100 rounded w-2/3 mb-2" />
+                <div className="h-3 bg-gray-50 rounded w-1/2" />
+              </div>
+            ))}
           </div>
+        ) : upcomingEvents.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {upcomingEvents.map(e => (
               <Link key={e.id} href={`/events/${e.id}`} className="p-4 bg-white rounded-xl border border-[#EDEFF1] hover:border-[#003478] hover:shadow-sm transition-all">
@@ -95,14 +119,14 @@ export default function HomePage() {
               </Link>
             ))}
           </div>
-        </section>
-      )}
+        ) : null}
+      </section>
 
-      {/* 오늘의 인기글 */}
+      {/* 인기글 */}
       {popularPosts.length > 0 && (
         <section className="max-w-5xl mx-auto py-8 px-4">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-gray-800">오늘의 인기글 🔥</h2>
+            <h2 className="text-xl font-bold text-gray-800">인기글 🔥</h2>
             <Link href="/community" className="text-sm text-[#003478] hover:underline">더 보기 →</Link>
           </div>
           <div className="bg-white rounded-xl border border-[#EDEFF1] divide-y divide-[#EDEFF1]">

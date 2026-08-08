@@ -47,12 +47,16 @@ export default function ItemsPage() {
         ) : (
           <div className="grid md:grid-cols-3 gap-4">
             {filtered.map(item => (
-              <div key={item.id} className="bg-white rounded-2xl border border-[#EDEFF1] p-5">
+              <div key={item.id} className={`bg-white rounded-2xl border border-[#EDEFF1] p-5 ${item.availableQuantity === 0 ? 'opacity-60' : ''}`}>
                 <div className="text-xs text-gray-400 mb-1">{CATEGORY_LABELS[item.category]}</div>
                 <h2 className="text-base font-bold text-gray-800 mb-2">{item.name}</h2>
                 {item.description && <p className="text-xs text-gray-500 mb-3">{item.description}</p>}
-                <div className="text-xs text-gray-500 mb-4">
+                <div className="text-xs text-gray-500 mb-1">
                   재고: {item.availableQuantity} / {item.totalQuantity}개
+                </div>
+                <div className="w-full bg-gray-100 rounded-full h-1.5 mb-4">
+                  <div className="bg-[#003478] h-1.5 rounded-full transition-all"
+                    style={{ width: `${item.totalQuantity > 0 ? Math.round(item.availableQuantity / item.totalQuantity * 100) : 0}%` }} />
                 </div>
                 {isLoggedIn && item.availableQuantity > 0 ? (
                   <Link href={`/items/${item.id}`}

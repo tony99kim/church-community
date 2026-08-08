@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import api from '@/lib/api';
 import type { Event, PageResponse } from '@/types';
+import Pagination from '@/components/Pagination';
+import { useAuthStore } from '@/store/authStore';
 
 const STATUS_LABEL: Record<string, string> = {
   UPCOMING: '예정',
@@ -28,21 +30,27 @@ const EVENT_CATEGORIES = [
 ];
 
 export default function EventsPage() {
+  const { isLoggedIn } = useAuthStore();
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState('');
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+
+  useEffect(() => { setPage(0); }, [category]);
 
   useEffect(() => {
     setLoading(true);
-    const params: Record<string, string | number> = { page: 0, size: 20, sort: 'startDate,asc' };
+    const params: Record<string, string | number> = { page, size: 12, sort: 'startDate,asc' };
     if (category) params.category = category;
     api.get('/events', { params })
       .then((r) => {
         const data: PageResponse<Event> = r.data.data;
         setEvents(data.content.filter((e: Event & { category?: string }) => e.category !== 'SERVICE'));
+        setTotalPages(data.totalPages);
       })
       .finally(() => setLoading(false));
-  }, [category]);
+  }, [category, page]);
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6">
@@ -90,10 +98,13 @@ export default function EventsPage() {
                 </div>
               )}
               <div className="p-5">
-                <div className="flex items-center gap-2 mb-2">
+                <div className="flex items-center gap-2 mb-2 flex-wrap">
                   <span className={`text-xs px-2 py-0.5 rounded border font-medium ${STATUS_COLOR[event.status]}`}>
                     {STATUS_LABEL[event.status]}
                   </span>
+                  {isLoggedIn && event.joined && (
+                    <span className="text-xs px-2 py-0.5 rounded border font-medium bg-green-50 text-green-700 border-green-200">✓ 신청함</span>
+                  )}
                   <h2 className="text-sm font-bold text-gray-900 truncate">{event.title}</h2>
                 </div>
                 <div className="flex items-center gap-3 text-xs text-gray-400 flex-wrap">
@@ -110,6 +121,12 @@ export default function EventsPage() {
               </div>
             </Link>
           ))}
+        </div>
+      )}
+
+      {totalPages > 1 && (
+        <div className="mt-6">
+          <Pagination page={page} totalPages={totalPages} onChange={(p) => { setPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />
         </div>
       )}
     </div>

@@ -1,13 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
+import Link from 'next/link';
 import api from '@/lib/api';
 import { Church } from '@/types';
 
 export default function ChurchDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const router = useRouter();
   const [church, setChurch] = useState<Church | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -25,7 +25,7 @@ export default function ChurchDetailPage() {
       <main className="min-h-screen bg-[#f4f6f8] flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-400 mb-4">교회 정보를 찾을 수 없습니다.</p>
-          <button onClick={() => router.back()} className="text-sm text-[#003478] hover:underline">← 돌아가기</button>
+          <Link href="/churches" className="text-sm text-[#003478] hover:underline">← 교회 목록</Link>
         </div>
       </main>
     );
@@ -34,9 +34,9 @@ export default function ChurchDetailPage() {
   return (
     <main className="min-h-screen bg-[#f4f6f8] py-10 px-4">
       <div className="max-w-2xl mx-auto">
-        <button onClick={() => router.back()} className="text-sm text-gray-400 hover:text-gray-600 mb-6 flex items-center gap-1">
+        <Link href="/churches" className="text-sm text-gray-400 hover:text-gray-600 mb-6 flex items-center gap-1">
           ← 교회 목록
-        </button>
+        </Link>
 
         <div className="bg-white rounded-2xl border border-[#EDEFF1] overflow-hidden">
           {church.imageUrl && (

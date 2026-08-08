@@ -222,6 +222,15 @@ export default function MyPage() {
     }
   };
 
+  const tabCount: Partial<Record<Tab, number>> = {
+    posts: posts.length,
+    spaceRentals: spaceRentals.length,
+    itemRentals: itemRentals.length,
+    faithQuestions: faithQuestions.length,
+    prayers: myPrayers.length,
+    welcomeKits: welcomeKits.length,
+  };
+
   const TABS: { key: Tab; label: string }[] = [
     { key: 'info', label: '내 정보' },
     { key: 'posts', label: '작성글' },
@@ -258,9 +267,14 @@ export default function MyPage() {
             <button
               key={t.key}
               onClick={() => setTab(t.key)}
-              className={`shrink-0 px-3 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap ${tab === t.key ? 'bg-[#003478] text-white' : 'text-gray-600 hover:bg-gray-50'}`}
+              className={`shrink-0 px-3 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap flex items-center gap-1 ${tab === t.key ? 'bg-[#003478] text-white' : 'text-gray-600 hover:bg-gray-50'}`}
             >
               {t.label}
+              {tabCount[t.key] !== undefined && tabCount[t.key]! > 0 && (
+                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${tab === t.key ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500'}`}>
+                  {tabCount[t.key]}
+                </span>
+              )}
             </button>
           ))}
         </div>

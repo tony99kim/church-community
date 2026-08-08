@@ -22,6 +22,7 @@ const STATUS_COLOR: Record<string, string> = {
 export default function ServicePage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeOnly, setActiveOnly] = useState(false);
 
   useEffect(() => {
     api.get('/events', { params: { category: 'SERVICE', size: 20, sort: 'startDate,asc' } })
@@ -35,8 +36,16 @@ export default function ServicePage() {
   return (
     <main className="min-h-screen bg-[#f4f6f8] py-10 px-4">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-2xl font-bold text-[#003478] mb-2">지역 섬김 🤝</h1>
-        <p className="text-gray-600 mb-8">염리동에서 함께 섬기는 봉사 기회들을 모아뒀어요. 참여 신청하고 이웃과 함께해요.</p>
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-[#003478]">지역 섬김 🤝</h1>
+            <p className="text-gray-600 text-sm mt-1">염리동에서 함께 섬기는 봉사 기회들을 모아뒀어요.</p>
+          </div>
+          <button onClick={() => setActiveOnly(v => !v)}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${activeOnly ? 'bg-[#003478] text-white' : 'bg-white border border-[#EDEFF1] text-gray-600'}`}>
+            모집 중만 보기
+          </button>
+        </div>
 
         {loading ? (
           <div className="grid md:grid-cols-2 gap-4">
@@ -50,18 +59,21 @@ export default function ServicePage() {
               </div>
             ))}
           </div>
-        ) : events.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-[#EDEFF1] py-20 text-center">
-            <div className="text-4xl mb-3">🤝</div>
-            <p className="text-gray-500 font-medium mb-1">현재 모집 중인 봉사가 없어요.</p>
-            <p className="text-sm text-gray-400 mb-5">봉사 소식은 커뮤니티 게시판에서도 확인할 수 있어요.</p>
-            <Link href="/community" className="inline-block text-sm text-[#003478] border border-blue-200 px-4 py-2 rounded-xl hover:bg-blue-50 transition">
-              커뮤니티 게시판 보기 →
-            </Link>
-          </div>
-        ) : (
+        ) : (() => {
+          const filtered = activeOnly ? events.filter(e => e.status === 'UPCOMING' || e.status === 'ONGOING') : events;
+          if (filtered.length === 0) return (
+            <div className="bg-white rounded-2xl border border-[#EDEFF1] py-20 text-center">
+              <div className="text-4xl mb-3">🤝</div>
+              <p className="text-gray-500 font-medium mb-1">현재 모집 중인 봉사가 없어요.</p>
+              <p className="text-sm text-gray-400 mb-5">봉사 소식은 커뮤니티 게시판에서도 확인할 수 있어요.</p>
+              <Link href="/community" className="inline-block text-sm text-[#003478] border border-blue-200 px-4 py-2 rounded-xl hover:bg-blue-50 transition">
+                커뮤니티 게시판 보기 →
+              </Link>
+            </div>
+          );
+          return (
           <div className="grid md:grid-cols-2 gap-4">
-            {events.map(event => (
+            {filtered.map(event => (
               <Link
                 key={event.id}
                 href={`/service/${event.id}`}
@@ -98,7 +110,8 @@ export default function ServicePage() {
               </Link>
             ))}
           </div>
-        )}
+          );
+        })()}
       </div>
     </main>
   );

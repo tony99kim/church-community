@@ -46,7 +46,13 @@ export default function SpacesPage() {
                 </h2>
                 <div className="grid md:grid-cols-2 gap-4">
                   {churchSpaces.map(space => (
-                    <div key={space.id} className="bg-white rounded-2xl border border-[#EDEFF1] p-5">
+                    <div key={space.id} className="bg-white rounded-2xl border border-[#EDEFF1] overflow-hidden">
+                      {space.imageUrl ? (
+                        <img src={space.imageUrl} alt={space.name} className="w-full h-28 object-cover" />
+                      ) : (
+                        <div className="w-full h-16 bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center text-2xl">🏠</div>
+                      )}
+                      <div className="p-5">
                       <div className="flex items-start justify-between mb-2">
                         <h3 className="text-base font-bold text-gray-800">{space.name}</h3>
                         <span className={`px-2 py-0.5 text-xs rounded-full ${space.available ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-500'}`}>
@@ -67,6 +73,7 @@ export default function SpacesPage() {
                           {isLoggedIn ? '날짜 선택하기' : '로그인 후 예약'}
                         </Link>
                       )}
+                      </div>
                     </div>
                   ))}
                 </div>

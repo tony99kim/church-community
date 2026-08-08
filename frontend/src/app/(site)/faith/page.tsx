@@ -115,10 +115,13 @@ export default function FaithPage() {
             )}
             {questions.map(q => (
               <div key={q.id} className="bg-white rounded-2xl border border-[#EDEFF1] p-5">
-                <div className="flex items-center gap-2 mb-2 text-xs text-gray-400">
+                <div className="flex items-center gap-2 mb-2 text-xs text-gray-400 flex-wrap">
                   <span>{q.anonymous ? '익명' : q.authorNickname}</span>
                   <span>·</span>
                   <span>{new Date(q.createdAt).toLocaleDateString()}</span>
+                  {q.answers.length === 0 && (
+                    <span className="px-1.5 py-0.5 bg-amber-50 text-amber-600 border border-amber-100 rounded text-[10px] font-medium">미답변</span>
+                  )}
                 </div>
                 <p className="text-gray-800 text-sm mb-3">{q.content}</p>
                 {q.answers.length > 0 && (
