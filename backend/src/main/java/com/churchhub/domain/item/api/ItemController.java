@@ -94,4 +94,19 @@ public class ItemController {
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         return ApiResponse.success(itemService.rejectRental(rentalId, req.getReason(), userDetails.getUserId()));
     }
+
+    @GetMapping("/items/rentals/{rentalId}/messages")
+    public ApiResponse<java.util.List<ItemDto.MessageResponse>> getMessages(
+            @PathVariable Long rentalId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ApiResponse.success(itemService.getMessages(rentalId, userDetails.getUserId()));
+    }
+
+    @PostMapping("/items/rentals/{rentalId}/messages")
+    public ApiResponse<ItemDto.MessageResponse> sendMessage(
+            @PathVariable Long rentalId,
+            @Valid @RequestBody ItemDto.MessageRequest req,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ApiResponse.success(itemService.sendMessage(rentalId, userDetails.getUserId(), req.getContent()));
+    }
 }

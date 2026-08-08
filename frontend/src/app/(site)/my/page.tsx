@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
-import { SpaceRental, ItemRental, FaithQuestion, PrayerRequest, WelcomeKit } from '@/types';
+import { SpaceRental, ItemRental, FaithQuestion, PrayerRequest, WelcomeKit, ChatMessage } from '@/types';
 
 interface Post {
   id: number;
@@ -62,6 +62,20 @@ export default function MyPage() {
   const [prayersLoading, setPrayersLoading] = useState(false);
   const [welcomeKits, setWelcomeKits] = useState<WelcomeKit[]>([]);
   const [welcomeKitsLoading, setWelcomeKitsLoading] = useState(false);
+
+  // 물품 채팅
+  const [itemChatId, setItemChatId] = useState<number | null>(null);
+  const [itemMessages, setItemMessages] = useState<ChatMessage[]>([]);
+  const [itemMsgInput, setItemMsgInput] = useState('');
+  const [sendingItemMsg, setSendingItemMsg] = useState(false);
+  const itemChatBottomRef = useRef<HTMLDivElement>(null);
+
+  // 신앙질문 채팅
+  const [faithChatId, setFaithChatId] = useState<number | null>(null);
+  const [faithMessages, setFaithMessages] = useState<ChatMessage[]>([]);
+  const [faithMsgInput, setFaithMsgInput] = useState('');
+  const [sendingFaithMsg, setSendingFaithMsg] = useState(false);
+  const faithChatBottomRef = useRef<HTMLDivElement>(null);
 
   // 프로필 수정
   const [nickname, setNickname] = useState('');
@@ -122,6 +136,52 @@ export default function MyPage() {
         .finally(() => setWelcomeKitsLoading(false));
     }
   }, [tab, user]);
+
+  const openItemChat = async (rentalId: number) => {
+    if (itemChatId === rentalId) { setItemChatId(null); return; }
+    setItemChatId(rentalId);
+    const res = await api.get(`/items/rentals/${rentalId}/messages`);
+    setItemMessages(res.data.data ?? []);
+    setTimeout(() => itemChatBottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
+  };
+
+  const sendItemMsg = async (rentalId: number) => {
+    const content = itemMsgInput.trim();
+    if (!content) return;
+    setSendingItemMsg(true);
+    try {
+      await api.post(`/items/rentals/${rentalId}/messages`, { content });
+      setItemMsgInput('');
+      const res = await api.get(`/items/rentals/${rentalId}/messages`);
+      setItemMessages(res.data.data ?? []);
+      setTimeout(() => itemChatBottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
+    } finally {
+      setSendingItemMsg(false);
+    }
+  };
+
+  const openFaithChat = async (questionId: number) => {
+    if (faithChatId === questionId) { setFaithChatId(null); return; }
+    setFaithChatId(questionId);
+    const res = await api.get(`/faith/questions/${questionId}/messages`);
+    setFaithMessages(res.data.data ?? []);
+    setTimeout(() => faithChatBottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
+  };
+
+  const sendFaithMsg = async (questionId: number) => {
+    const content = faithMsgInput.trim();
+    if (!content) return;
+    setSendingFaithMsg(true);
+    try {
+      await api.post(`/faith/questions/${questionId}/messages`, { content });
+      setFaithMsgInput('');
+      const res = await api.get(`/faith/questions/${questionId}/messages`);
+      setFaithMessages(res.data.data ?? []);
+      setTimeout(() => faithChatBottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
+    } finally {
+      setSendingFaithMsg(false);
+    }
+  };
 
   const handleNickname = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -354,7 +414,7 @@ export default function MyPage() {
                 {itemRentals.map((r) => (
                   <li key={r.id} className="px-6 py-4">
                     <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
+                      <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_BADGE[r.status]}`}>
                             {STATUS_LABEL[r.status]}
@@ -369,10 +429,47 @@ export default function MyPage() {
                           <div className="text-xs text-red-400 mt-0.5">거절 사유: {r.rejectReason}</div>
                         )}
                       </div>
-                      <div className="text-xs text-gray-400 shrink-0">
-                        {new Date(r.createdAt).toLocaleDateString('ko-KR')}
+                      <div className="flex flex-col items-end gap-1 shrink-0">
+                        <div className="text-xs text-gray-400">{new Date(r.createdAt).toLocaleDateString('ko-KR')}</div>
+                        <button onClick={() => openItemChat(r.id)}
+                          className={`text-xs px-2 py-1 rounded-lg border transition ${itemChatId === r.id ? 'bg-[#003478] text-white border-[#003478]' : 'border-gray-200 text-gray-500 hover:border-[#003478]'}`}>
+                          💬 {itemChatId === r.id ? '닫기' : '채팅'}
+                        </button>
                       </div>
                     </div>
+                    {itemChatId === r.id && (
+                      <div className="mt-3 border-t border-gray-100 pt-3">
+                        <div className="bg-gray-50 rounded-xl p-3 max-h-48 overflow-y-auto space-y-2 mb-2">
+                          {itemMessages.length === 0 ? (
+                            <p className="text-xs text-gray-400 text-center py-3">아직 메시지가 없습니다.</p>
+                          ) : itemMessages.map(m => (
+                            <div key={m.id} className={`flex ${m.senderRole === 'USER' ? 'justify-end' : 'justify-start'}`}>
+                              <div className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm ${m.senderRole === 'USER' ? 'bg-[#003478] text-white' : 'bg-white border border-gray-200 text-gray-800'}`}>
+                                {m.senderRole !== 'USER' && <div className="text-[10px] text-gray-400 mb-0.5">{m.senderNickname}</div>}
+                                <p>{m.content}</p>
+                                <div className={`text-[10px] mt-0.5 ${m.senderRole === 'USER' ? 'text-blue-200' : 'text-gray-400'}`}>
+                                  {new Date(m.createdAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                          <div ref={itemChatBottomRef} />
+                        </div>
+                        <div className="flex gap-2">
+                          <input
+                            value={itemMsgInput}
+                            onChange={e => setItemMsgInput(e.target.value)}
+                            onKeyDown={e => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), sendItemMsg(r.id))}
+                            placeholder="메시지를 입력하세요..."
+                            className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]"
+                          />
+                          <button onClick={() => sendItemMsg(r.id)} disabled={sendingItemMsg || !itemMsgInput.trim()}
+                            className="px-3 py-2 bg-[#003478] text-white rounded-xl text-sm font-medium hover:bg-blue-900 disabled:opacity-50">
+                            전송
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -445,13 +542,19 @@ export default function MyPage() {
               <ul className="divide-y divide-gray-50">
                 {faithQuestions.map((q) => (
                   <li key={q.id} className="px-6 py-4">
-                    <div className="flex items-center gap-2 mb-1 text-xs text-gray-400">
-                      <span>{q.anonymous ? '익명' : '실명'}</span>
-                      <span>·</span>
-                      <span>{new Date(q.createdAt).toLocaleDateString('ko-KR')}</span>
-                      {q.answers.length > 0 && (
-                        <span className="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded text-[10px]">답변 {q.answers.length}개</span>
-                      )}
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <div className="flex items-center gap-2 text-xs text-gray-400">
+                        <span>{q.anonymous ? '익명' : '실명'}</span>
+                        <span>·</span>
+                        <span>{new Date(q.createdAt).toLocaleDateString('ko-KR')}</span>
+                        {q.answers.length > 0 && (
+                          <span className="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded text-[10px]">답변 {q.answers.length}개</span>
+                        )}
+                      </div>
+                      <button onClick={() => openFaithChat(q.id)}
+                        className={`text-xs px-2 py-1 rounded-lg border transition shrink-0 ${faithChatId === q.id ? 'bg-[#003478] text-white border-[#003478]' : 'border-gray-200 text-gray-500 hover:border-[#003478]'}`}>
+                        💬 {faithChatId === q.id ? '닫기' : '채팅'}
+                      </button>
                     </div>
                     <p className="text-sm text-gray-800 mb-2">{q.content}</p>
                     {q.answers.map(a => (
@@ -460,6 +563,40 @@ export default function MyPage() {
                         <p className="text-sm text-gray-700">{a.content}</p>
                       </div>
                     ))}
+                    {faithChatId === q.id && (
+                      <div className="mt-3 border-t border-gray-100 pt-3">
+                        <div className="text-xs font-semibold text-gray-600 mb-2">목사님과 대화</div>
+                        <div className="bg-gray-50 rounded-xl p-3 max-h-48 overflow-y-auto space-y-2 mb-2">
+                          {faithMessages.length === 0 ? (
+                            <p className="text-xs text-gray-400 text-center py-3">아직 메시지가 없습니다.</p>
+                          ) : faithMessages.map(m => (
+                            <div key={m.id} className={`flex ${m.senderRole === 'USER' ? 'justify-end' : 'justify-start'}`}>
+                              <div className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm ${m.senderRole === 'USER' ? 'bg-[#003478] text-white' : 'bg-white border border-gray-200 text-gray-800'}`}>
+                                {m.senderRole !== 'USER' && <div className="text-[10px] text-gray-400 mb-0.5">{m.senderNickname}</div>}
+                                <p>{m.content}</p>
+                                <div className={`text-[10px] mt-0.5 ${m.senderRole === 'USER' ? 'text-blue-200' : 'text-gray-400'}`}>
+                                  {new Date(m.createdAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                          <div ref={faithChatBottomRef} />
+                        </div>
+                        <div className="flex gap-2">
+                          <input
+                            value={faithMsgInput}
+                            onChange={e => setFaithMsgInput(e.target.value)}
+                            onKeyDown={e => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), sendFaithMsg(q.id))}
+                            placeholder="질문을 이어가세요..."
+                            className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]"
+                          />
+                          <button onClick={() => sendFaithMsg(q.id)} disabled={sendingFaithMsg || !faithMsgInput.trim()}
+                            className="px-3 py-2 bg-[#003478] text-white rounded-xl text-sm font-medium hover:bg-blue-900 disabled:opacity-50">
+                            전송
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </li>
                 ))}
               </ul>

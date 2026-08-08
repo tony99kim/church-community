@@ -3,11 +3,14 @@ package com.churchhub.domain.faith.service;
 import com.churchhub.domain.faith.dto.FaithDto;
 import com.churchhub.domain.faith.entity.FaithAnswer;
 import com.churchhub.domain.faith.entity.FaithQuestion;
+import com.churchhub.domain.faith.entity.FaithQuestionMessage;
 import com.churchhub.domain.faith.entity.PrayerRequest;
 import com.churchhub.domain.faith.repository.FaithAnswerRepository;
+import com.churchhub.domain.faith.repository.FaithQuestionMessageRepository;
 import com.churchhub.domain.faith.repository.FaithQuestionRepository;
 import com.churchhub.domain.faith.repository.PrayerRequestRepository;
 import com.churchhub.domain.user.entity.User;
+import com.churchhub.domain.user.entity.UserRole;
 import com.churchhub.domain.user.repository.UserRepository;
 import com.churchhub.exception.BusinessException;
 import com.churchhub.exception.ErrorCode;
@@ -24,6 +27,7 @@ public class FaithService {
 
     private final FaithQuestionRepository questionRepository;
     private final FaithAnswerRepository answerRepository;
+    private final FaithQuestionMessageRepository messageRepository;
     private final UserRepository userRepository;
     private final PrayerRequestRepository prayerRequestRepository;
 
@@ -100,6 +104,37 @@ public class FaithService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
         prayer.pray();
         return FaithDto.PrayerResponse.from(prayer);
+    }
+
+    public List<FaithDto.MessageResponse> getQuestionMessages(Long questionId, Long callerId) {
+        FaithQuestion question = questionRepository.findById(questionId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
+        User caller = userRepository.findById(callerId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        boolean isAdmin = caller.getRole() == UserRole.SUPER_ADMIN
+                || caller.getRole() == UserRole.PASTOR;
+        if (!isAdmin && !question.getAuthor().getId().equals(callerId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
+        return messageRepository.findAllByQuestionIdOrderByCreatedAtAsc(questionId)
+                .stream().map(FaithDto.MessageResponse::from).toList();
+    }
+
+    @Transactional
+    public FaithDto.MessageResponse sendQuestionMessage(Long questionId, Long callerId, String content) {
+        FaithQuestion question = questionRepository.findById(questionId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
+        User caller = userRepository.findById(callerId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        boolean isAdmin = caller.getRole() == UserRole.SUPER_ADMIN
+                || caller.getRole() == UserRole.PASTOR;
+        if (!isAdmin && !question.getAuthor().getId().equals(callerId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
+        String role = isAdmin ? "PASTOR" : "USER";
+        FaithQuestionMessage msg = FaithQuestionMessage.builder()
+                .question(question).sender(caller).senderRole(role).content(content).build();
+        return FaithDto.MessageResponse.from(messageRepository.save(msg));
     }
 
     @Transactional

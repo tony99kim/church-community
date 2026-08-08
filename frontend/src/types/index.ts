@@ -197,6 +197,15 @@ export interface PrayerRequest {
   createdAt: string;
 }
 
+// Chat messages
+export interface ChatMessage {
+  id: number;
+  senderNickname: string;
+  senderRole: string; // 'ADMIN' | 'USER' | 'PASTOR'
+  content: string;
+  createdAt: string;
+}
+
 // Event category
 export type EventCategory = 'NEIGHBORHOOD' | 'FAITH' | 'SERVICE' | 'CHURCH' | 'WELCOME_TABLE';
 

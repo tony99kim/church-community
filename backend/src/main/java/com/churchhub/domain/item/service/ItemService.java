@@ -5,6 +5,8 @@ import com.churchhub.domain.church.repository.ChurchRepository;
 import com.churchhub.domain.item.dto.ItemDto;
 import com.churchhub.domain.item.entity.Item;
 import com.churchhub.domain.item.entity.ItemRental;
+import com.churchhub.domain.item.entity.ItemRentalMessage;
+import com.churchhub.domain.item.repository.ItemRentalMessageRepository;
 import com.churchhub.domain.item.repository.ItemRentalRepository;
 import com.churchhub.domain.item.repository.ItemRepository;
 import com.churchhub.domain.notification.entity.NotificationType;
@@ -28,6 +30,7 @@ public class ItemService {
 
     private final ItemRepository itemRepository;
     private final ItemRentalRepository itemRentalRepository;
+    private final ItemRentalMessageRepository messageRepository;
     private final ChurchRepository churchRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
@@ -137,6 +140,37 @@ public class ItemService {
                 "물품 대여 신청이 거절되었습니다: " + rental.getItem().getName(),
                 rentalId, RelatedType.POST);
         return ItemDto.RentalResponse.from(rental);
+    }
+
+    public List<ItemDto.MessageResponse> getMessages(Long rentalId, Long callerId) {
+        ItemRental rental = itemRentalRepository.findById(rentalId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ITEM_RENTAL_NOT_FOUND));
+        User caller = getCallerUser(callerId);
+        boolean isAdmin = caller.getRole() == UserRole.SUPER_ADMIN
+                || caller.getRole() == UserRole.CHURCH_MANAGER
+                || caller.getRole() == UserRole.PASTOR;
+        if (!isAdmin && !rental.getApplicant().getId().equals(callerId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
+        return messageRepository.findAllByRentalIdOrderByCreatedAtAsc(rentalId)
+                .stream().map(ItemDto.MessageResponse::from).toList();
+    }
+
+    @Transactional
+    public ItemDto.MessageResponse sendMessage(Long rentalId, Long callerId, String content) {
+        ItemRental rental = itemRentalRepository.findById(rentalId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ITEM_RENTAL_NOT_FOUND));
+        User caller = getCallerUser(callerId);
+        boolean isAdmin = caller.getRole() == UserRole.SUPER_ADMIN
+                || caller.getRole() == UserRole.CHURCH_MANAGER
+                || caller.getRole() == UserRole.PASTOR;
+        if (!isAdmin && !rental.getApplicant().getId().equals(callerId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
+        String role = isAdmin ? "ADMIN" : "USER";
+        ItemRentalMessage msg = ItemRentalMessage.builder()
+                .rental(rental).sender(caller).senderRole(role).content(content).build();
+        return ItemDto.MessageResponse.from(messageRepository.save(msg));
     }
 
     private User getCallerUser(Long callerId) {

@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/faith")
@@ -92,5 +93,20 @@ public class FaithController {
     @PreAuthorize("hasAnyRole('PASTOR', 'SUPER_ADMIN')")
     public ApiResponse<FaithDto.PrayerResponse> toggleAdminPrayed(@PathVariable Long id) {
         return ApiResponse.success(faithService.toggleAdminPrayed(id));
+    }
+
+    @GetMapping("/questions/{id}/messages")
+    public ApiResponse<List<FaithDto.MessageResponse>> getQuestionMessages(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ApiResponse.success(faithService.getQuestionMessages(id, userDetails.getUserId()));
+    }
+
+    @PostMapping("/questions/{id}/messages")
+    public ApiResponse<FaithDto.MessageResponse> sendQuestionMessage(
+            @PathVariable Long id,
+            @Valid @RequestBody FaithDto.MessageRequest req,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ApiResponse.success(faithService.sendQuestionMessage(id, userDetails.getUserId(), req.getContent()));
     }
 }

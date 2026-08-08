@@ -2,6 +2,7 @@ package com.churchhub.domain.faith.dto;
 
 import com.churchhub.domain.faith.entity.FaithAnswer;
 import com.churchhub.domain.faith.entity.FaithQuestion;
+import com.churchhub.domain.faith.entity.FaithQuestionMessage;
 import com.churchhub.domain.faith.entity.PrayerRequest;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
@@ -61,6 +62,30 @@ public class FaithDto {
                     .publicVisible(q.isPublicVisible())
                     .answers(answers.stream().map(AnswerResponse::from).toList())
                     .createdAt(q.getCreatedAt()).build();
+        }
+    }
+
+    @Getter
+    public static class MessageRequest {
+        @NotBlank private String content;
+    }
+
+    @Getter
+    @Builder
+    public static class MessageResponse {
+        private Long id;
+        private String senderNickname;
+        private String senderRole;
+        private String content;
+        private LocalDateTime createdAt;
+
+        public static MessageResponse from(FaithQuestionMessage m) {
+            return MessageResponse.builder()
+                    .id(m.getId())
+                    .senderNickname(m.getSender().getNickname())
+                    .senderRole(m.getSenderRole())
+                    .content(m.getContent())
+                    .createdAt(m.getCreatedAt()).build();
         }
     }
 

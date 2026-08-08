@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import api from '@/lib/api';
-import { FaithQuestion, PrayerRequest } from '@/types';
+import { FaithQuestion, PrayerRequest, ChatMessage } from '@/types';
 
 type Tab = 'questions' | 'prayers';
 type QFilter = 'all' | 'unanswered' | 'answered';
@@ -15,10 +15,12 @@ export default function AdminFaithPage() {
   const [questions, setQuestions] = useState<FaithQuestion[]>([]);
   const [prayers, setPrayers] = useState<PrayerRequest[]>([]);
   const [loading, setLoading] = useState(true);
-  const [answerInputs, setAnswerInputs] = useState<Record<number, string>>({});
-  const [submitting, setSubmitting] = useState<number | null>(null);
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [prayingId, setPrayingId] = useState<number | null>(null);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [msgInput, setMsgInput] = useState('');
+  const [sendingMsg, setSendingMsg] = useState(false);
+  const chatBottomRef = useRef<HTMLDivElement>(null);
 
   const fetchAll = () => {
     Promise.all([
@@ -29,19 +31,26 @@ export default function AdminFaithPage() {
 
   useEffect(() => { fetchAll(); }, []);
 
-  const submitAnswer = async (questionId: number) => {
-    const content = answerInputs[questionId]?.trim();
+  const openChat = async (questionId: number) => {
+    if (expandedId === questionId) { setExpandedId(null); return; }
+    setExpandedId(questionId);
+    const res = await api.get(`/faith/questions/${questionId}/messages`);
+    setMessages(res.data.data ?? []);
+    setTimeout(() => chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
+  };
+
+  const sendMsg = async (questionId: number) => {
+    const content = msgInput.trim();
     if (!content) return;
-    setSubmitting(questionId);
+    setSendingMsg(true);
     try {
-      await api.post(`/faith/questions/${questionId}/answers`, { content });
-      setAnswerInputs(prev => ({ ...prev, [questionId]: '' }));
-      setExpandedId(null);
-      fetchAll();
-    } catch {
-      alert('답변 등록에 실패했습니다.');
+      await api.post(`/faith/questions/${questionId}/messages`, { content });
+      setMsgInput('');
+      const res = await api.get(`/faith/questions/${questionId}/messages`);
+      setMessages(res.data.data ?? []);
+      setTimeout(() => chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
     } finally {
-      setSubmitting(null);
+      setSendingMsg(false);
     }
   };
 
@@ -149,28 +158,44 @@ export default function AdminFaithPage() {
                     )}
                   </div>
                   <button
-                    onClick={() => setExpandedId(expandedId === q.id ? null : q.id)}
-                    className="text-xs text-[#003478] border border-blue-200 px-3 py-1.5 rounded-lg hover:bg-blue-50 shrink-0"
+                    onClick={() => openChat(q.id)}
+                    className={`text-xs px-3 py-1.5 rounded-lg border transition shrink-0 ${expandedId === q.id ? 'bg-[#003478] text-white border-[#003478]' : 'text-[#003478] border-blue-200 hover:bg-blue-50'}`}
                   >
-                    {expandedId === q.id ? '닫기' : '답변 달기'}
+                    {expandedId === q.id ? '닫기' : '💬 채팅'}
                   </button>
                 </div>
                 {expandedId === q.id && (
                   <div className="mt-3 border-t border-[#EDEFF1] pt-3">
-                    <textarea
-                      rows={3}
-                      value={answerInputs[q.id] ?? ''}
-                      onChange={e => setAnswerInputs(prev => ({ ...prev, [q.id]: e.target.value }))}
-                      placeholder="답변을 입력하세요..."
-                      className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478] resize-none mb-2"
-                    />
-                    <div className="flex justify-end">
+                    <div className="bg-gray-50 rounded-xl p-3 max-h-56 overflow-y-auto space-y-2 mb-2">
+                      {messages.length === 0 ? (
+                        <p className="text-xs text-gray-400 text-center py-4">아직 대화가 없습니다. 먼저 메시지를 보내세요.</p>
+                      ) : messages.map(m => (
+                        <div key={m.id} className={`flex ${m.senderRole === 'PASTOR' ? 'justify-end' : 'justify-start'}`}>
+                          <div className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm ${m.senderRole === 'PASTOR' ? 'bg-[#003478] text-white' : 'bg-white border border-[#EDEFF1] text-gray-800'}`}>
+                            {m.senderRole !== 'PASTOR' && <div className="text-[10px] text-gray-400 mb-0.5">{m.senderNickname}</div>}
+                            <p>{m.content}</p>
+                            <div className={`text-[10px] mt-0.5 ${m.senderRole === 'PASTOR' ? 'text-blue-200' : 'text-gray-400'}`}>
+                              {new Date(m.createdAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                      <div ref={chatBottomRef} />
+                    </div>
+                    <div className="flex gap-2">
+                      <input
+                        value={msgInput}
+                        onChange={e => setMsgInput(e.target.value)}
+                        onKeyDown={e => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), sendMsg(q.id))}
+                        placeholder="답변 또는 추가 메시지..."
+                        className="flex-1 border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]"
+                      />
                       <button
-                        onClick={() => submitAnswer(q.id)}
-                        disabled={!answerInputs[q.id]?.trim() || submitting === q.id}
+                        onClick={() => sendMsg(q.id)}
+                        disabled={sendingMsg || !msgInput.trim()}
                         className="px-4 py-2 text-sm bg-[#003478] text-white rounded-xl font-semibold hover:bg-blue-900 disabled:opacity-50"
                       >
-                        {submitting === q.id ? '등록 중...' : '답변 등록'}
+                        전송
                       </button>
                     </div>
                   </div>

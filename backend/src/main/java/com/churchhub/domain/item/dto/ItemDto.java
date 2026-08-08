@@ -3,6 +3,7 @@ package com.churchhub.domain.item.dto;
 import com.churchhub.domain.item.entity.Item;
 import com.churchhub.domain.item.entity.ItemCategory;
 import com.churchhub.domain.item.entity.ItemRental;
+import com.churchhub.domain.item.entity.ItemRentalMessage;
 import com.churchhub.domain.space.entity.RentalStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -45,6 +46,30 @@ public class ItemDto {
     @Getter
     public static class RejectRequest {
         private String reason;
+    }
+
+    @Getter
+    public static class MessageRequest {
+        @NotBlank private String content;
+    }
+
+    @Getter
+    @Builder
+    public static class MessageResponse {
+        private Long id;
+        private String senderNickname;
+        private String senderRole;
+        private String content;
+        private LocalDateTime createdAt;
+
+        public static MessageResponse from(ItemRentalMessage m) {
+            return MessageResponse.builder()
+                    .id(m.getId())
+                    .senderNickname(m.getSender().getNickname())
+                    .senderRole(m.getSenderRole())
+                    .content(m.getContent())
+                    .createdAt(m.getCreatedAt()).build();
+        }
     }
 
     @Getter

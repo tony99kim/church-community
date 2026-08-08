@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import api from '@/lib/api';
-import { Item, ItemRental, Church, ItemCategory } from '@/types';
+import { Item, ItemRental, Church, ItemCategory, ChatMessage } from '@/types';
 import { useAuthStore } from '@/store/authStore';
 
 const STATUS_LABEL: Record<string, string> = { PENDING: '대기중', APPROVED: '승인', REJECTED: '거절', CANCELLED: '취소' };
@@ -21,6 +21,11 @@ export default function AdminItemsPage() {
   const [editId, setEditId] = useState<number | null>(null);
   const [form, setForm] = useState({ ...EMPTY_FORM });
   const [loading, setLoading] = useState(true);
+  const [chatRentalId, setChatRentalId] = useState<number | null>(null);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [msgInput, setMsgInput] = useState('');
+  const [sendingMsg, setSendingMsg] = useState(false);
+  const chatBottomRef = useRef<HTMLDivElement>(null);
 
   const fetchAll = () => {
     Promise.all([
@@ -77,6 +82,29 @@ export default function AdminItemsPage() {
     if (reason === null) return;
     await api.put(`/admin/items/rentals/${id}/reject`, { reason });
     fetchAll();
+  };
+
+  const openChat = async (rentalId: number) => {
+    if (chatRentalId === rentalId) { setChatRentalId(null); return; }
+    setChatRentalId(rentalId);
+    const res = await api.get(`/items/rentals/${rentalId}/messages`);
+    setMessages(res.data.data ?? []);
+    setTimeout(() => chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
+  };
+
+  const sendMsg = async (rentalId: number) => {
+    const content = msgInput.trim();
+    if (!content) return;
+    setSendingMsg(true);
+    try {
+      await api.post(`/items/rentals/${rentalId}/messages`, { content });
+      setMsgInput('');
+      const res = await api.get(`/items/rentals/${rentalId}/messages`);
+      setMessages(res.data.data ?? []);
+      setTimeout(() => chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
+    } finally {
+      setSendingMsg(false);
+    }
   };
 
   if (loading) return <div className="p-6 text-gray-400">불러오는 중...</div>;
@@ -143,12 +171,51 @@ export default function AdminItemsPage() {
                   <div className="text-xs text-gray-400 mt-0.5">{r.applicantNickname} · {r.contactPhone}</div>
                   <div className="text-xs text-gray-500 mt-1">{r.startDate} ~ {r.endDate}</div>
                 </div>
-                <span className={`text-xs font-medium ${STATUS_COLOR[r.status]}`}>{STATUS_LABEL[r.status]}</span>
+                <div className="flex items-center gap-2">
+                  <span className={`text-xs font-medium ${STATUS_COLOR[r.status]}`}>{STATUS_LABEL[r.status]}</span>
+                  <button onClick={() => openChat(r.id)}
+                    className={`text-xs px-2 py-1 rounded-lg border transition ${chatRentalId === r.id ? 'bg-[#003478] text-white border-[#003478]' : 'border-gray-200 text-gray-500 hover:border-[#003478]'}`}>
+                    💬 채팅
+                  </button>
+                </div>
               </div>
               {r.status === 'PENDING' && (
                 <div className="flex gap-2 mt-3">
                   <button onClick={() => approve(r.id)} className="px-3 py-1.5 bg-green-500 text-white rounded-lg text-xs font-medium hover:bg-green-600">승인</button>
                   <button onClick={() => reject(r.id)} className="px-3 py-1.5 bg-red-500 text-white rounded-lg text-xs font-medium hover:bg-red-600">거절</button>
+                </div>
+              )}
+              {chatRentalId === r.id && (
+                <div className="mt-3 border-t border-[#EDEFF1] pt-3">
+                  <div className="bg-gray-50 rounded-xl p-3 max-h-60 overflow-y-auto space-y-2 mb-2">
+                    {messages.length === 0 ? (
+                      <p className="text-xs text-gray-400 text-center py-4">아직 메시지가 없습니다. 먼저 말을 걸어보세요.</p>
+                    ) : messages.map(m => (
+                      <div key={m.id} className={`flex ${m.senderRole === 'ADMIN' ? 'justify-end' : 'justify-start'}`}>
+                        <div className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm ${m.senderRole === 'ADMIN' ? 'bg-[#003478] text-white' : 'bg-white border border-[#EDEFF1] text-gray-800'}`}>
+                          {m.senderRole !== 'ADMIN' && <div className="text-[10px] text-gray-400 mb-0.5">{m.senderNickname}</div>}
+                          <p>{m.content}</p>
+                          <div className={`text-[10px] mt-0.5 ${m.senderRole === 'ADMIN' ? 'text-blue-200' : 'text-gray-400'}`}>
+                            {new Date(m.createdAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    <div ref={chatBottomRef} />
+                  </div>
+                  <div className="flex gap-2">
+                    <input
+                      value={msgInput}
+                      onChange={e => setMsgInput(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), sendMsg(r.id))}
+                      placeholder="메시지를 입력하세요..."
+                      className="flex-1 border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]"
+                    />
+                    <button onClick={() => sendMsg(r.id)} disabled={sendingMsg || !msgInput.trim()}
+                      className="px-4 py-2 bg-[#003478] text-white rounded-xl text-sm font-medium hover:bg-blue-900 disabled:opacity-50">
+                      전송
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
