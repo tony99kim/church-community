@@ -1,11 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
-import { FaithQuestion, PrayerRequest } from '@/types';
+import { FaithQuestion, PrayerRequest, PastorInfo } from '@/types';
 import { useAuthStore } from '@/store/authStore';
 
-type Tab = 'questions' | 'prayers';
+type Tab = 'questions' | 'prayers' | 'consult';
 
 export default function FaithPage() {
   const [tab, setTab] = useState<Tab>('questions');
@@ -18,11 +19,16 @@ export default function FaithPage() {
   const [pPublic, setPPublic] = useState(false);
   const [loading, setLoading] = useState(true);
   const { isLoggedIn } = useAuthStore();
+  const router = useRouter();
+  const [pastors, setPastors] = useState<PastorInfo[]>([]);
+  const [consultForm, setConsultForm] = useState({ pastorId: '', message: '' });
+  const [consultLoading, setConsultLoading] = useState(false);
 
   useEffect(() => {
     Promise.all([
       api.get('/faith/questions').then(r => setQuestions(r.data.data ?? [])),
       api.get('/faith/prayers').then(r => setPrayers(r.data.data ?? [])),
+      api.get('/users/pastors').then(r => setPastors(r.data.data ?? [])).catch(() => {}),
     ]).finally(() => setLoading(false));
   }, []);
 
@@ -46,6 +52,23 @@ export default function FaithPage() {
     api.get('/faith/prayers').then(r => setPrayers(r.data.data ?? []));
   };
 
+  const submitConsult = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!consultForm.pastorId || !consultForm.message.trim()) return;
+    setConsultLoading(true);
+    try {
+      const res = await api.post('/conversations', {
+        pastorId: Number(consultForm.pastorId),
+        initialMessage: consultForm.message,
+      });
+      router.push(`/messages?convId=${res.data.data.id}`);
+    } catch {
+      alert('메시지 전송에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      setConsultLoading(false);
+    }
+  };
+
   const pray = async (id: number) => {
     await api.post(`/faith/prayers/${id}/pray`);
     setPrayers(prev => prev.map(p => p.id === id ? { ...p, prayerCount: p.prayerCount + 1 } : p));
@@ -59,8 +82,8 @@ export default function FaithPage() {
         <h1 className="text-2xl font-bold text-[#003478] mb-2">신앙 Q&A ✝️</h1>
         <p className="text-gray-600 mb-6">신앙 질문을 남기면 목사님이 답변해 드립니다.</p>
 
-        <div className="flex gap-2 mb-6">
-          {([['questions', '신앙 질문'], ['prayers', '기도 요청']] as const).map(([key, label]) => (
+        <div className="flex gap-2 mb-6 flex-wrap">
+          {([['questions', '신앙 질문'], ['prayers', '기도 요청'], ['consult', '비공개 상담 🔒']] as const).map(([key, label]) => (
             <button key={key} onClick={() => setTab(key)}
               className={`px-5 py-2 rounded-full text-sm font-medium transition-colors ${tab === key ? 'bg-[#003478] text-white' : 'bg-white border border-[#EDEFF1] text-gray-600'}`}>
               {label}
@@ -110,6 +133,45 @@ export default function FaithPage() {
                 )}
               </div>
             ))}
+          </div>
+        )}
+
+        {tab === 'consult' && (
+          <div className="bg-white rounded-2xl border border-[#EDEFF1] p-6 max-w-lg mx-auto">
+            <h2 className="text-base font-semibold text-[#003478] mb-1">비공개 상담</h2>
+            <p className="text-xs text-gray-500 mb-5">목사님께 개인 메시지를 보내드립니다. 내용은 본인과 해당 목사님만 볼 수 있습니다.</p>
+            {!isLoggedIn ? (
+              <p className="text-sm text-gray-500 text-center py-8">로그인 후 이용할 수 있습니다.</p>
+            ) : pastors.length === 0 ? (
+              <p className="text-sm text-gray-500 text-center py-8">현재 상담 가능한 목사님이 없습니다.</p>
+            ) : (
+              <form onSubmit={submitConsult} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1.5">목사님 선택</label>
+                  <select required value={consultForm.pastorId}
+                    onChange={e => setConsultForm(p => ({ ...p, pastorId: e.target.value }))}
+                    className="w-full px-3 py-2.5 border border-[#EDEFF1] rounded-lg text-sm focus:outline-none focus:border-[#003478]">
+                    <option value="">-- 목사님을 선택하세요 --</option>
+                    {pastors.map(p => (
+                      <option key={p.id} value={p.id}>
+                        {p.nickname}{p.churchName ? ` (${p.churchName})` : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1.5">상담 내용</label>
+                  <textarea required rows={5} value={consultForm.message}
+                    onChange={e => setConsultForm(p => ({ ...p, message: e.target.value }))}
+                    placeholder="상담하고 싶은 내용을 작성해주세요..."
+                    className="w-full px-3 py-2.5 border border-[#EDEFF1] rounded-lg text-sm focus:outline-none focus:border-[#003478] resize-none" />
+                </div>
+                <button type="submit" disabled={consultLoading || !consultForm.pastorId || !consultForm.message.trim()}
+                  className="w-full py-2.5 bg-[#003478] text-white rounded-lg text-sm font-medium hover:bg-blue-900 disabled:opacity-50 transition-colors">
+                  {consultLoading ? '전송 중...' : '메시지 보내기'}
+                </button>
+              </form>
+            )}
           </div>
         )}
 
