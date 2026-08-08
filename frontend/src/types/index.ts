@@ -206,6 +206,35 @@ export interface ChatMessage {
   createdAt: string;
 }
 
+// DM / Conversations
+export interface Conversation {
+  id: number;
+  userId: number;
+  userNickname: string;
+  pastorId: number;
+  pastorNickname: string;
+  faithQuestionId: number | null;
+  lastMessagePreview: string;
+  lastMessageAt: string | null;
+  unreadCount: number;
+  createdAt: string;
+}
+
+export interface DmMessage {
+  id: number;
+  senderId: number;
+  senderNickname: string;
+  content: string;
+  read: boolean;
+  createdAt: string;
+}
+
+export interface PastorInfo {
+  id: number;
+  nickname: string;
+  churchName: string | null;
+}
+
 // Event category
 export type EventCategory = 'NEIGHBORHOOD' | 'FAITH' | 'SERVICE' | 'CHURCH' | 'WELCOME_TABLE';
 
