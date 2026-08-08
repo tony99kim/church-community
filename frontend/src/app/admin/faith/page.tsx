@@ -133,7 +133,10 @@ export default function AdminFaithPage() {
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 mb-1 text-xs text-gray-400">
-                      <span>{q.anonymous ? '익명' : q.authorNickname}</span>
+                      <span>{q.authorNickname}</span>
+                      {q.anonymous && (
+                        <span className="bg-gray-100 text-gray-400 px-1.5 py-0.5 rounded text-[10px]">익명</span>
+                      )}
                       <span>·</span>
                       <span>{new Date(q.createdAt).toLocaleDateString('ko-KR')}</span>
                       {!q.publicVisible && (

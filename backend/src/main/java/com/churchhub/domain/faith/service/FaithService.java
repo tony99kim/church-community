@@ -68,7 +68,7 @@ public class FaithService {
     public List<FaithDto.QuestionResponse> getAllQuestionsForAdmin() {
         return questionRepository.findAllByOrderByCreatedAtDesc()
                 .stream().map(q -> FaithDto.QuestionResponse.from(q,
-                        answerRepository.findAllByQuestionIdOrderByCreatedAtAsc(q.getId())))
+                        answerRepository.findAllByQuestionIdOrderByCreatedAtAsc(q.getId()), true))
                 .toList();
     }
 

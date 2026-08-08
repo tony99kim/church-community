@@ -54,9 +54,15 @@ public class FaithDto {
         private LocalDateTime createdAt;
 
         public static QuestionResponse from(FaithQuestion q, List<FaithAnswer> answers) {
+            return from(q, answers, false);
+        }
+
+        public static QuestionResponse from(FaithQuestion q, List<FaithAnswer> answers, boolean showRealAuthor) {
+            String authorNickname = (q.isAnonymous() && !showRealAuthor)
+                    ? null : q.getAuthor().getNickname();
             return QuestionResponse.builder()
                     .id(q.getId())
-                    .authorNickname(q.isAnonymous() ? null : q.getAuthor().getNickname())
+                    .authorNickname(authorNickname)
                     .anonymous(q.isAnonymous())
                     .content(q.getContent())
                     .publicVisible(q.isPublicVisible())
