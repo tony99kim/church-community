@@ -47,6 +47,9 @@ public enum ErrorCode {
     ITEM_TERMS_NOT_AGREED(HttpStatus.BAD_REQUEST, "약관에 동의해야 합니다."),
     ITEM_HAS_RENTALS(HttpStatus.BAD_REQUEST, "대여 신청이 있는 물품은 삭제할 수 없습니다."),
 
+    // DM
+    CONVERSATION_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 대화방입니다."),
+
     // Space
     SPACE_NOT_FOUND(HttpStatus.NOT_FOUND, "공간을 찾을 수 없습니다."),
     SPACE_RENTAL_NOT_FOUND(HttpStatus.NOT_FOUND, "대여 신청을 찾을 수 없습니다."),
