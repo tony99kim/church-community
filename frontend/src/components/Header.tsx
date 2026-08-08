@@ -22,6 +22,7 @@ export default function Header() {
   const [notiOpen, setNotiOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [dmUnreadCount, setDmUnreadCount] = useState(0);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const notiRef = useRef<HTMLDivElement>(null);
   const isAdmin = user?.role === 'SUPER_ADMIN' || user?.role === 'CHURCH_MANAGER' || user?.role === 'PASTOR';
@@ -29,6 +30,7 @@ export default function Header() {
   const fetchUnread = useCallback(() => {
     if (!isLoggedIn) return;
     api.get('/notifications/unread-count').then((r) => setUnreadCount(r.data.data.count));
+    api.get('/conversations/unread-count').then((r) => setDmUnreadCount(r.data.data.count)).catch(() => {});
   }, [isLoggedIn]);
 
   useEffect(() => {
@@ -109,6 +111,18 @@ export default function Header() {
               className="hidden sm:flex items-center bg-[#003478] text-white text-xs font-bold px-4 py-1.5 rounded-full hover:bg-[#002560] transition"
             >
               + 글쓰기
+            </Link>
+
+            {/* DM 메시지 아이콘 */}
+            <Link href="/messages" className="relative p-1.5 text-gray-500 hover:text-[#003478] transition">
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+              {dmUnreadCount > 0 && (
+                <span className="absolute top-0.5 right-0.5 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                  {dmUnreadCount > 9 ? '9+' : dmUnreadCount}
+                </span>
+              )}
             </Link>
 
             {/* 알림 벨 */}
@@ -226,6 +240,9 @@ export default function Header() {
           {isLoggedIn ? (
             <>
               <Link href="/posts/write" className="block py-2 text-sm font-medium text-[#003478]" onClick={() => setMenuOpen(false)}>+ 글쓰기</Link>
+              <Link href="/messages" className="flex items-center gap-1.5 py-2 text-sm font-medium text-gray-700 hover:text-[#003478]" onClick={() => setMenuOpen(false)}>
+                메시지{dmUnreadCount > 0 && <span className="w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">{dmUnreadCount > 9 ? '9+' : dmUnreadCount}</span>}
+              </Link>
               <Link href="/my" className="block py-2 text-sm font-medium text-gray-700 hover:text-[#003478]" onClick={() => setMenuOpen(false)}>내 정보</Link>
               {isAdmin && <Link href="/admin" className="block py-2 text-sm font-medium text-gray-700 hover:text-[#003478]" onClick={() => setMenuOpen(false)}>관리자</Link>}
               <button onClick={() => { logout(); setMenuOpen(false); }} className="block py-2 text-sm font-medium text-red-500 w-full text-left">로그아웃</button>
