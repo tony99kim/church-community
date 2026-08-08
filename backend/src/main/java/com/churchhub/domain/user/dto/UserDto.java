@@ -68,4 +68,20 @@ public class UserDto {
                     .build();
         }
     }
+
+    @Getter
+    @Builder
+    public static class PastorInfo {
+        private Long id;
+        private String nickname;
+        private String churchName;
+
+        public static PastorInfo from(User u) {
+            return PastorInfo.builder()
+                    .id(u.getId())
+                    .nickname(u.getNickname())
+                    .churchName(u.getChurch() != null ? u.getChurch().getName() : null)
+                    .build();
+        }
+    }
 }

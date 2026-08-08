@@ -2,6 +2,8 @@ package com.churchhub.domain.user.service;
 
 import com.churchhub.domain.user.dto.UserDto;
 import com.churchhub.domain.user.entity.User;
+import com.churchhub.domain.user.entity.UserRole;
+import com.churchhub.domain.user.entity.UserStatus;
 import com.churchhub.domain.user.repository.UserRepository;
 import com.churchhub.exception.BusinessException;
 import com.churchhub.exception.ErrorCode;
@@ -45,6 +47,12 @@ public class UserService {
         }
 
         user.changePassword(passwordEncoder.encode(request.getNewPassword()));
+    }
+
+    public java.util.List<UserDto.PastorInfo> getPastors() {
+        return userRepository.findByRoleInAndStatus(
+                        java.util.List.of(UserRole.PASTOR, UserRole.SUPER_ADMIN), UserStatus.ACTIVE)
+                .stream().map(UserDto.PastorInfo::from).toList();
     }
 
     private User getUser(Long userId) {

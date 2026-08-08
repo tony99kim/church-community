@@ -57,4 +57,10 @@ public class UserController {
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(ApiResponse.success(postService.getUserPosts(userId, pageable)));
     }
+
+    @Operation(summary = "목사님/관리자 목록 조회 (DM 대상 선택용)")
+    @GetMapping("/pastors")
+    public ApiResponse<java.util.List<UserDto.PastorInfo>> getPastors() {
+        return ApiResponse.success(userService.getPastors());
+    }
 }
