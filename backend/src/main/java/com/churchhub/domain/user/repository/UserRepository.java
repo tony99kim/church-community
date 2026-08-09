@@ -24,4 +24,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Page<User> searchByKeyword(@Param("keyword") String keyword, @Param("status") UserStatus status, Pageable pageable);
 
     List<User> findByRoleInAndStatus(List<UserRole> roles, UserStatus status);
+
+    @Query("SELECT u FROM User u WHERE u.status = 'ACTIVE' AND u.id != :excludeId AND LOWER(u.nickname) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    List<User> searchActiveByNickname(@Param("keyword") String keyword, @Param("excludeId") Long excludeId, Pageable pageable);
 }

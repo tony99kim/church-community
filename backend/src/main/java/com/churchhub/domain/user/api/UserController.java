@@ -63,4 +63,12 @@ public class UserController {
     public ApiResponse<java.util.List<UserDto.PastorInfo>> getPastors() {
         return ApiResponse.success(userService.getPastors());
     }
+
+    @Operation(summary = "유저 닉네임 검색 (DM 대상 찾기)")
+    @GetMapping("/search")
+    public ApiResponse<java.util.List<UserDto.BasicInfo>> searchUsers(
+            @RequestParam String keyword,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ApiResponse.success(userService.searchUsers(keyword, userDetails.getUserId()));
+    }
 }

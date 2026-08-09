@@ -18,7 +18,7 @@ function formatDate(dateStr: string) {
 }
 
 function CommentItem({
-  comment, currentUserId, isAdmin, onReply, onDelete, onEdit,
+  comment, currentUserId, isAdmin, onReply, onDelete, onEdit, onDm,
 }: {
   comment: Comment;
   currentUserId?: number;
@@ -26,6 +26,7 @@ function CommentItem({
   onReply: (id: number, nickname: string) => void;
   onDelete: (id: number) => void;
   onEdit: (id: number, content: string) => void;
+  onDm?: (recipientId: number) => void;
 }) {
   const [editing, setEditing] = useState(false);
   const [editText, setEditText] = useState(comment.content);
@@ -56,6 +57,14 @@ function CommentItem({
                 {comment.authorNickname?.[0] ?? '?'}
               </div>
               <span className="text-sm font-bold text-gray-900">{comment.authorNickname}</span>
+              {onDm && currentUserId && currentUserId !== comment.authorId && comment.authorId && (
+                <button
+                  onClick={() => onDm(comment.authorId!)}
+                  className="text-[10px] px-1.5 py-0.5 border border-[#EDEFF1] rounded-full text-gray-400 hover:border-[#003478] hover:text-[#003478] transition"
+                >
+                  DM
+                </button>
+              )}
               <span className="text-xs text-gray-400">{new Date(comment.createdAt).toLocaleDateString('ko-KR')}</span>
             </div>
             <div className="flex items-center gap-2 text-xs">
@@ -104,7 +113,7 @@ function CommentItem({
         </>
       )}
       {comment.replies?.map((reply) => (
-        <CommentItem key={reply.id} comment={reply} currentUserId={currentUserId} isAdmin={isAdmin} onReply={onReply} onDelete={onDelete} onEdit={onEdit} />
+        <CommentItem key={reply.id} comment={reply} currentUserId={currentUserId} isAdmin={isAdmin} onReply={onReply} onDelete={onDelete} onEdit={onEdit} onDm={onDm} />
       ))}
     </div>
   );
@@ -193,6 +202,15 @@ export default function PostDetailClient() {
     }
   };
 
+  const startDm = async (recipientId: number, initialMessage: string) => {
+    try {
+      const res = await api.post('/conversations', { recipientId, initialMessage });
+      router.push(`/messages?convId=${res.data.data.id}`);
+    } catch {
+      alert('메시지 전송에 실패했습니다.');
+    }
+  };
+
   if (loading) return (
     <div className="flex gap-6 max-w-6xl mx-auto px-4 py-5 animate-pulse">
       <div className="w-64 shrink-0 hidden lg:block"><div className="h-40 bg-gray-100 rounded-xl" /></div>
@@ -244,7 +262,17 @@ export default function PostDetailClient() {
                   {post.authorNickname?.[0]}
                 </div>
                 <div>
-                  <div className="text-sm font-bold text-gray-900">{post.authorNickname}</div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-bold text-gray-900">{post.authorNickname}</span>
+                    {isLoggedIn && user?.id !== post.authorId && post.authorId && (
+                      <button
+                        onClick={() => startDm(post.authorId!, `안녕하세요! "${post.title}" 게시글 보고 연락드려요.`)}
+                        className="text-[10px] px-2 py-0.5 border border-[#EDEFF1] rounded-full text-gray-400 hover:border-[#003478] hover:text-[#003478] transition"
+                      >
+                        DM
+                      </button>
+                    )}
+                  </div>
                   <div className="text-xs text-gray-400">{formatDate(post.createdAt)}</div>
                 </div>
               </div>
@@ -306,6 +334,7 @@ export default function PostDetailClient() {
                   onReply={(cid, nickname) => { setReplyTo(cid); setReplyNickname(nickname); }}
                   onDelete={handleCommentDelete}
                   onEdit={handleCommentEdit}
+                  onDm={isLoggedIn ? (recipientId) => startDm(recipientId, `안녕하세요! 댓글 보고 연락드려요.`) : undefined}
                 />
               ))
             )}

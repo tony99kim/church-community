@@ -8,7 +8,6 @@ import com.churchhub.domain.dm.repository.ConversationRepository;
 import com.churchhub.domain.faith.entity.FaithQuestion;
 import com.churchhub.domain.faith.repository.FaithQuestionRepository;
 import com.churchhub.domain.user.entity.User;
-import com.churchhub.domain.user.entity.UserRole;
 import com.churchhub.domain.user.repository.UserRepository;
 import com.churchhub.exception.BusinessException;
 import com.churchhub.exception.ErrorCode;
@@ -30,10 +29,7 @@ public class DmService {
     private final FaithQuestionRepository faithQuestionRepository;
 
     public List<DmDto.ConversationResponse> listMyConversations(Long callerId) {
-        User caller = getUser(callerId);
-        List<Conversation> convs = isPastor(caller)
-                ? conversationRepository.findByPastorIdOrderByLastMessageAtDesc(callerId)
-                : conversationRepository.findByUserIdOrderByLastMessageAtDesc(callerId);
+        List<Conversation> convs = conversationRepository.findAllByParticipant(callerId);
 
         return convs.stream().map(c -> {
             List<ConversationMessage> msgs = messageRepository.findAllByConversationIdOrderByCreatedAtAsc(c.getId());
@@ -47,23 +43,21 @@ public class DmService {
     @Transactional
     public DmDto.ConversationResponse startConversation(Long callerId, DmDto.StartRequest req) {
         User caller = getUser(callerId);
-        if (isPastor(caller)) throw new BusinessException(ErrorCode.FORBIDDEN);
-
-        User pastor = userRepository.findById(req.getPastorId())
+        User recipient = userRepository.findById(req.getRecipientId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-        if (!isPastor(pastor)) throw new BusinessException(ErrorCode.FORBIDDEN);
+        if (caller.getId().equals(recipient.getId())) throw new BusinessException(ErrorCode.FORBIDDEN);
 
         Conversation conv;
         if (req.getFaithQuestionId() != null) {
             FaithQuestion question = faithQuestionRepository.findById(req.getFaithQuestionId())
                     .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
             conv = conversationRepository.save(
-                    Conversation.builder().user(caller).pastor(pastor).faithQuestion(question).build());
+                    Conversation.builder().user(caller).pastor(recipient).faithQuestion(question).build());
         } else {
             conv = conversationRepository
-                    .findByUserIdAndPastorIdAndFaithQuestionIsNull(callerId, req.getPastorId())
+                    .findDirectConversation(callerId, req.getRecipientId())
                     .orElseGet(() -> conversationRepository.save(
-                            Conversation.builder().user(caller).pastor(pastor).build()));
+                            Conversation.builder().user(caller).pastor(recipient).build()));
         }
 
         String content = req.getInitialMessage();
@@ -105,10 +99,6 @@ public class DmService {
                 || conv.getPastor().getId().equals(callerId);
         if (!isParticipant) throw new BusinessException(ErrorCode.FORBIDDEN);
         return conv;
-    }
-
-    private boolean isPastor(User user) {
-        return user.getRole() == UserRole.PASTOR || user.getRole() == UserRole.SUPER_ADMIN;
     }
 
     private User getUser(Long userId) {

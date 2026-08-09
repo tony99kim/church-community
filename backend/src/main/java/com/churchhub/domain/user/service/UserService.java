@@ -55,6 +55,12 @@ public class UserService {
                 .stream().map(UserDto.PastorInfo::from).toList();
     }
 
+    public java.util.List<UserDto.BasicInfo> searchUsers(String keyword, Long callerId) {
+        return userRepository.searchActiveByNickname(keyword, callerId,
+                        org.springframework.data.domain.PageRequest.of(0, 10))
+                .stream().map(UserDto.BasicInfo::from).toList();
+    }
+
     private User getUser(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));

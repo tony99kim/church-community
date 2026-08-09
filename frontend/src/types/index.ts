@@ -235,6 +235,11 @@ export interface PastorInfo {
   churchName: string | null;
 }
 
+export interface UserBasicInfo {
+  id: number;
+  nickname: string;
+}
+
 // Event category
 export type EventCategory = 'NEIGHBORHOOD' | 'FAITH' | 'SERVICE' | 'CHURCH' | 'WELCOME_TABLE';
 

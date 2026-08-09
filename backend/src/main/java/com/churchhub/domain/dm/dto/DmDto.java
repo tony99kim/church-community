@@ -13,7 +13,7 @@ public class DmDto {
 
     @Getter
     public static class StartRequest {
-        @NotNull private Long pastorId;
+        @NotNull private Long recipientId;
         private Long faithQuestionId;
         @NotBlank private String initialMessage;
     }

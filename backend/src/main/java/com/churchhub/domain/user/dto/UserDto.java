@@ -84,4 +84,15 @@ public class UserDto {
                     .build();
         }
     }
+
+    @Getter
+    @Builder
+    public static class BasicInfo {
+        private Long id;
+        private String nickname;
+
+        public static BasicInfo from(User u) {
+            return BasicInfo.builder().id(u.getId()).nickname(u.getNickname()).build();
+        }
+    }
 }
