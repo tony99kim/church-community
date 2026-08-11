@@ -103,4 +103,9 @@ public class Event {
     public boolean isFull() {
         return maxParticipants != null && currentParticipants >= maxParticipants;
     }
+
+    public boolean isJoinable() {
+        if (status == EventStatus.CANCELLED || status == EventStatus.DRAFT || status == EventStatus.ENDED) return false;
+        return endDate == null || endDate.isAfter(java.time.LocalDateTime.now());
+    }
 }

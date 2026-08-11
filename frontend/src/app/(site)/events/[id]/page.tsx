@@ -61,7 +61,8 @@ export default function EventDetailPage() {
     <div className="max-w-3xl mx-auto px-4 py-8 text-center text-gray-400">행사를 찾을 수 없습니다.</div>
   );
 
-  const canJoin = event.status === 'UPCOMING' || event.status === 'ONGOING';
+  const isPastEndDate = event.endDate ? new Date(event.endDate) < new Date() : false;
+  const canJoin = (event.status === 'UPCOMING' || event.status === 'ONGOING') && !isPastEndDate;
   const isFull = event.maxParticipants !== null && event.currentParticipants >= event.maxParticipants && !event.joined;
 
   return (

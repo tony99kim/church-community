@@ -137,6 +137,7 @@ public class EventService {
     @Transactional
     public void joinEvent(Long eventId, Long userId) {
         Event event = getEventOrThrow(eventId);
+        if (!event.isJoinable()) throw new BusinessException(ErrorCode.EVENT_NOT_JOINABLE);
         if (event.isFull()) throw new BusinessException(ErrorCode.EVENT_FULL);
 
         participantRepository.findByEventIdAndUserId(eventId, userId).ifPresentOrElse(

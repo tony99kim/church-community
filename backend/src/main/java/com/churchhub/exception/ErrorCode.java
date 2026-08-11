@@ -64,6 +64,7 @@ public enum ErrorCode {
     EVENT_FULL(HttpStatus.CONFLICT, "참여 정원이 초과되었습니다."),
     EVENT_ALREADY_JOINED(HttpStatus.CONFLICT, "이미 참여 신청한 행사입니다."),
     EVENT_NOT_JOINED(HttpStatus.BAD_REQUEST, "참여 신청하지 않은 행사입니다."),
+    EVENT_NOT_JOINABLE(HttpStatus.BAD_REQUEST, "신청 가능한 행사가 아닙니다."),
 
     // Common
     INVALID_INPUT(HttpStatus.BAD_REQUEST, "잘못된 입력값입니다."),
