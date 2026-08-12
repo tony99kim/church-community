@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import api from '@/lib/api';
+import { toast } from '@/components/Toast';
 
 interface Post {
   id: number;
@@ -54,8 +55,9 @@ export default function AdminPostsPage() {
     try {
       await api.delete(`/posts/${post.id}`);
       fetchPosts(page);
+      toast('게시글이 삭제되었습니다');
     } catch {
-      alert('삭제에 실패했습니다.');
+      toast('삭제에 실패했습니다', 'error');
     }
   };
 

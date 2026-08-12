@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import api from '@/lib/api';
 import { FaithQuestion, PrayerRequest, ChatMessage } from '@/types';
+import { toast } from '@/components/Toast';
 
 type Tab = 'questions' | 'prayers';
 type QFilter = 'all' | 'unanswered' | 'answered';
@@ -49,6 +50,8 @@ export default function AdminFaithPage() {
       const res = await api.get(`/faith/questions/${questionId}/messages`);
       setMessages(res.data.data ?? []);
       setTimeout(() => chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
+    } catch {
+      toast('전송에 실패했습니다', 'error');
     } finally {
       setSendingMsg(false);
     }
@@ -59,8 +62,9 @@ export default function AdminFaithPage() {
     try {
       const res = await api.put(`/faith/admin/prayers/${prayerId}/prayed`);
       setPrayers(prev => prev.map(p => p.id === prayerId ? { ...p, adminPrayed: res.data.data.adminPrayed } : p));
+      toast('기도 상태가 변경되었습니다');
     } catch {
-      alert('변경에 실패했습니다.');
+      toast('변경에 실패했습니다', 'error');
     } finally {
       setPrayingId(null);
     }

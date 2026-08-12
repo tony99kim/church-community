@@ -5,6 +5,7 @@ import api from '@/lib/api';
 import { uploadImage } from '@/lib/supabase';
 import { Space, SpaceRental, Church, SpaceBlock } from '@/types';
 import { useAuthStore } from '@/store/authStore';
+import { toast } from '@/components/Toast';
 
 const STATUS_LABEL: Record<string, string> = { PENDING: '대기중', APPROVED: '예약확정', REJECTED: '거절', CANCELLED: '취소' };
 const STATUS_BADGE: Record<string, string> = {
@@ -69,7 +70,7 @@ export default function AdminSpacesPage() {
     try {
       const url = await uploadImage(file);
       setForm(p => ({ ...p, imageUrl: url }));
-    } catch { alert('이미지 업로드에 실패했습니다.'); }
+    } catch { toast('이미지 업로드에 실패했습니다', 'error'); }
     finally { setThumbUploading(false); e.target.value = ''; }
   };
 
@@ -111,19 +112,25 @@ export default function AdminSpacesPage() {
     if (me?.role !== 'CHURCH_MANAGER') {
       body.churchId = form.churchId ? Number(form.churchId) : null;
     }
-    if (editId) {
-      await api.put(`/admin/spaces/${editId}`, body);
-    } else {
-      await api.post('/admin/spaces', body);
-    }
-    setShowForm(false);
-    fetchAll();
+    try {
+      if (editId) {
+        await api.put(`/admin/spaces/${editId}`, body);
+      } else {
+        await api.post('/admin/spaces', body);
+      }
+      setShowForm(false);
+      fetchAll();
+      toast(editId ? '저장되었습니다' : '공간이 등록되었습니다');
+    } catch { toast('저장에 실패했습니다', 'error'); }
   };
 
   const handleDelete = async (id: number) => {
     if (!confirm('이 공간을 삭제하시겠어요?')) return;
-    await api.delete(`/admin/spaces/${id}`);
-    fetchAll();
+    try {
+      await api.delete(`/admin/spaces/${id}`);
+      fetchAll();
+      toast('삭제되었습니다');
+    } catch { toast('삭제에 실패했습니다', 'error'); }
   };
 
   const openBlockManager = async (spaceId: number) => {
@@ -147,27 +154,42 @@ export default function AdminSpacesPage() {
     } else {
       body.blockDate = blockForm.blockDate;
     }
-    await api.post(`/admin/spaces/${blockSpaceId}/blocks`, body);
-    const r = await api.get(`/admin/spaces/${blockSpaceId}/blocks`);
-    setBlocks(r.data.data ?? []);
-    setBlockForm({ ...EMPTY_BLOCK });
+    try {
+      await api.post(`/admin/spaces/${blockSpaceId}/blocks`, body);
+      const r = await api.get(`/admin/spaces/${blockSpaceId}/blocks`);
+      setBlocks(r.data.data ?? []);
+      setBlockForm({ ...EMPTY_BLOCK });
+      toast('차단이 추가되었습니다');
+    } catch { toast('추가에 실패했습니다', 'error'); }
   };
 
   const deleteBlock = async (blockId: number) => {
-    await api.delete(`/admin/spaces/blocks/${blockId}`);
-    if (blockSpaceId) {
-      const r = await api.get(`/admin/spaces/${blockSpaceId}/blocks`);
-      setBlocks(r.data.data ?? []);
-    }
+    try {
+      await api.delete(`/admin/spaces/blocks/${blockId}`);
+      if (blockSpaceId) {
+        const r = await api.get(`/admin/spaces/${blockSpaceId}/blocks`);
+        setBlocks(r.data.data ?? []);
+      }
+      toast('차단이 삭제되었습니다');
+    } catch { toast('삭제에 실패했습니다', 'error'); }
   };
 
-  const approve = async (id: number) => { await api.put(`/admin/spaces/rentals/${id}/approve`); fetchAll(); };
+  const approve = async (id: number) => {
+    try {
+      await api.put(`/admin/spaces/rentals/${id}/approve`);
+      fetchAll();
+      toast('승인되었습니다');
+    } catch { toast('승인에 실패했습니다', 'error'); }
+  };
   const openReject = (id: number) => { setRejectId(id); setRejectReason(''); };
   const confirmReject = async () => {
     if (rejectId === null) return;
-    await api.put(`/admin/spaces/rentals/${rejectId}/reject`, { reason: rejectReason });
-    setRejectId(null);
-    fetchAll();
+    try {
+      await api.put(`/admin/spaces/rentals/${rejectId}/reject`, { reason: rejectReason });
+      setRejectId(null);
+      fetchAll();
+      toast('거절 처리되었습니다');
+    } catch { toast('거절에 실패했습니다', 'error'); }
   };
 
   const openMessage = (r: SpaceRental) => {
@@ -181,7 +203,8 @@ export default function AdminSpacesPage() {
       await api.put(`/admin/spaces/rentals/${messageRentalId}/message`, { adminMessage: messageInput });
       setMessageRentalId(null);
       fetchAll();
-    } catch { alert('메시지 전송에 실패했습니다.'); }
+      toast('메시지가 전송되었습니다');
+    } catch { toast('메시지 전송에 실패했습니다', 'error'); }
     finally { setSendingMessage(false); }
   };
 

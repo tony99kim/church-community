@@ -6,6 +6,7 @@ import api from '@/lib/api';
 import type { Event } from '@/types';
 import { uploadImage } from '@/lib/supabase';
 import { useAuthStore } from '@/store/authStore';
+import { toast } from '@/components/Toast';
 
 const RichEditor = dynamic(() => import('@/components/RichEditor'), { ssr: false });
 
@@ -106,7 +107,7 @@ export default function AdminServicePage() {
       const url = await uploadImage(file);
       setForm((f) => ({ ...f, thumbnailUrl: url }));
     } catch {
-      alert('썸네일 업로드에 실패했습니다.');
+      toast('이미지 업로드에 실패했습니다', 'error');
     } finally {
       setThumbUploading(false);
       e.target.value = '';
@@ -132,8 +133,11 @@ export default function AdminServicePage() {
   };
 
   const handlePublish = async (id: number) => {
-    await api.patch(`/admin/events/${id}/status`, { status: 'UPCOMING' });
-    fetchEvents();
+    try {
+      await api.patch(`/admin/events/${id}/status`, { status: 'UPCOMING' });
+      fetchEvents();
+      toast('공개되었습니다');
+    } catch { toast('공개에 실패했습니다', 'error'); }
   };
 
   const handleSave = async (ev: React.FormEvent) => {
@@ -153,8 +157,9 @@ export default function AdminServicePage() {
       }
       setShowForm(false);
       fetchEvents();
+      toast(editId ? '수정되었습니다' : '봉사 활동이 등록되었습니다');
     } catch {
-      alert('저장에 실패했습니다.');
+      toast('저장에 실패했습니다', 'error');
     } finally {
       setSaving(false);
     }
@@ -162,8 +167,11 @@ export default function AdminServicePage() {
 
   const handleDelete = async (id: number) => {
     if (!confirm('봉사 활동을 삭제(취소)하시겠어요?')) return;
-    await api.delete(`/admin/events/${id}`);
-    fetchEvents();
+    try {
+      await api.delete(`/admin/events/${id}`);
+      fetchEvents();
+      toast('삭제되었습니다');
+    } catch { toast('삭제에 실패했습니다', 'error'); }
   };
 
   const filteredParticipants = selectedEvent === 'all'

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import type { Category } from '@/types';
+import { toast } from '@/components/Toast';
 
 const TYPE_OPTIONS = [
   { value: 'COMMUNITY', label: '커뮤니티' },
@@ -56,6 +57,7 @@ export default function AdminCategoriesPage() {
       }
       setShowModal(false);
       fetchCategories();
+      toast(editing ? '수정되었습니다' : '카테고리가 추가되었습니다');
     } catch (err: unknown) {
       const e = err as { response?: { data?: { message?: string } } };
       setError(e.response?.data?.message || '저장에 실패했습니다.');
@@ -69,14 +71,16 @@ export default function AdminCategoriesPage() {
     try {
       await api.delete(`/admin/categories/${cat.id}`);
       fetchCategories();
-    } catch { alert('삭제에 실패했습니다.'); }
+      toast('삭제되었습니다');
+    } catch { toast('삭제에 실패했습니다', 'error'); }
   };
 
   const handleToggleVisible = async (cat: Category) => {
     try {
       await api.put(`/admin/categories/${cat.id}`, { name: cat.name, description: cat.description, type: cat.type, sortOrder: cat.sortOrder, visible: !cat.visible });
       fetchCategories();
-    } catch { alert('변경에 실패했습니다.'); }
+      toast(cat.visible ? '숨김 처리되었습니다' : '공개 처리되었습니다');
+    } catch { toast('변경에 실패했습니다', 'error'); }
   };
 
   const rootCategories = categories

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import api from '@/lib/api';
+import { toast } from '@/components/Toast';
 
 type ReportStatus = 'PENDING' | 'RESOLVED' | 'REJECTED';
 type ReportType = 'POST' | 'COMMENT' | 'USER';
@@ -55,10 +56,13 @@ export default function AdminReportsPage() {
 
   const handleAction = async () => {
     if (!actionId || !actionType) return;
-    await api.put(`/admin/reports/${actionId}/${actionType}`, { adminNote: note });
-    setActionId(null);
-    setActionType(null);
-    fetchReports(filter || undefined);
+    try {
+      await api.put(`/admin/reports/${actionId}/${actionType}`, { adminNote: note });
+      setActionId(null);
+      setActionType(null);
+      fetchReports(filter || undefined);
+      toast(actionType === 'resolve' ? '신고가 처리되었습니다' : '신고가 기각되었습니다');
+    } catch { toast('처리에 실패했습니다', 'error'); }
   };
 
   return (

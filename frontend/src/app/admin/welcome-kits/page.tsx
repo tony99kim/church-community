@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import { WelcomeKit } from '@/types';
+import { toast } from '@/components/Toast';
 
 export default function AdminWelcomeKitsPage() {
   const router = useRouter();
@@ -20,14 +21,20 @@ export default function AdminWelcomeKitsPage() {
   useEffect(() => { fetchKits(); }, []);
 
   const markProcessed = async (id: number) => {
-    await api.put(`/admin/welcome/kits/${id}/process`);
-    fetchKits();
+    try {
+      await api.put(`/admin/welcome/kits/${id}/process`);
+      fetchKits();
+      toast('처리 완료로 변경되었습니다');
+    } catch { toast('처리에 실패했습니다', 'error'); }
   };
 
   const deleteKit = async (id: number) => {
     if (!confirm('이 신청 건을 삭제하시겠어요? 복구할 수 없습니다.')) return;
-    await api.delete(`/admin/welcome/kits/${id}`);
-    fetchKits();
+    try {
+      await api.delete(`/admin/welcome/kits/${id}`);
+      fetchKits();
+      toast('삭제되었습니다');
+    } catch { toast('삭제에 실패했습니다', 'error'); }
   };
 
   const startChat = async (kit: WelcomeKit) => {
@@ -38,7 +45,7 @@ export default function AdminWelcomeKitsPage() {
       const res = await api.post('/conversations', { recipientId: kit.userId, initialMessage: msg });
       router.push(`/messages?convId=${res.data.data.id}`);
     } catch {
-      alert('채팅 시작에 실패했습니다. 다시 시도해주세요.');
+      toast('채팅 시작에 실패했습니다', 'error');
     } finally {
       setStartingChat(null);
     }

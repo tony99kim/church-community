@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import { uploadImage } from '@/lib/supabase';
 import { Church } from '@/types';
+import { toast } from '@/components/Toast';
 
 const EMPTY_FORM = {
   name: '', address: '', sundayServiceTime: '', hasYouthGroup: false,
@@ -32,7 +33,7 @@ export default function AdminChurchesPage() {
       try {
         const url = await uploadImage(file);
         setForm(p => ({ ...p, imageUrl: url }));
-      } catch { alert('이미지 업로드에 실패했습니다.'); }
+      } catch { toast('이미지 업로드에 실패했습니다', 'error'); }
       finally { setThumbUploading(false); e.target.value = ''; }
     };
 
@@ -43,6 +44,9 @@ export default function AdminChurchesPage() {
       await api.post('/admin/churches', createForm);
       setCreateForm({ ...EMPTY_FORM });
       fetchChurches();
+      toast('교회가 등록되었습니다');
+    } catch {
+      toast('등록에 실패했습니다', 'error');
     } finally {
       setSaving(false);
     }
@@ -72,6 +76,9 @@ export default function AdminChurchesPage() {
       await api.put(`/admin/churches/${editTarget.id}`, editForm);
       setEditTarget(null);
       fetchChurches();
+      toast('저장되었습니다');
+    } catch {
+      toast('저장에 실패했습니다', 'error');
     } finally {
       setSaving(false);
     }
@@ -79,8 +86,13 @@ export default function AdminChurchesPage() {
 
   const handleDelete = async (id: number) => {
     if (!confirm('삭제하시겠습니까?')) return;
-    await api.delete(`/admin/churches/${id}`);
-    fetchChurches();
+    try {
+      await api.delete(`/admin/churches/${id}`);
+      fetchChurches();
+      toast('삭제되었습니다');
+    } catch {
+      toast('삭제에 실패했습니다', 'error');
+    }
   };
 
   const FormFields = ({

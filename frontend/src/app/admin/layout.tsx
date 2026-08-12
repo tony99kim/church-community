@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useAuthStore } from '@/store/authStore';
 import api from '@/lib/api';
 import { PendingCountsProvider, usePendingCounts } from '@/context/PendingCountsContext';
+import { ToastContainer } from '@/components/Toast';
 
 type NavLeaf = { href: string; label: string; icon: string; exact?: boolean; countKey?: string };
 type NavGroup = { group: string; icon: string; basePath: string; children: NavLeaf[] };
@@ -191,6 +192,7 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
         <main className="flex-1 overflow-auto">
           {children}
         </main>
+        <ToastContainer />
       </div>
     </div>
   );

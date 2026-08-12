@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
+import { toast } from '@/components/Toast';
 
 interface User {
   id: number;
@@ -157,7 +158,8 @@ export default function AdminUsersPage() {
     try {
       await api.put(`/admin/users/${u.id}/status`, { status: newStatus });
       fetchUsers(page);
-    } catch { alert('변경에 실패했습니다.'); }
+      toast(`${u.nickname}님을 ${action}했습니다`);
+    } catch { toast('변경에 실패했습니다', 'error'); }
   };
 
   const handleDelete = async (u: User) => {
@@ -165,7 +167,8 @@ export default function AdminUsersPage() {
     try {
       await api.delete(`/admin/users/${u.id}`);
       fetchUsers(page);
-    } catch { alert('삭제에 실패했습니다.'); }
+      toast('삭제되었습니다');
+    } catch { toast('삭제에 실패했습니다', 'error'); }
   };
 
   const handleRoleChange = async (u: User, newRole: string) => {
@@ -178,7 +181,8 @@ export default function AdminUsersPage() {
     try {
       await api.put(`/admin/users/${u.id}/role`, { role: newRole });
       fetchUsers(page);
-    } catch { alert('권한 변경에 실패했습니다.'); }
+      toast('권한이 변경되었습니다');
+    } catch { toast('권한 변경에 실패했습니다', 'error'); }
   };
 
   const confirmChurchManagerAssign = async () => {
@@ -187,7 +191,8 @@ export default function AdminUsersPage() {
       await api.put(`/admin/users/${pendingRoleChange.userId}/role`, { role: 'CHURCH_MANAGER', churchId: Number(selectedChurchId) });
       setPendingRoleChange(null);
       fetchUsers(page);
-    } catch { alert('권한 변경에 실패했습니다.'); }
+      toast('권한이 변경되었습니다');
+    } catch { toast('권한 변경에 실패했습니다', 'error'); }
   };
 
   const isSuperAdmin = me?.role === 'SUPER_ADMIN';

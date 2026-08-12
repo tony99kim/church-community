@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import api from '@/lib/api';
 import { Item, ItemRental, Church, ItemCategory, ChatMessage } from '@/types';
 import { useAuthStore } from '@/store/authStore';
+import { toast } from '@/components/Toast';
 
 const STATUS_LABEL: Record<string, string> = { PENDING: '대기중', APPROVED: '대여중', REJECTED: '거절', CANCELLED: '취소', RETURNED: '반납완료' };
 const STATUS_COLOR: Record<string, string> = { PENDING: 'text-amber-500', APPROVED: 'text-green-600', REJECTED: 'text-red-500', CANCELLED: 'text-gray-400', RETURNED: 'text-blue-500' };
@@ -55,37 +56,48 @@ export default function AdminItemsPage() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     const body: Record<string, unknown> = {
-      name: form.name,
-      description: form.description || null,
-      category: form.category,
-      totalQuantity: Number(form.totalQuantity),
+      name: form.name, description: form.description || null,
+      category: form.category, totalQuantity: Number(form.totalQuantity),
     };
     if (me?.role !== 'CHURCH_MANAGER') {
       body.churchId = form.churchId ? Number(form.churchId) : null;
     }
-    if (editId) {
-      await api.put(`/admin/items/${editId}`, body);
-    } else {
-      await api.post('/admin/items', body);
-    }
-    setShowForm(false);
-    fetchAll();
+    try {
+      if (editId) {
+        await api.put(`/admin/items/${editId}`, body);
+      } else {
+        await api.post('/admin/items', body);
+      }
+      setShowForm(false);
+      fetchAll();
+      toast(editId ? '저장되었습니다' : '물품이 등록되었습니다');
+    } catch { toast('저장에 실패했습니다', 'error'); }
   };
 
   const handleDelete = async (id: number) => {
     if (!confirm('이 물품을 삭제하시겠어요?')) return;
-    await api.delete(`/admin/items/${id}`);
-    fetchAll();
+    try {
+      await api.delete(`/admin/items/${id}`);
+      fetchAll();
+      toast('삭제되었습니다');
+    } catch { toast('삭제에 실패했습니다', 'error'); }
   };
 
-  const approve = async (id: number) => { await api.put(`/admin/items/rentals/${id}/approve`); fetchAll(); };
+  const approve = async (id: number) => {
+    try {
+      await api.put(`/admin/items/rentals/${id}/approve`);
+      fetchAll();
+      toast('승인되었습니다');
+    } catch { toast('승인에 실패했습니다', 'error'); }
+  };
   const returnRental = async (id: number) => {
     if (!confirm('반납 완료 처리하시겠어요? 재고가 복구됩니다.')) return;
     try {
       await api.put(`/admin/items/rentals/${id}/return`);
       fetchAll();
+      toast('반납 완료 처리되었습니다');
     } catch {
-      alert('반납 처리에 실패했습니다. 다시 시도해주세요.');
+      toast('반납 처리에 실패했습니다', 'error');
     }
   };
   const openReject = (id: number) => { setRejectId(id); setRejectReason(''); };
@@ -95,8 +107,9 @@ export default function AdminItemsPage() {
       await api.put(`/admin/items/rentals/${rejectId}/reject`, { reason: rejectReason });
       setRejectId(null);
       fetchAll();
+      toast('거절 처리되었습니다');
     } catch {
-      alert('거절 처리에 실패했습니다.');
+      toast('거절에 실패했습니다', 'error');
     }
   };
 
