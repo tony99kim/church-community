@@ -90,7 +90,7 @@ export default function AdminEventsPage() {
       const url = await uploadImage(file);
       setForm((f) => ({ ...f, thumbnailUrl: url }));
     } catch {
-      alert('썸네일 업로드에 실패했습니다.');
+      toast('썸네일 업로드에 실패했습니다', 'error');
     } finally {
       setThumbUploading(false);
       e.target.value = '';

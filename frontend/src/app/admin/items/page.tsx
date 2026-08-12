@@ -1,10 +1,12 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import { Item, ItemRental, Church, ItemCategory, ChatMessage } from '@/types';
 import { useAuthStore } from '@/store/authStore';
 import { toast } from '@/components/Toast';
+import { ChatBox } from '@/components/ChatBox';
+import { RejectModal } from '@/components/RejectModal';
 
 const STATUS_LABEL: Record<string, string> = { PENDING: '대기중', APPROVED: '대여중', REJECTED: '거절', CANCELLED: '취소', RETURNED: '반납완료' };
 const STATUS_COLOR: Record<string, string> = { PENDING: 'text-amber-500', APPROVED: 'text-green-600', REJECTED: 'text-red-500', CANCELLED: 'text-gray-400', RETURNED: 'text-blue-500' };
@@ -24,12 +26,9 @@ export default function AdminItemsPage() {
   const [loading, setLoading] = useState(true);
   const [chatRentalId, setChatRentalId] = useState<number | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [msgInput, setMsgInput] = useState('');
   const [sendingMsg, setSendingMsg] = useState(false);
   const [rejectId, setRejectId] = useState<number | null>(null);
-  const [rejectReason, setRejectReason] = useState('');
   const [rentalFilter, setRentalFilter] = useState<'active' | 'history'>('active');
-  const chatBottomRef = useRef<HTMLDivElement>(null);
 
   const fetchAll = () => {
     Promise.all([
@@ -102,10 +101,10 @@ export default function AdminItemsPage() {
     }
   };
   const openReject = (id: number) => { setRejectId(id); setRejectReason(''); };
-  const confirmReject = async () => {
+  const confirmReject = async (reason: string) => {
     if (rejectId === null) return;
     try {
-      await api.put(`/admin/items/rentals/${rejectId}/reject`, { reason: rejectReason });
+      await api.put(`/admin/items/rentals/${rejectId}/reject`, { reason });
       setRejectId(null);
       fetchAll();
       toast('거절 처리되었습니다');
@@ -119,19 +118,14 @@ export default function AdminItemsPage() {
     setChatRentalId(rentalId);
     const res = await api.get(`/items/rentals/${rentalId}/messages`);
     setMessages(res.data.data ?? []);
-    setTimeout(() => chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
   };
 
-  const sendMsg = async (rentalId: number) => {
-    const content = msgInput.trim();
-    if (!content) return;
+  const sendMsg = async (rentalId: number, content: string) => {
     setSendingMsg(true);
     try {
       await api.post(`/items/rentals/${rentalId}/messages`, { content });
-      setMsgInput('');
       const res = await api.get(`/items/rentals/${rentalId}/messages`);
       setMessages(res.data.data ?? []);
-      setTimeout(() => chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
     } finally {
       setSendingMsg(false);
     }
@@ -233,37 +227,12 @@ export default function AdminItemsPage() {
                 </div>
               )}
               {chatRentalId === r.id && (
-                <div className="mt-3 border-t border-[#EDEFF1] pt-3">
-                  <div className="bg-gray-50 rounded-xl p-3 max-h-60 overflow-y-auto space-y-2 mb-2">
-                    {messages.length === 0 ? (
-                      <p className="text-xs text-gray-400 text-center py-4">아직 메시지가 없습니다. 먼저 말을 걸어보세요.</p>
-                    ) : messages.map(m => (
-                      <div key={m.id} className={`flex ${m.senderRole === 'ADMIN' ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm ${m.senderRole === 'ADMIN' ? 'bg-[#003478] text-white' : 'bg-white border border-[#EDEFF1] text-gray-800'}`}>
-                          {m.senderRole !== 'ADMIN' && <div className="text-[10px] text-gray-400 mb-0.5">{m.senderNickname}</div>}
-                          <p>{m.content}</p>
-                          <div className={`text-[10px] mt-0.5 ${m.senderRole === 'ADMIN' ? 'text-blue-200' : 'text-gray-400'}`}>
-                            {new Date(m.createdAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                    <div ref={chatBottomRef} />
-                  </div>
-                  <div className="flex gap-2">
-                    <input
-                      value={msgInput}
-                      onChange={e => setMsgInput(e.target.value)}
-                      onKeyDown={e => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), sendMsg(r.id))}
-                      placeholder="메시지를 입력하세요..."
-                      className="flex-1 border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]"
-                    />
-                    <button onClick={() => sendMsg(r.id)} disabled={sendingMsg || !msgInput.trim()}
-                      className="px-4 py-2 bg-[#003478] text-white rounded-xl text-sm font-medium hover:bg-blue-900 disabled:opacity-50">
-                      전송
-                    </button>
-                  </div>
-                </div>
+                <ChatBox
+                  messages={messages}
+                  onSend={(content) => sendMsg(r.id, content)}
+                  sending={sendingMsg}
+                  adminRole="ADMIN"
+                />
               )}
             </div>
           ))}
@@ -273,21 +242,7 @@ export default function AdminItemsPage() {
 
       {/* 거절 모달 */}
       {rejectId !== null && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl w-full max-w-sm p-6 shadow-xl">
-            <h2 className="font-bold text-gray-900 mb-3">거절 사유</h2>
-            <textarea rows={3} value={rejectReason}
-              onChange={e => setRejectReason(e.target.value)}
-              placeholder="거절 사유를 입력하세요"
-              className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478] resize-none mb-4" />
-            <div className="flex gap-2 justify-end">
-              <button onClick={() => setRejectId(null)}
-                className="px-4 py-2 text-sm border border-gray-300 rounded-xl hover:bg-gray-50">취소</button>
-              <button onClick={confirmReject} disabled={!rejectReason.trim()}
-                className="px-4 py-2 text-sm bg-red-500 text-white rounded-xl font-semibold hover:bg-red-600 disabled:opacity-50">거절 확인</button>
-            </div>
-          </div>
-        </div>
+        <RejectModal onConfirm={confirmReject} onClose={() => setRejectId(null)} />
       )}
 
       {/* 물품 등록/수정 모달 */}

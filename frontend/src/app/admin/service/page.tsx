@@ -83,7 +83,7 @@ export default function AdminServicePage() {
   useEffect(() => {
     fetchEvents();
     if (me?.role === 'SUPER_ADMIN') {
-      api.get('/churches').then(r => setChurches(r.data.data ?? []));
+      api.get('/churches').then(r => setChurches(r.data.data ?? [])).catch(() => {});
     }
   }, []);
 
@@ -96,6 +96,7 @@ export default function AdminServicePage() {
         const serviceIds = new Set(events.map(e => e.id));
         setParticipants(all.filter(p => serviceIds.has(p.eventId)));
       })
+      .catch(() => toast('참여자 목록을 불러오지 못했습니다', 'error'))
       .finally(() => setParticipantsLoading(false));
   }, [tab, events]);
 

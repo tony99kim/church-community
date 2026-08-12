@@ -20,7 +20,7 @@ export default function AdminChurchesPage() {
   const [thumbUploading, setThumbUploading] = useState(false);
 
   const fetchChurches = () => {
-    api.get('/admin/churches').then(r => setChurches(r.data.data ?? []));
+    api.get('/admin/churches').then(r => setChurches(r.data.data ?? [])).catch(() => toast('교회 목록을 불러오지 못했습니다', 'error'));
   };
 
   useEffect(() => { fetchChurches(); }, []);

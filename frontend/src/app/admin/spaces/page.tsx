@@ -6,6 +6,7 @@ import { uploadImage } from '@/lib/supabase';
 import { Space, SpaceRental, Church, SpaceBlock } from '@/types';
 import { useAuthStore } from '@/store/authStore';
 import { toast } from '@/components/Toast';
+import { RejectModal } from '@/components/RejectModal';
 
 const STATUS_LABEL: Record<string, string> = { PENDING: '대기중', APPROVED: '예약확정', REJECTED: '거절', CANCELLED: '취소' };
 const STATUS_BADGE: Record<string, string> = {
@@ -49,7 +50,6 @@ export default function AdminSpacesPage() {
 
   // 거절 모달
   const [rejectId, setRejectId] = useState<number | null>(null);
-  const [rejectReason, setRejectReason] = useState('');
 
   // 메시지 모달
   const [messageRentalId, setMessageRentalId] = useState<number | null>(null);
@@ -181,11 +181,11 @@ export default function AdminSpacesPage() {
       toast('승인되었습니다');
     } catch { toast('승인에 실패했습니다', 'error'); }
   };
-  const openReject = (id: number) => { setRejectId(id); setRejectReason(''); };
-  const confirmReject = async () => {
+  const openReject = (id: number) => { setRejectId(id); };
+  const confirmReject = async (reason: string) => {
     if (rejectId === null) return;
     try {
-      await api.put(`/admin/spaces/rentals/${rejectId}/reject`, { reason: rejectReason });
+      await api.put(`/admin/spaces/rentals/${rejectId}/reject`, { reason });
       setRejectId(null);
       fetchAll();
       toast('거절 처리되었습니다');
@@ -396,21 +396,7 @@ export default function AdminSpacesPage() {
 
       {/* 거절 모달 */}
       {rejectId !== null && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl w-full max-w-sm p-6 shadow-xl">
-            <h2 className="font-bold text-gray-900 mb-3">거절 사유</h2>
-            <textarea rows={3} value={rejectReason}
-              onChange={e => setRejectReason(e.target.value)}
-              placeholder="거절 사유를 입력하세요"
-              className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478] resize-none mb-4" />
-            <div className="flex gap-2 justify-end">
-              <button onClick={() => setRejectId(null)}
-                className="px-4 py-2 text-sm border border-gray-300 rounded-xl hover:bg-gray-50">취소</button>
-              <button onClick={confirmReject} disabled={!rejectReason.trim()}
-                className="px-4 py-2 text-sm bg-red-500 text-white rounded-xl font-semibold hover:bg-red-600 disabled:opacity-50">거절 확인</button>
-            </div>
-          </div>
-        </div>
+        <RejectModal onConfirm={confirmReject} onClose={() => setRejectId(null)} />
       )}
 
       {/* 메시지 모달 */}

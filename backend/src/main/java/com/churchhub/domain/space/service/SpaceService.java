@@ -146,19 +146,6 @@ public class SpaceService {
     }
 
     @Transactional
-    public SpaceDto.Response createSpace(SpaceDto.CreateRequest req) {
-        Church church = churchRepository.findById(req.getChurchId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.CHURCH_NOT_FOUND));
-        Space space = Space.builder()
-                .church(church).name(req.getName()).description(req.getDescription())
-                .usageTypes(req.getUsageTypes()).capacity(req.getCapacity())
-                .openTime(req.getOpenTime()).closeTime(req.getCloseTime()).slotMinutes(req.getSlotMinutes())
-                .imageUrl(req.getImageUrl())
-                .build();
-        return SpaceDto.Response.from(spaceRepository.save(space));
-    }
-
-    @Transactional
     public SpaceDto.RentalResponse applyRental(Long spaceId, Long userId, SpaceDto.RentalRequest req) {
         Space space = spaceRepository.findById(spaceId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.SPACE_NOT_FOUND));
