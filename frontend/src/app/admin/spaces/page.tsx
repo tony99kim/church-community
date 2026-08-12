@@ -6,7 +6,7 @@ import { uploadImage } from '@/lib/supabase';
 import { Space, SpaceRental, Church, SpaceBlock } from '@/types';
 import { useAuthStore } from '@/store/authStore';
 
-const STATUS_LABEL: Record<string, string> = { PENDING: '대기중', APPROVED: '승인', REJECTED: '거절', CANCELLED: '취소' };
+const STATUS_LABEL: Record<string, string> = { PENDING: '대기중', APPROVED: '예약확정', REJECTED: '거절', CANCELLED: '취소' };
 const STATUS_BADGE: Record<string, string> = {
   PENDING: 'bg-amber-50 text-amber-600',
   APPROVED: 'bg-green-50 text-green-600',
@@ -203,7 +203,7 @@ export default function AdminSpacesPage() {
         {(['spaces', 'rentals'] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
             className={`px-4 py-1.5 rounded-lg text-sm font-medium transition ${tab === t ? 'bg-white text-[#003478] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
-            {t === 'spaces' ? `공간 목록 (${spaces.length})` : `예약 현황 (${rentals.filter(r => r.status === 'PENDING').length})`}
+            {t === 'spaces' ? `공간 목록 (${spaces.length})` : `예약 현황 (대기 ${rentals.filter(r => r.status === 'PENDING').length} · 확정 ${rentals.filter(r => r.status === 'APPROVED').length})`}
           </button>
         ))}
       </div>

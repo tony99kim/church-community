@@ -22,13 +22,7 @@ const navEntries: NavEntry[] = [
       { href: '/admin/categories', label: '카테고리 관리', icon: '📁' },
     ],
   },
-  {
-    group: '행사 관리', icon: '📅', basePath: '/admin/events',
-    children: [
-      { href: '/admin/events', label: '행사 관리', icon: '📅' },
-      { href: '/admin/participants', label: '행사 참여자', icon: '🎫' },
-    ],
-  },
+  { href: '/admin/events', label: '행사 관리', icon: '📅' },
   { href: '/admin/spaces', label: '공간 대여 관리', icon: '🏠', countKey: 'spaceRentals' },
   { href: '/admin/items', label: '물품 대여 관리', icon: '📦', countKey: 'itemRentals' },
   { href: '/admin/welcome-kits', label: '웰컴 키트 신청', icon: '🎁', countKey: 'welcomeKits' },

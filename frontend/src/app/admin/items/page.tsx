@@ -25,6 +25,8 @@ export default function AdminItemsPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [msgInput, setMsgInput] = useState('');
   const [sendingMsg, setSendingMsg] = useState(false);
+  const [rejectId, setRejectId] = useState<number | null>(null);
+  const [rejectReason, setRejectReason] = useState('');
   const chatBottomRef = useRef<HTMLDivElement>(null);
 
   const fetchAll = () => {
@@ -86,11 +88,16 @@ export default function AdminItemsPage() {
       alert('반납 처리에 실패했습니다. 다시 시도해주세요.');
     }
   };
-  const reject = async (id: number) => {
-    const reason = prompt('거절 사유를 입력하세요');
-    if (reason === null) return;
-    await api.put(`/admin/items/rentals/${id}/reject`, { reason });
-    fetchAll();
+  const openReject = (id: number) => { setRejectId(id); setRejectReason(''); };
+  const confirmReject = async () => {
+    if (rejectId === null) return;
+    try {
+      await api.put(`/admin/items/rentals/${rejectId}/reject`, { reason: rejectReason });
+      setRejectId(null);
+      fetchAll();
+    } catch {
+      alert('거절 처리에 실패했습니다.');
+    }
   };
 
   const openChat = async (rentalId: number) => {
@@ -190,8 +197,8 @@ export default function AdminItemsPage() {
               </div>
               {r.status === 'PENDING' && (
                 <div className="flex gap-2 mt-3">
-                  <button onClick={() => approve(r.id)} className="px-3 py-1.5 bg-green-500 text-white rounded-lg text-xs font-medium hover:bg-green-600">승인</button>
-                  <button onClick={() => reject(r.id)} className="px-3 py-1.5 bg-red-500 text-white rounded-lg text-xs font-medium hover:bg-red-600">거절</button>
+                  <button onClick={() => approve(r.id)} className="px-3 py-1.5 bg-[#003478] text-white rounded-lg text-xs font-medium hover:bg-blue-900">승인</button>
+                  <button onClick={() => openReject(r.id)} className="px-3 py-1.5 border border-gray-300 text-gray-600 rounded-lg text-xs font-medium hover:bg-gray-50">거절</button>
                 </div>
               )}
               {r.status === 'APPROVED' && (
@@ -234,6 +241,25 @@ export default function AdminItemsPage() {
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* 거절 모달 */}
+      {rejectId !== null && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-sm p-6 shadow-xl">
+            <h2 className="font-bold text-gray-900 mb-3">거절 사유</h2>
+            <textarea rows={3} value={rejectReason}
+              onChange={e => setRejectReason(e.target.value)}
+              placeholder="거절 사유를 입력하세요"
+              className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478] resize-none mb-4" />
+            <div className="flex gap-2 justify-end">
+              <button onClick={() => setRejectId(null)}
+                className="px-4 py-2 text-sm border border-gray-300 rounded-xl hover:bg-gray-50">취소</button>
+              <button onClick={confirmReject} disabled={!rejectReason.trim()}
+                className="px-4 py-2 text-sm bg-red-500 text-white rounded-xl font-semibold hover:bg-red-600 disabled:opacity-50">거절 확인</button>
+            </div>
+          </div>
         </div>
       )}
 

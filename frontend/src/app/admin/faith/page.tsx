@@ -89,22 +89,14 @@ export default function AdminFaithPage() {
 
       {/* 메인 탭 */}
       <div className="flex gap-1 mb-4 bg-gray-100 rounded-xl p-1 w-fit">
-        {(['questions', 'prayers'] as const).map(t => (
-          <button key={t} onClick={() => setTab(t)}
-            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition relative ${tab === t ? 'bg-white text-[#003478] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
-            {t === 'questions' ? `신앙 질문 (${questions.length})` : `기도 요청 (${prayers.length})`}
-            {t === 'questions' && unansweredCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
-                {unansweredCount}
-              </span>
-            )}
-            {t === 'prayers' && unprayedCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
-                {unprayedCount}
-              </span>
-            )}
-          </button>
-        ))}
+        <button onClick={() => setTab('questions')}
+          className={`px-4 py-1.5 rounded-lg text-sm font-medium transition ${tab === 'questions' ? 'bg-white text-[#003478] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
+          {unansweredCount > 0 ? `신앙 질문 (미답변 ${unansweredCount})` : `신앙 질문 (${questions.length})`}
+        </button>
+        <button onClick={() => setTab('prayers')}
+          className={`px-4 py-1.5 rounded-lg text-sm font-medium transition ${tab === 'prayers' ? 'bg-white text-[#003478] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
+          {unprayedCount > 0 ? `기도 요청 (미기도 ${unprayedCount})` : `기도 요청 (${prayers.length})`}
+        </button>
       </div>
 
       {tab === 'questions' && (
