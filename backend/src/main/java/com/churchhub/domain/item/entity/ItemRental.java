@@ -74,4 +74,5 @@ public class ItemRental {
         this.status = RentalStatus.REJECTED;
         this.rejectReason = reason;
     }
+    public void returnItem() { this.status = RentalStatus.RETURNED; }
 }

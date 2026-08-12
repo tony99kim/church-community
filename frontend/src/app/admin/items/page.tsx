@@ -5,8 +5,8 @@ import api from '@/lib/api';
 import { Item, ItemRental, Church, ItemCategory, ChatMessage } from '@/types';
 import { useAuthStore } from '@/store/authStore';
 
-const STATUS_LABEL: Record<string, string> = { PENDING: '대기중', APPROVED: '승인', REJECTED: '거절', CANCELLED: '취소' };
-const STATUS_COLOR: Record<string, string> = { PENDING: 'text-amber-500', APPROVED: 'text-green-600', REJECTED: 'text-red-500', CANCELLED: 'text-gray-400' };
+const STATUS_LABEL: Record<string, string> = { PENDING: '대기중', APPROVED: '대여중', REJECTED: '거절', CANCELLED: '취소', RETURNED: '반납완료' };
+const STATUS_COLOR: Record<string, string> = { PENDING: 'text-amber-500', APPROVED: 'text-green-600', REJECTED: 'text-red-500', CANCELLED: 'text-gray-400', RETURNED: 'text-blue-500' };
 const CATEGORY_LABEL: Record<ItemCategory, string> = { MOVING: '이사', CLEANING: '청소', LIVING: '생활', EVENT: '행사' };
 
 const EMPTY_FORM = { churchId: '', name: '', description: '', category: 'LIVING' as ItemCategory, totalQuantity: '1' };
@@ -77,6 +77,11 @@ export default function AdminItemsPage() {
   };
 
   const approve = async (id: number) => { await api.put(`/admin/items/rentals/${id}/approve`); fetchAll(); };
+  const returnRental = async (id: number) => {
+    if (!confirm('반납 완료 처리하시겠어요? 재고가 복구됩니다.')) return;
+    await api.put(`/admin/items/rentals/${id}/return`);
+    fetchAll();
+  };
   const reject = async (id: number) => {
     const reason = prompt('거절 사유를 입력하세요');
     if (reason === null) return;
@@ -183,6 +188,11 @@ export default function AdminItemsPage() {
                 <div className="flex gap-2 mt-3">
                   <button onClick={() => approve(r.id)} className="px-3 py-1.5 bg-green-500 text-white rounded-lg text-xs font-medium hover:bg-green-600">승인</button>
                   <button onClick={() => reject(r.id)} className="px-3 py-1.5 bg-red-500 text-white rounded-lg text-xs font-medium hover:bg-red-600">거절</button>
+                </div>
+              )}
+              {r.status === 'APPROVED' && (
+                <div className="flex gap-2 mt-3">
+                  <button onClick={() => returnRental(r.id)} className="px-3 py-1.5 bg-blue-500 text-white rounded-lg text-xs font-medium hover:bg-blue-600">반납 완료</button>
                 </div>
               )}
               {chatRentalId === r.id && (

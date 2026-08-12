@@ -86,6 +86,14 @@ public class ItemController {
         return ApiResponse.success(itemService.approveRental(rentalId, userDetails.getUserId()));
     }
 
+    @PutMapping("/admin/items/rentals/{rentalId}/return")
+    @PreAuthorize("hasAnyRole('PASTOR', 'CHURCH_MANAGER', 'SUPER_ADMIN')")
+    public ApiResponse<ItemDto.RentalResponse> returnRental(
+            @PathVariable Long rentalId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ApiResponse.success(itemService.returnRental(rentalId, userDetails.getUserId()));
+    }
+
     @PutMapping("/admin/items/rentals/{rentalId}/reject")
     @PreAuthorize("hasAnyRole('PASTOR', 'CHURCH_MANAGER', 'SUPER_ADMIN')")
     public ApiResponse<ItemDto.RentalResponse> rejectRental(

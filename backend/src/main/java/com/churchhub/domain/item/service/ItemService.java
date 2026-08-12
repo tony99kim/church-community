@@ -130,6 +130,19 @@ public class ItemService {
     }
 
     @Transactional
+    public ItemDto.RentalResponse returnRental(Long rentalId, Long callerId) {
+        ItemRental rental = itemRentalRepository.findById(rentalId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ITEM_RENTAL_NOT_FOUND));
+        verifyItemOwnership(rental.getItem(), getCallerUser(callerId));
+        if (rental.getStatus() != com.churchhub.domain.space.entity.RentalStatus.APPROVED) {
+            throw new BusinessException(ErrorCode.ITEM_RENTAL_NOT_FOUND);
+        }
+        rental.returnItem();
+        rental.getItem().increaseStock(rental.getQuantity());
+        return ItemDto.RentalResponse.from(rental);
+    }
+
+    @Transactional
     public ItemDto.RentalResponse rejectRental(Long rentalId, String reason, Long callerId) {
         ItemRental rental = itemRentalRepository.findById(rentalId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ITEM_RENTAL_NOT_FOUND));
