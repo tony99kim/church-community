@@ -28,6 +28,7 @@ export default function AdminItemsPage() {
   const [sendingMsg, setSendingMsg] = useState(false);
   const [rejectId, setRejectId] = useState<number | null>(null);
   const [rejectReason, setRejectReason] = useState('');
+  const [rentalFilter, setRentalFilter] = useState<'active' | 'history'>('active');
   const chatBottomRef = useRef<HTMLDivElement>(null);
 
   const fetchAll = () => {
@@ -189,10 +190,22 @@ export default function AdminItemsPage() {
 
       {/* 신청 관리 탭 */}
       {tab === 'rentals' && (
+        <>
+          <div className="flex gap-1 mb-4">
+            {([
+              { key: 'active', label: `진행중 (${rentals.filter(r => r.status === 'PENDING' || r.status === 'APPROVED').length})` },
+              { key: 'history', label: `완료 이력 (${rentals.filter(r => r.status === 'RETURNED' || r.status === 'REJECTED' || r.status === 'CANCELLED').length})` },
+            ] as const).map(f => (
+              <button key={f.key} onClick={() => setRentalFilter(f.key)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition ${rentalFilter === f.key ? 'bg-[#003478] text-white border-[#003478]' : 'bg-white text-gray-500 border-gray-200 hover:border-[#003478]'}`}>
+                {f.label}
+              </button>
+            ))}
+          </div>
         <div className="space-y-3">
-          {rentals.length === 0 ? (
-            <div className="bg-white border border-[#EDEFF1] rounded-xl py-16 text-center text-gray-400 text-sm">신청 내역이 없습니다.</div>
-          ) : rentals.map(r => (
+          {rentals.filter(r => rentalFilter === 'active' ? (r.status === 'PENDING' || r.status === 'APPROVED') : (r.status === 'RETURNED' || r.status === 'REJECTED' || r.status === 'CANCELLED')).length === 0 ? (
+            <div className="bg-white border border-[#EDEFF1] rounded-xl py-16 text-center text-gray-400 text-sm">{rentalFilter === 'active' ? '진행 중인 신청이 없습니다.' : '완료된 이력이 없습니다.'}</div>
+          ) : rentals.filter(r => rentalFilter === 'active' ? (r.status === 'PENDING' || r.status === 'APPROVED') : (r.status === 'RETURNED' || r.status === 'REJECTED' || r.status === 'CANCELLED')).map(r => (
             <div key={r.id} className="bg-white border border-[#EDEFF1] rounded-xl p-4">
               <div className="flex items-start justify-between">
                 <div>
@@ -255,6 +268,7 @@ export default function AdminItemsPage() {
             </div>
           ))}
         </div>
+        </>
       )}
 
       {/* 거절 모달 */}

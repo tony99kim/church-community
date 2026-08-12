@@ -135,7 +135,7 @@ public class ItemService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.ITEM_RENTAL_NOT_FOUND));
         verifyItemOwnership(rental.getItem(), getCallerUser(callerId));
         if (rental.getStatus() != com.churchhub.domain.space.entity.RentalStatus.APPROVED) {
-            throw new BusinessException(ErrorCode.ITEM_RENTAL_NOT_FOUND);
+            throw new BusinessException(ErrorCode.ITEM_RENTAL_NOT_RETURNABLE);
         }
         rental.returnItem();
         rental.getItem().increaseStock(rental.getQuantity());

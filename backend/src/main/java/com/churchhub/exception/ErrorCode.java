@@ -46,6 +46,7 @@ public enum ErrorCode {
     ITEM_OUT_OF_STOCK(HttpStatus.BAD_REQUEST, "재고가 부족합니다."),
     ITEM_TERMS_NOT_AGREED(HttpStatus.BAD_REQUEST, "약관에 동의해야 합니다."),
     ITEM_HAS_RENTALS(HttpStatus.BAD_REQUEST, "대여 신청이 있는 물품은 삭제할 수 없습니다."),
+    ITEM_RENTAL_NOT_RETURNABLE(HttpStatus.BAD_REQUEST, "대여 중인 물품만 반납 처리할 수 있습니다."),
 
     // DM
     CONVERSATION_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 대화방입니다."),
