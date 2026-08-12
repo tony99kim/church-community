@@ -46,33 +46,39 @@ export default function SpacesPage() {
                 </h2>
                 <div className="grid md:grid-cols-2 gap-4">
                   {churchSpaces.map(space => (
-                    <div key={space.id} className="bg-white rounded-2xl border border-[#EDEFF1] overflow-hidden">
+                    <div key={space.id} className="bg-white rounded-2xl border border-[#EDEFF1] overflow-hidden flex flex-col">
                       {space.imageUrl ? (
-                        <img src={space.imageUrl} alt={space.name} className="w-full h-28 object-cover" />
+                        <img src={space.imageUrl} alt={space.name} className="w-full h-44 object-cover shrink-0" />
                       ) : (
-                        <div className="w-full h-16 bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center text-2xl">🏠</div>
+                        <div className="w-full h-44 bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center text-4xl shrink-0">🏠</div>
                       )}
-                      <div className="p-5">
-                      <div className="flex items-start justify-between mb-2">
-                        <h3 className="text-base font-bold text-gray-800">{space.name}</h3>
-                        <span className={`px-2 py-0.5 text-xs rounded-full ${space.available ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-500'}`}>
-                          {space.available ? '예약 가능' : '예약 불가'}
-                        </span>
-                      </div>
-                      {space.description && <p className="text-sm text-gray-500 mb-3">{space.description}</p>}
-                      <div className="text-xs text-gray-400 space-y-0.5 mb-4">
-                        {space.usageTypes && <div>✅ {space.usageTypes}</div>}
-                        {space.capacity && <div>👥 최대 {space.capacity}명</div>}
-                        {space.openTime && (
-                          <div>🕐 {space.openTime.slice(0, 5)} ~ {space.closeTime?.slice(0, 5)} ({space.slotMinutes}분 단위)</div>
-                        )}
-                      </div>
-                      {space.available && (
-                        <Link href={`/spaces/${space.id}`}
-                          className="block text-center py-2 bg-[#003478] text-white rounded-xl text-sm font-medium hover:bg-blue-900 transition-colors">
-                          {isLoggedIn ? '날짜 선택하기' : '로그인 후 예약'}
-                        </Link>
-                      )}
+                      <div className="p-5 flex flex-col flex-1">
+                        <div className="flex items-start justify-between mb-2">
+                          <h3 className="text-base font-bold text-gray-800">{space.name}</h3>
+                          <span className={`px-2 py-0.5 text-xs rounded-full shrink-0 ml-2 ${space.available ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-500'}`}>
+                            {space.available ? '예약 가능' : '예약 불가'}
+                          </span>
+                        </div>
+                        {space.description && <p className="text-sm text-gray-500 mb-3">{space.description}</p>}
+                        <div className="text-xs text-gray-400 space-y-0.5 flex-1">
+                          {space.usageTypes && <div>✅ {space.usageTypes}</div>}
+                          {space.capacity && <div>👥 최대 {space.capacity}명</div>}
+                          {space.openTime && (
+                            <div>🕐 {space.openTime.slice(0, 5)} ~ {space.closeTime?.slice(0, 5)} ({space.slotMinutes}분 단위)</div>
+                          )}
+                        </div>
+                        <div className="mt-4">
+                          {space.available ? (
+                            <Link href={`/spaces/${space.id}`}
+                              className="block text-center py-2 bg-[#003478] text-white rounded-xl text-sm font-medium hover:bg-blue-900 transition-colors">
+                              {isLoggedIn ? '날짜 선택하기' : '로그인 후 예약'}
+                            </Link>
+                          ) : (
+                            <div className="block text-center py-2 bg-gray-100 text-gray-400 rounded-xl text-sm font-medium cursor-not-allowed">
+                              예약 불가
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))}
