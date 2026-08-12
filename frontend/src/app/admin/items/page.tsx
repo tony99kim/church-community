@@ -79,8 +79,12 @@ export default function AdminItemsPage() {
   const approve = async (id: number) => { await api.put(`/admin/items/rentals/${id}/approve`); fetchAll(); };
   const returnRental = async (id: number) => {
     if (!confirm('반납 완료 처리하시겠어요? 재고가 복구됩니다.')) return;
-    await api.put(`/admin/items/rentals/${id}/return`);
-    fetchAll();
+    try {
+      await api.put(`/admin/items/rentals/${id}/return`);
+      fetchAll();
+    } catch {
+      alert('반납 처리에 실패했습니다. 다시 시도해주세요.');
+    }
   };
   const reject = async (id: number) => {
     const reason = prompt('거절 사유를 입력하세요');
@@ -130,7 +134,7 @@ export default function AdminItemsPage() {
         {(['items', 'rentals'] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
             className={`px-4 py-1.5 rounded-lg text-sm font-medium transition ${tab === t ? 'bg-white text-[#003478] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
-            {t === 'items' ? `물품 목록 (${items.length})` : `신청 관리 (${rentals.filter(r => r.status === 'PENDING').length})`}
+            {t === 'items' ? `물품 목록 (${items.length})` : `신청 관리 (대기 ${rentals.filter(r => r.status === 'PENDING').length} · 대여중 ${rentals.filter(r => r.status === 'APPROVED').length})`}
           </button>
         ))}
       </div>
