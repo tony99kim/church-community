@@ -1,15 +1,17 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import { WelcomeKit } from '@/types';
 
 export default function AdminWelcomeKitsPage() {
+  const router = useRouter();
   const [kits, setKits] = useState<WelcomeKit[]>([]);
   const [loading, setLoading] = useState(true);
-  const [messageInputs, setMessageInputs] = useState<Record<number, string>>({});
-  const [sending, setSending] = useState<number | null>(null);
+  const [chatInputs, setChatInputs] = useState<Record<number, string>>({});
   const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [startingChat, setStartingChat] = useState<number | null>(null);
 
   const fetchKits = () => {
     api.get('/admin/welcome/kits').then(r => setKits(r.data.data ?? [])).finally(() => setLoading(false));
@@ -22,19 +24,17 @@ export default function AdminWelcomeKitsPage() {
     fetchKits();
   };
 
-  const sendMessage = async (id: number) => {
-    const msg = messageInputs[id]?.trim();
-    if (!msg) return;
-    setSending(id);
+  const startChat = async (kit: WelcomeKit) => {
+    const msg = chatInputs[kit.id]?.trim();
+    if (!msg || !kit.userId) return;
+    setStartingChat(kit.id);
     try {
-      await api.put(`/admin/welcome/kits/${id}/message`, { adminMessage: msg });
-      setMessageInputs(prev => ({ ...prev, [id]: '' }));
-      setExpandedId(null);
-      fetchKits();
+      const res = await api.post('/conversations', { recipientId: kit.userId, initialMessage: msg });
+      router.push(`/messages?convId=${res.data.data.id}`);
     } catch {
-      alert('메시지 전송에 실패했습니다.');
+      alert('채팅 시작에 실패했습니다. 다시 시도해주세요.');
     } finally {
-      setSending(null);
+      setStartingChat(null);
     }
   };
 
@@ -75,12 +75,16 @@ export default function AdminWelcomeKitsPage() {
                     )}
                   </div>
                   <div className="flex gap-2 shrink-0">
-                    <button
-                      onClick={() => setExpandedId(expandedId === kit.id ? null : kit.id)}
-                      className="text-xs text-[#003478] border border-blue-200 px-3 py-1.5 rounded-lg hover:bg-blue-50"
-                    >
-                      {expandedId === kit.id ? '닫기' : '메시지 보내기'}
-                    </button>
+                    {kit.userId ? (
+                      <button
+                        onClick={() => setExpandedId(expandedId === kit.id ? null : kit.id)}
+                        className="text-xs text-[#003478] border border-blue-200 px-3 py-1.5 rounded-lg hover:bg-blue-50"
+                      >
+                        💬 {expandedId === kit.id ? '닫기' : '채팅 시작'}
+                      </button>
+                    ) : (
+                      <span className="text-xs text-gray-400 border border-gray-200 px-3 py-1.5 rounded-lg">비회원 신청</span>
+                    )}
                     <button
                       onClick={() => markProcessed(kit.id)}
                       className="text-xs text-green-700 border border-green-200 px-3 py-1.5 rounded-lg hover:bg-green-50"
@@ -89,22 +93,26 @@ export default function AdminWelcomeKitsPage() {
                     </button>
                   </div>
                 </div>
-                {expandedId === kit.id && (
+                {expandedId === kit.id && kit.userId && (
                   <div className="mt-3 border-t border-[#EDEFF1] pt-3">
+                    <p className="text-xs text-gray-500 mb-2">
+                      <span className="font-medium text-gray-700">{kit.name}</span>님께 첫 메시지를 보내면 채팅방이 열립니다.
+                    </p>
                     <textarea
+                      autoFocus
                       rows={3}
-                      value={messageInputs[kit.id] ?? ''}
-                      onChange={e => setMessageInputs(prev => ({ ...prev, [kit.id]: e.target.value }))}
-                      placeholder="예: 안녕하세요! 웰컴 키트 신청 감사합니다. 다음 주 화요일에 전달드릴게요."
+                      value={chatInputs[kit.id] ?? ''}
+                      onChange={e => setChatInputs(prev => ({ ...prev, [kit.id]: e.target.value }))}
+                      placeholder={`안녕하세요 ${kit.name}님! 웰컴 키트 신청 감사합니다. 전달 일정을 안내드릴게요.`}
                       className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478] resize-none mb-2"
                     />
                     <div className="flex justify-end">
                       <button
-                        onClick={() => sendMessage(kit.id)}
-                        disabled={!messageInputs[kit.id]?.trim() || sending === kit.id}
+                        onClick={() => startChat(kit)}
+                        disabled={!chatInputs[kit.id]?.trim() || startingChat === kit.id}
                         className="px-4 py-2 text-sm bg-[#003478] text-white rounded-xl font-semibold hover:bg-blue-900 disabled:opacity-50"
                       >
-                        {sending === kit.id ? '전송 중...' : '메시지 전송 & 처리 완료'}
+                        {startingChat === kit.id ? '채팅 여는 중...' : '채팅방 열기 →'}
                       </button>
                     </div>
                   </div>
