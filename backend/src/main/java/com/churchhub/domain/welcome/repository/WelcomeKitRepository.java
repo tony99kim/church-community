@@ -9,4 +9,5 @@ public interface WelcomeKitRepository extends JpaRepository<WelcomeKit, Long> {
     List<WelcomeKit> findAllByOrderByCreatedAtDesc();
     List<WelcomeKit> findAllByProcessedFalseOrderByCreatedAtDesc();
     List<WelcomeKit> findAllByUserIdOrderByCreatedAtDesc(Long userId);
+    boolean existsByUserId(Long userId);
 }

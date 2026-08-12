@@ -521,11 +521,16 @@ export default function MyPage() {
                         </div>
                         {kit.address && <div className="text-xs text-gray-500">📍 {kit.address}</div>}
                         {kit.message && <div className="text-xs text-gray-400 mt-0.5 italic">"{kit.message}"</div>}
-                        {kit.adminMessage && (
+                        {kit.adminMessage ? (
                           <div className="mt-2 bg-blue-50 rounded-lg px-3 py-2">
                             <div className="text-xs text-[#003478] font-semibold mb-0.5">담당자 메시지</div>
                             <p className="text-sm text-gray-700">{kit.adminMessage}</p>
                           </div>
+                        ) : (
+                          <Link href="/messages"
+                            className="mt-2 inline-flex items-center gap-1.5 text-xs text-[#003478] hover:underline">
+                            💬 담당자로부터 메시지가 오면 여기서 확인하세요 →
+                          </Link>
                         )}
                       </div>
                     </div>

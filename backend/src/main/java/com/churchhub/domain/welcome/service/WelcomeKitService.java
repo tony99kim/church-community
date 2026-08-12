@@ -5,6 +5,8 @@ import com.churchhub.domain.user.repository.UserRepository;
 import com.churchhub.domain.welcome.dto.WelcomeKitDto;
 import com.churchhub.domain.welcome.entity.WelcomeKit;
 import com.churchhub.domain.welcome.repository.WelcomeKitRepository;
+import com.churchhub.exception.BusinessException;
+import com.churchhub.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +23,9 @@ public class WelcomeKitService {
 
     @Transactional
     public WelcomeKitDto.Response apply(WelcomeKitDto.Request req, Long userId) {
+        if (userId != null && welcomeKitRepository.existsByUserId(userId)) {
+            throw new BusinessException(ErrorCode.WELCOME_KIT_ALREADY_APPLIED);
+        }
         User user = userId != null ? userRepository.findById(userId).orElse(null) : null;
         WelcomeKit kit = WelcomeKit.builder()
                 .user(user).name(req.getName()).phone(req.getPhone())
