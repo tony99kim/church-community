@@ -24,6 +24,12 @@ export default function AdminWelcomeKitsPage() {
     fetchKits();
   };
 
+  const deleteKit = async (id: number) => {
+    if (!confirm('이 신청 건을 삭제하시겠어요? 복구할 수 없습니다.')) return;
+    await api.delete(`/admin/welcome/kits/${id}`);
+    fetchKits();
+  };
+
   const startChat = async (kit: WelcomeKit) => {
     const msg = chatInputs[kit.id]?.trim();
     if (!msg || !kit.userId) return;
@@ -91,6 +97,12 @@ export default function AdminWelcomeKitsPage() {
                     >
                       처리 완료
                     </button>
+                    <button
+                      onClick={() => deleteKit(kit.id)}
+                      className="text-xs text-red-500 border border-red-200 px-3 py-1.5 rounded-lg hover:bg-red-50"
+                    >
+                      삭제
+                    </button>
                   </div>
                 </div>
                 {expandedId === kit.id && kit.userId && (
@@ -143,7 +155,15 @@ export default function AdminWelcomeKitsPage() {
                     )}
                     <div className="text-xs text-gray-400 mt-1">{new Date(kit.createdAt).toLocaleDateString('ko-KR')} 신청</div>
                   </div>
-                  <span className="text-xs font-medium text-green-600 shrink-0">처리 완료</span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-xs font-medium text-green-600">처리 완료</span>
+                    <button
+                      onClick={() => deleteKit(kit.id)}
+                      className="text-xs text-red-400 hover:text-red-600"
+                    >
+                      삭제
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}

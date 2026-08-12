@@ -52,4 +52,11 @@ public class WelcomeKitController {
             @Valid @RequestBody WelcomeKitDto.AdminMessageRequest req) {
         return ApiResponse.success(welcomeKitService.sendAdminMessage(id, req.getAdminMessage()));
     }
+
+    @DeleteMapping("/admin/welcome/kits/{id}")
+    @PreAuthorize("hasAnyRole('PASTOR', 'CHURCH_MANAGER', 'SUPER_ADMIN')")
+    public ApiResponse<Void> delete(@PathVariable Long id) {
+        welcomeKitService.delete(id);
+        return ApiResponse.success(null);
+    }
 }

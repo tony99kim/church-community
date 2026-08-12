@@ -52,6 +52,12 @@ public class WelcomeKitService {
     }
 
     @Transactional
+    public void delete(Long id) {
+        if (!welcomeKitRepository.existsById(id)) throw new RuntimeException("Not found");
+        welcomeKitRepository.deleteById(id);
+    }
+
+    @Transactional
     public WelcomeKitDto.Response sendAdminMessage(Long id, String adminMessage) {
         WelcomeKit kit = welcomeKitRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Not found"));
