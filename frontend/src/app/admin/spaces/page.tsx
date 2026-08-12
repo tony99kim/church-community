@@ -31,8 +31,20 @@ export default function AdminSpacesPage() {
   const [loading, setLoading] = useState(true);
 
   // 예약 현황 필터
-  const [rentalDate, setRentalDate] = useState(new Date().toISOString().slice(0, 10));
+  const today = new Date().toISOString().slice(0, 10);
+  const plus30 = new Date(Date.now() + 30 * 864e5).toISOString().slice(0, 10);
+  const [dateFrom, setDateFrom] = useState(today);
+  const [dateTo, setDateTo] = useState(plus30);
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
+
+  const setPreset = (preset: 'today' | 'week' | 'month' | 'all') => {
+    const t = new Date();
+    const fmt = (d: Date) => d.toISOString().slice(0, 10);
+    if (preset === 'today') { setDateFrom(fmt(t)); setDateTo(fmt(t)); }
+    else if (preset === 'week') { const e = new Date(t); e.setDate(t.getDate() + 6); setDateFrom(fmt(t)); setDateTo(fmt(e)); }
+    else if (preset === 'month') { const e = new Date(t); e.setMonth(t.getMonth() + 1); setDateFrom(fmt(t)); setDateTo(fmt(e)); }
+    else { setDateFrom(''); setDateTo(''); }
+  };
 
   // 거절 모달
   const [rejectId, setRejectId] = useState<number | null>(null);
@@ -196,76 +208,122 @@ export default function AdminSpacesPage() {
         ))}
       </div>
 
-      {/* 공간 목록 탭 */}
-      {tab === 'spaces' && (
-        <div className="space-y-2">
-          {spaces.length === 0 ? (
-            <div className="bg-white border border-[#EDEFF1] rounded-xl py-16 text-center text-gray-400 text-sm">
-              등록된 공간이 없습니다. 공간을 추가해주세요.
-            </div>
-          ) : spaces.map(s => (
-            <div key={s.id} className="bg-white border border-[#EDEFF1] rounded-xl p-4 flex items-center justify-between">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="font-medium text-sm">{s.name}</span>
-                  {!s.available && <span className="text-xs px-2 py-0.5 bg-red-50 text-red-500 rounded-full">대여 불가</span>}
+      {/* 공간 목록 탭 — 교회별 그룹 */}
+      {tab === 'spaces' && (() => {
+        if (spaces.length === 0) return (
+          <div className="bg-white border border-[#EDEFF1] rounded-xl py-16 text-center text-gray-400 text-sm">
+            등록된 공간이 없습니다. 공간을 추가해주세요.
+          </div>
+        );
+        const grouped = spaces.reduce<Record<string, Space[]>>((acc, s) => {
+          const key = s.churchName ?? '교회 미지정';
+          if (!acc[key]) acc[key] = [];
+          acc[key].push(s);
+          return acc;
+        }, {});
+        return (
+          <div className="space-y-6">
+            {Object.entries(grouped).map(([church, list]) => (
+              <section key={church}>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-sm font-bold text-gray-700">⛪ {church}</span>
+                  <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{list.length}개</span>
                 </div>
-                <div className="text-xs text-gray-400 mt-0.5">
-                  {s.churchName ?? '교회 미지정'} {s.capacity ? `· 최대 ${s.capacity}명` : ''} {s.usageTypes ? `· ${s.usageTypes}` : ''}
+                <div className="space-y-2">
+                  {list.map(s => (
+                    <div key={s.id} className="bg-white border border-[#EDEFF1] rounded-xl p-4 flex items-center justify-between">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-sm">{s.name}</span>
+                          {!s.available && <span className="text-xs px-2 py-0.5 bg-red-50 text-red-500 rounded-full">대여 불가</span>}
+                        </div>
+                        <div className="text-xs text-gray-400 mt-0.5">
+                          {s.capacity ? `최대 ${s.capacity}명` : ''}{s.usageTypes ? ` · ${s.usageTypes}` : ''}
+                        </div>
+                        {s.description && <div className="text-xs text-gray-500 mt-1">{s.description}</div>}
+                      </div>
+                      <div className="flex gap-2 shrink-0 ml-4">
+                        <button onClick={() => openBlockManager(s.id)} className="text-xs text-orange-600 border border-orange-200 px-2 py-1 rounded-lg hover:bg-orange-50">차단 관리</button>
+                        <button onClick={() => openEdit(s)} className="text-xs text-[#003478] hover:underline">수정</button>
+                        <button onClick={() => handleDelete(s.id)} className="text-xs text-red-500 hover:underline">삭제</button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                {s.description && <div className="text-xs text-gray-500 mt-1">{s.description}</div>}
-              </div>
-              <div className="flex gap-2 shrink-0 ml-4">
-                <button onClick={() => openBlockManager(s.id)} className="text-xs text-orange-600 border border-orange-200 px-2 py-1 rounded-lg hover:bg-orange-50">차단 관리</button>
-                <button onClick={() => openEdit(s)} className="text-xs text-[#003478] hover:underline">수정</button>
-                <button onClick={() => handleDelete(s.id)} className="text-xs text-red-500 hover:underline">삭제</button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+              </section>
+            ))}
+          </div>
+        );
+      })()}
 
       {/* 예약 현황 탭 */}
-      {tab === 'rentals' && (
-        <div>
-          {/* 필터 */}
-          <div className="flex flex-wrap items-center gap-3 mb-4">
-            <div className="flex items-center gap-2">
-              <label className="text-sm font-medium text-gray-700">날짜</label>
-              <input type="date" value={rentalDate}
-                onChange={e => setRentalDate(e.target.value)}
-                className="border border-gray-300 rounded-xl px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]" />
-            </div>
-            <div className="flex items-center gap-2">
-              <label className="text-sm font-medium text-gray-700">상태</label>
+      {tab === 'rentals' && (() => {
+        const filtered = rentals.filter(r => {
+          const d = r.startDateTime.slice(0, 10);
+          if (dateFrom && d < dateFrom) return false;
+          if (dateTo && d > dateTo) return false;
+          if (statusFilter !== 'ALL' && r.status !== statusFilter) return false;
+          return true;
+        });
+        const pendingCount = rentals.filter(r => r.status === 'PENDING').length;
+        return (
+          <div>
+            {/* 처리 필요 알림 */}
+            {pendingCount > 0 && (
+              <div
+                onClick={() => setStatusFilter('PENDING')}
+                className="mb-4 flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 cursor-pointer hover:bg-amber-100 transition"
+              >
+                <span className="text-amber-500 text-lg">⚠️</span>
+                <div className="flex-1">
+                  <span className="text-sm font-semibold text-amber-700">처리 대기중인 예약이 {pendingCount}건 있습니다.</span>
+                  <span className="text-xs text-amber-500 ml-2">클릭해서 필터링</span>
+                </div>
+              </div>
+            )}
+
+            {/* 필터 */}
+            <div className="flex flex-wrap items-center gap-3 mb-4">
+              {/* 빠른 선택 */}
+              <div className="flex gap-1">
+                {(['today','week','month','all'] as const).map((p, i) => (
+                  <button key={p} onClick={() => setPreset(p)}
+                    className="px-3 py-1.5 text-xs font-medium border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-600 transition">
+                    {['오늘','이번 주','이번 달','전체'][i]}
+                  </button>
+                ))}
+              </div>
+              <div className="flex items-center gap-2">
+                <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)}
+                  className="border border-gray-300 rounded-xl px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]" />
+                <span className="text-gray-400 text-sm">~</span>
+                <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)}
+                  className="border border-gray-300 rounded-xl px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]" />
+              </div>
               <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
                 className="border border-gray-300 rounded-xl px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]">
-                <option value="ALL">전체</option>
+                <option value="ALL">전체 상태</option>
                 <option value="PENDING">대기중</option>
                 <option value="APPROVED">승인</option>
                 <option value="REJECTED">거절</option>
                 <option value="CANCELLED">취소</option>
               </select>
+              <span className="text-xs text-gray-400">{filtered.length}건</span>
             </div>
-          </div>
 
-          {/* 테이블 */}
-          <div className="bg-white border border-[#EDEFF1] rounded-xl overflow-hidden">
-            <table className="w-full text-sm">
-              <thead className="bg-[#f4f6f8] border-b border-[#EDEFF1]">
-                <tr>
-                  {['공간명','신청자','날짜/시간','인원','목적','연락처','상태','액션'].map(h => (
-                    <th key={h} className="px-3 py-2 text-left text-xs font-semibold text-gray-600 whitespace-nowrap">{h}</th>
-                  ))}
-                  <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 whitespace-nowrap">메시지</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#EDEFF1]">
-                {rentals
-                  .filter(r => r.startDateTime.startsWith(rentalDate))
-                  .filter(r => statusFilter === 'ALL' || r.status === statusFilter)
-                  .map(r => (
-                    <tr key={r.id} className="hover:bg-gray-50">
+            {/* 테이블 */}
+            <div className="bg-white border border-[#EDEFF1] rounded-xl overflow-hidden">
+              <table className="w-full text-sm">
+                <thead className="bg-[#f4f6f8] border-b border-[#EDEFF1]">
+                  <tr>
+                    {['공간명','신청자','날짜/시간','인원','목적','연락처','상태','액션','메시지'].map(h => (
+                      <th key={h} className="px-3 py-2 text-left text-xs font-semibold text-gray-600 whitespace-nowrap">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#EDEFF1]">
+                  {filtered.map(r => (
+                    <tr key={r.id} className={`hover:bg-gray-50 ${r.status === 'PENDING' ? 'bg-amber-50/30' : ''}`}>
                       <td className="px-3 py-2 font-medium text-gray-800 whitespace-nowrap">{r.spaceName}</td>
                       <td className="px-3 py-2 text-gray-600 whitespace-nowrap">{r.applicantNickname}</td>
                       <td className="px-3 py-2 text-gray-600 whitespace-nowrap text-xs">
@@ -291,11 +349,9 @@ export default function AdminSpacesPage() {
                         )}
                       </td>
                       <td className="px-3 py-2">
-                        <button
-                          onClick={() => openMessage(r)}
-                          className="px-2 py-1 text-xs border border-blue-200 text-[#003478] rounded-lg hover:bg-blue-50 whitespace-nowrap"
-                        >
-                          {r.adminMessage ? '메시지 수정' : '메시지'}
+                        <button onClick={() => openMessage(r)}
+                          className="px-2 py-1 text-xs border border-blue-200 text-[#003478] rounded-lg hover:bg-blue-50 whitespace-nowrap">
+                          {r.adminMessage ? '수정' : '메시지'}
                         </button>
                         {r.adminMessage && (
                           <div className="text-[10px] text-blue-600 mt-0.5 max-w-[100px] truncate" title={r.adminMessage}>
@@ -305,14 +361,15 @@ export default function AdminSpacesPage() {
                       </td>
                     </tr>
                   ))}
-                {rentals.filter(r => r.startDateTime.startsWith(rentalDate)).filter(r => statusFilter === 'ALL' || r.status === statusFilter).length === 0 && (
-                  <tr><td colSpan={9} className="py-12 text-center text-gray-400 text-sm">해당 날짜에 예약이 없습니다.</td></tr>
-                )}
-              </tbody>
-            </table>
+                  {filtered.length === 0 && (
+                    <tr><td colSpan={9} className="py-12 text-center text-gray-400 text-sm">조건에 맞는 예약이 없습니다.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* 거절 모달 */}
       {rejectId !== null && (
