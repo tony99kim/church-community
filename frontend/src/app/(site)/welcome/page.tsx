@@ -15,7 +15,8 @@ export default function WelcomePage() {
   useEffect(() => {
     if (!isLoggedIn) return;
     api.get('/welcome/kits/my').then(r => {
-      if (r.data.data) setExistingKit(r.data.data);
+      const kits = r.data.data;
+      if (kits?.length > 0) setExistingKit(kits[0]);
     }).catch(() => {});
   }, [isLoggedIn]);
 
