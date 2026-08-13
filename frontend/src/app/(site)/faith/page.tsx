@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import api from '@/lib/api';
 import { FaithQuestion, PrayerRequest, PastorInfo } from '@/types';
 import { useAuthStore } from '@/store/authStore';
+import { toast } from '@/components/Toast';
 
 type Tab = 'questions' | 'prayers' | 'consult';
 
@@ -58,12 +60,12 @@ export default function FaithPage() {
     setConsultLoading(true);
     try {
       const res = await api.post('/conversations', {
-        pastorId: Number(consultForm.pastorId),
+        recipientId: Number(consultForm.pastorId),
         initialMessage: consultForm.message,
       });
       router.push(`/messages?convId=${res.data.data.id}`);
     } catch {
-      alert('메시지 전송에 실패했습니다. 다시 시도해주세요.');
+      toast('메시지 전송에 실패했습니다. 다시 시도해주세요.', 'error');
     } finally {
       setConsultLoading(false);
     }
@@ -93,6 +95,11 @@ export default function FaithPage() {
 
         {tab === 'questions' && (
           <div className="space-y-4">
+            {!isLoggedIn && (
+              <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 text-center text-sm text-gray-600">
+                <Link href="/login" className="text-[#003478] font-semibold hover:underline">로그인</Link> 후 신앙 질문을 남길 수 있습니다.
+              </div>
+            )}
             {isLoggedIn && (
               <form onSubmit={submitQuestion} className="bg-white rounded-2xl border border-[#EDEFF1] p-5">
                 <textarea required value={qForm.content} rows={3} placeholder="신앙에 대해 궁금한 점을 남겨주세요..."
@@ -180,6 +187,11 @@ export default function FaithPage() {
 
         {tab === 'prayers' && (
           <div className="space-y-4">
+            {!isLoggedIn && (
+              <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 text-center text-sm text-gray-600">
+                <Link href="/login" className="text-[#003478] font-semibold hover:underline">로그인</Link> 후 기도 요청을 남길 수 있습니다.
+              </div>
+            )}
             {isLoggedIn && (
               <form onSubmit={submitPrayer} className="bg-white rounded-2xl border border-[#EDEFF1] p-5">
                 <textarea required value={pForm.content} rows={3} placeholder="기도 제목을 나눠주세요..."

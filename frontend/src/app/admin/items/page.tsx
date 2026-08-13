@@ -100,7 +100,7 @@ export default function AdminItemsPage() {
       toast('반납 처리에 실패했습니다', 'error');
     }
   };
-  const openReject = (id: number) => { setRejectId(id); setRejectReason(''); };
+  const openReject = (id: number) => { setRejectId(id); };
   const confirmReject = async (reason: string) => {
     if (rejectId === null) return;
     try {

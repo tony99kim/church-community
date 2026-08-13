@@ -104,18 +104,14 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const token = localStorage.getItem('accessToken') ?? sessionStorage.getItem('accessToken');
     if (!token) { router.push('/login'); return; }
-    if (!isLoggedIn) {
-      api.get('/users/me')
-        .then((res) => {
-          const u = res.data.data;
-          setUser(u);
-          if (u.role !== 'SUPER_ADMIN' && u.role !== 'CHURCH_MANAGER' && u.role !== 'PASTOR') router.push('/');
-        })
-        .catch(() => router.push('/login'));
-    } else if (user && user.role !== 'SUPER_ADMIN' && user.role !== 'CHURCH_MANAGER' && user.role !== 'PASTOR') {
-      router.push('/');
-    }
-  }, [isLoggedIn, user]);
+    api.get('/users/me')
+      .then((res) => {
+        const u = res.data.data;
+        setUser(u);
+        if (u.role !== 'SUPER_ADMIN' && u.role !== 'CHURCH_MANAGER' && u.role !== 'PASTOR') router.push('/');
+      })
+      .catch(() => router.push('/login'));
+  }, [pathname]);
 
   const handleLogout = () => {
     logout();

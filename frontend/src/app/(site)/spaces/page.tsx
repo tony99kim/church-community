@@ -9,6 +9,7 @@ import { useAuthStore } from '@/store/authStore';
 export default function SpacesPage() {
   const [spaces, setSpaces] = useState<Space[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
   const { isLoggedIn } = useAuthStore();
 
   useEffect(() => {
@@ -17,8 +18,12 @@ export default function SpacesPage() {
 
   if (loading) return <div className="min-h-screen flex items-center justify-center text-gray-400">불러오는 중...</div>;
 
+  const filtered = search.trim()
+    ? spaces.filter(s => s.name.includes(search) || (s.churchName ?? '').includes(search))
+    : spaces;
+
   // 교회별 그룹화
-  const grouped = spaces.reduce<Record<string, Space[]>>((acc, s) => {
+  const grouped = filtered.reduce<Record<string, Space[]>>((acc, s) => {
     const key = s.churchName ?? '기타';
     if (!acc[key]) acc[key] = [];
     acc[key].push(s);
@@ -29,7 +34,14 @@ export default function SpacesPage() {
     <main className="min-h-screen bg-[#f4f6f8] py-10 px-4">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-2xl font-bold text-[#003478] mb-2">공간 대여 🏠</h1>
-        <p className="text-gray-500 text-sm mb-6">날짜와 시간대를 선택해 바로 예약하세요. 담당자 확인 후 최종 승인됩니다.</p>
+        <p className="text-gray-500 text-sm mb-4">날짜와 시간대를 선택해 바로 예약하세요. 담당자 확인 후 최종 승인됩니다.</p>
+
+        <input
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="공간명 또는 교회명으로 검색..."
+          className="w-full mb-4 px-4 py-2.5 border border-[#EDEFF1] rounded-lg text-sm focus:outline-none focus:border-[#003478]"
+        />
 
         {!isLoggedIn && (
           <p className="text-sm text-amber-600 mb-6">※ 예약하려면 <Link href="/login" className="underline">로그인</Link>이 필요합니다.</p>

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
+import { toast } from '@/components/Toast';
 
 export default function WelcomePage() {
   const { isLoggedIn } = useAuthStore();
@@ -27,7 +28,7 @@ export default function WelcomePage() {
       await api.post('/welcome/kit', form);
       setSubmitted(true);
     } catch {
-      alert('신청 중 오류가 발생했습니다. 다시 시도해주세요.');
+      toast('신청 중 오류가 발생했습니다. 다시 시도해주세요.', 'error');
     } finally {
       setLoading(false);
     }
@@ -56,7 +57,7 @@ export default function WelcomePage() {
                 <div className="text-2xl mb-2">✅</div>
                 <p className="text-green-700 font-semibold mb-1">신청이 완료되었습니다!</p>
                 <p className="text-sm text-gray-500 mb-4">
-                  처리 상태: {(existingKit?.processed || submitted) ? (existingKit?.processed ? '처리 완료' : '처리 중') : '처리 중'}
+                  처리 상태: {existingKit?.processed ? '처리 완료' : '처리 중'}
                 </p>
                 <Link href="/my" className="inline-block px-5 py-2 border border-[#003478] text-[#003478] rounded-lg text-sm font-medium hover:bg-blue-50 transition-colors">
                   마이페이지에서 확인하기 →

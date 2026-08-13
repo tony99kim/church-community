@@ -9,12 +9,16 @@ import com.churchhub.domain.user.entity.User;
 import com.churchhub.domain.user.repository.UserRepository;
 import com.churchhub.exception.BusinessException;
 import com.churchhub.exception.ErrorCode;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -47,10 +51,11 @@ public class NotificationService {
         notificationRepository.markAllReadByReceiverId(userId);
     }
 
-    @Transactional
+    @CircuitBreaker(name = "notification", fallbackMethod = "sendFallback")
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void send(Long receiverId, Long senderId, NotificationType type, String content,
                      Long relatedId, RelatedType relatedType) {
-        if (receiverId.equals(senderId)) return; // 자기 자신에게는 알림 안 보냄
+        if (receiverId.equals(senderId)) return;
         User receiver = userRepository.getReferenceById(receiverId);
         User sender = senderId != null ? userRepository.getReferenceById(senderId) : null;
         notificationRepository.save(Notification.builder()
@@ -61,5 +66,10 @@ public class NotificationService {
                 .relatedId(relatedId)
                 .relatedType(relatedType)
                 .build());
+    }
+
+    private void sendFallback(Long receiverId, Long senderId, NotificationType type, String content,
+                              Long relatedId, RelatedType relatedType, Exception e) {
+        log.warn("Notification send failed (circuit open), skipping: {}", e.getMessage());
     }
 }

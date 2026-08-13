@@ -56,6 +56,8 @@ api.interceptors.response.use(
   (res) => res,
   async (error) => {
     const original = error.config;
+
+    // 401: 토큰 갱신 후 재시도
     if (error.response?.status === 401 && !original._retry) {
       original._retry = true;
       const refreshToken = getToken('refreshToken');
@@ -69,10 +71,26 @@ api.interceptors.response.use(
           return api(original);
         } catch {
           clearTokens();
-          window.location.href = '/login';
+          if (typeof window !== 'undefined') window.location.href = '/login';
         }
+      } else {
+        // 리프레시 토큰 없음 = 세션 만료
+        clearTokens();
+        if (typeof window !== 'undefined') window.location.href = '/login';
       }
+      return Promise.reject(error);
     }
+
+    // 5xx 또는 네트워크 오류: 최대 2회 지수 백오프 재시도 (1s, 2s)
+    const status = error.response?.status;
+    const isRetryable = !error.response || (status >= 500 && status !== 501);
+    const retryCount = original._retryCount ?? 0;
+    if (isRetryable && retryCount < 2) {
+      original._retryCount = retryCount + 1;
+      await new Promise(r => setTimeout(r, 1000 * (retryCount + 1)));
+      return api(original);
+    }
+
     return Promise.reject(error);
   }
 );

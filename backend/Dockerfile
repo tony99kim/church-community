@@ -10,4 +10,9 @@ FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 COPY --from=build /app/build/libs/church-hub.jar app.jar
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "-Dspring.profiles.active=prod", "app.jar"]
+ENTRYPOINT ["java", \
+  "-XX:MaxRAMPercentage=75.0", \
+  "-XX:+UseContainerSupport", \
+  "-XX:+OptimizeStringConcat", \
+  "-Dspring.profiles.active=prod", \
+  "-jar", "app.jar"]

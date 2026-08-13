@@ -83,8 +83,8 @@ export default function CommunityPage() {
             className="px-4 py-2 bg-[#003478] text-white rounded-lg text-sm font-medium hover:bg-blue-900 transition-colors">
             검색
           </button>
-          {isLoggedIn && activeCategory && (
-            <Link href={`/posts/write?categoryId=${activeCategory}`}
+          {activeCategory && (
+            <Link href={isLoggedIn ? `/posts/write?categoryId=${activeCategory}` : '/login'}
               className="px-4 py-2 border border-[#003478] text-[#003478] rounded-lg text-sm font-medium hover:bg-blue-50 transition-colors">
               글쓰기
             </Link>

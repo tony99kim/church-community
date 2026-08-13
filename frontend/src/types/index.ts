@@ -89,7 +89,7 @@ export interface Church {
 }
 
 // Space Rental
-export type RentalStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED';
+export type RentalStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED' | 'RETURNED';
 
 export interface Space {
   id: number;
