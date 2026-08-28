@@ -23,7 +23,7 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
+    @Column
     private String password;
 
     @Column(nullable = false, unique = true, length = 20)
@@ -36,6 +36,12 @@ public class User {
     private String phone;
 
     private String profileImageUrl;
+
+    @Column(nullable = false, length = 10)
+    private String provider = "LOCAL";
+
+    @Column(length = 100)
+    private String providerId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -63,6 +69,25 @@ public class User {
         this.nickname = nickname;
         this.name = name != null ? name : nickname;
         this.phone = phone;
+        this.provider = "LOCAL";
+    }
+
+    public static User fromOAuth(String email, String nickname, String profileImageUrl,
+                                  String provider, String providerId) {
+        User user = new User();
+        user.email = email;
+        user.nickname = nickname;
+        user.name = nickname;
+        user.profileImageUrl = profileImageUrl;
+        user.provider = provider;
+        user.providerId = providerId;
+        user.role = UserRole.USER;
+        user.status = UserStatus.ACTIVE;
+        return user;
+    }
+
+    public void updateOAuthProfile(String nickname, String profileImageUrl) {
+        if (profileImageUrl != null) this.profileImageUrl = profileImageUrl;
     }
 
     public void updateProfile(String nickname, String name, String phone, String profileImageUrl) {
@@ -89,7 +114,8 @@ public class User {
     }
 
     public boolean isAdmin() {
-        return this.role == UserRole.PASTOR || this.role == UserRole.CHURCH_MANAGER || this.role == UserRole.SUPER_ADMIN;
+        return this.role == UserRole.PASTOR || this.role == UserRole.CHURCH_MANAGER
+                || this.role == UserRole.SUPER_ADMIN;
     }
 
     public void assignChurch(Church church) {

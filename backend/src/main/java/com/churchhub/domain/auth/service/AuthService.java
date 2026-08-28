@@ -9,9 +9,12 @@ import com.churchhub.exception.BusinessException;
 import com.churchhub.exception.ErrorCode;
 import com.churchhub.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +24,7 @@ public class AuthService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
+    private final StringRedisTemplate redisTemplate;
 
     @Transactional
     public void register(AuthDto.RegisterRequest request) {
@@ -74,8 +78,14 @@ public class AuthService {
     }
 
     @Transactional
-    public void logout(Long userId) {
+    public void logout(Long userId, String accessToken) {
         refreshTokenRepository.deleteAllByUserId(userId);
+        if (accessToken != null) {
+            long remainingMs = jwtTokenProvider.getRemainingExpiryMs(accessToken);
+            if (remainingMs > 0) {
+                redisTemplate.opsForValue().set("bl:" + accessToken, "1", remainingMs, TimeUnit.MILLISECONDS);
+            }
+        }
     }
 
     @Transactional
