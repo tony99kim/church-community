@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = (process.env.NEXT_PUBLIC_API_URL || 'https://churchhub-backend.fly.dev/api/v1').trim();
+const BASE_URL = `${(process.env.NEXT_PUBLIC_API_URL || 'https://churchhub-backend.fly.dev').trim()}/api/v1`;
 
 const api = axios.create({
   baseURL: BASE_URL,
