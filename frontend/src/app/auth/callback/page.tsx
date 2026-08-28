@@ -28,7 +28,8 @@ function OAuthCallback() {
         setUser({ id, email, nickname, role, profileImageUrl });
         router.replace('/');
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error('OAuth callback failed:', err);
         router.replace('/login?error=oauth_failed');
       });
   }, []);
@@ -45,7 +46,11 @@ function OAuthCallback() {
 
 export default function OAuthCallbackPage() {
   return (
-    <Suspense>
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-[#f4f6f8]">
+        <div className="w-10 h-10 border-4 border-[#003478] border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
       <OAuthCallback />
     </Suspense>
   );
