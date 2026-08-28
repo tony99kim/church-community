@@ -3,9 +3,6 @@ spring:
     lazy-initialization: true
   mvc:
     dispatch-options-request: true
-
-server:
-  forward-headers-strategy: native
   datasource:
     url: ${DATABASE_URL}
     driver-class-name: org.postgresql.Driver
@@ -29,6 +26,9 @@ server:
       timeout: 2000ms
       ssl:
         enabled: true
+
+server:
+  forward-headers-strategy: native
 
 supabase:
   url: ${SUPABASE_URL:https://mcdtxlcsbcxupzmkzjqd.supabase.co}
