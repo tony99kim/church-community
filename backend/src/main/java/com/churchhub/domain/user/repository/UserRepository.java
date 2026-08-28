@@ -27,4 +27,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u FROM User u WHERE u.status = 'ACTIVE' AND u.id != :excludeId AND LOWER(u.nickname) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<User> searchActiveByNickname(@Param("keyword") String keyword, @Param("excludeId") Long excludeId, Pageable pageable);
+
+    Optional<User> findByProviderAndProviderId(String provider, String providerId);
 }

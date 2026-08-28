@@ -3,6 +3,9 @@ package com.churchhub.config;
 import com.churchhub.security.CustomUserDetailsService;
 import com.churchhub.security.JwtAuthenticationFilter;
 import com.churchhub.security.JwtTokenProvider;
+import com.churchhub.security.oauth2.CustomOAuth2UserService;
+import com.churchhub.security.oauth2.OAuth2FailureHandler;
+import com.churchhub.security.oauth2.OAuth2SuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,6 +31,9 @@ public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final CustomUserDetailsService userDetailsService;
+    private final CustomOAuth2UserService oAuth2UserService;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
+    private final OAuth2FailureHandler oAuth2FailureHandler;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -53,8 +59,8 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // 공개 API
                 .requestMatchers("/api/v1/auth/**").permitAll()
+                .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/posts/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/categories/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/events/**").permitAll()
@@ -64,14 +70,15 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/items/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/faith/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/welcome/kit").permitAll()
-                // Swagger
                 .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/api-docs/**", "/webjars/**").permitAll()
-                // 헬스체크
                 .requestMatchers("/actuator/health").permitAll()
-                // 관리자 전용 (세부 권한은 각 엔드포인트의 @PreAuthorize 로 제어)
                 .requestMatchers("/api/v1/admin/**").hasAnyRole("PASTOR", "CHURCH_MANAGER", "SUPER_ADMIN")
-                // 나머지는 인증 필요
                 .anyRequest().authenticated()
+            )
+            .oauth2Login(oauth2 -> oauth2
+                .userInfoEndpoint(info -> info.userService(oAuth2UserService))
+                .successHandler(oAuth2SuccessHandler)
+                .failureHandler(oAuth2FailureHandler)
             )
             .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
