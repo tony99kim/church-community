@@ -15,6 +15,11 @@ function OAuthCallback() {
     const refreshToken = searchParams.get('refreshToken');
     const error        = searchParams.get('error');
 
+    // Clear tokens from URL immediately to prevent Referer header leakage
+    if (typeof window !== 'undefined') {
+      window.history.replaceState({}, '', '/auth/callback');
+    }
+
     if (error || !accessToken || !refreshToken) {
       router.replace('/login?error=oauth_failed');
       return;
@@ -32,6 +37,7 @@ function OAuthCallback() {
         console.error('OAuth callback failed:', err);
         router.replace('/login?error=oauth_failed');
       });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

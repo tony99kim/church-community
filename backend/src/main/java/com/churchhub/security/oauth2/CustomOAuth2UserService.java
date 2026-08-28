@@ -55,18 +55,22 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     }
 
     private User createOAuthUser(OAuth2UserInfo info) {
+        if (info.getEmail() != null && userRepository.existsByEmail(info.getEmail())) {
+            throw new OAuth2AuthenticationException(
+                    "이미 이메일로 가입된 계정입니다. 이메일 로그인을 이용해 주세요.");
+        }
         String nickname = resolveUniqueNickname(info.getNickname(), info.getProviderId());
         User user = User.fromOAuth(info.getEmail(), nickname, info.getProfileImageUrl(),
                 info.getProvider(), info.getProviderId());
         try {
             return userRepository.save(user);
         } catch (org.springframework.dao.DataIntegrityViolationException e) {
-            // nickname collision under concurrent registration — retry with random suffix
+            // nickname collision under concurrent registration — retry with random 5-digit suffix
             String fallback = nickname.substring(0, Math.min(nickname.length(), 14))
                     + "_" + (int)(Math.random() * 90000 + 10000);
             user = User.fromOAuth(info.getEmail(), fallback, info.getProfileImageUrl(),
                     info.getProvider(), info.getProviderId());
-            return userRepository.save(user);
+            return userRepository.save(user); // ponytail: 3-collision nickname fallback still possible; DB constraint is final guard
         }
     }
 
