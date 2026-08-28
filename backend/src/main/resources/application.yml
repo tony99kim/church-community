@@ -17,6 +17,27 @@ spring:
       password: ${REDIS_PASSWORD:}
       ssl:
         enabled: ${REDIS_SSL:false}
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID:dev-google-client-id}
+            client-secret: ${GOOGLE_CLIENT_SECRET:dev-google-client-secret}
+            scope: email, profile
+          kakao:
+            client-id: ${KAKAO_CLIENT_ID:dev-kakao-client-id}
+            client-secret: ${KAKAO_CLIENT_SECRET:dev-kakao-client-secret}
+            redirect-uri: "{baseUrl}/login/oauth2/code/kakao"
+            client-authentication-method: client_secret_post
+            authorization-grant-type: authorization_code
+            scope: profile_nickname, account_email
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id
   jackson:
     serialization:
       write-dates-as-timestamps: false
@@ -32,6 +53,9 @@ jwt:
 
 cors:
   allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:3001}
+
+oauth2:
+  redirect-url: ${OAUTH2_REDIRECT_URL:http://localhost:3000/auth/callback}
 
 management:
   endpoint:
