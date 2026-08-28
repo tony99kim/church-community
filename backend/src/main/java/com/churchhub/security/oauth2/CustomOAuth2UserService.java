@@ -58,7 +58,16 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String nickname = resolveUniqueNickname(info.getNickname(), info.getProviderId());
         User user = User.fromOAuth(info.getEmail(), nickname, info.getProfileImageUrl(),
                 info.getProvider(), info.getProviderId());
-        return userRepository.save(user);
+        try {
+            return userRepository.save(user);
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            // nickname collision under concurrent registration — retry with random suffix
+            String fallback = nickname.substring(0, Math.min(nickname.length(), 14))
+                    + "_" + (int)(Math.random() * 90000 + 10000);
+            user = User.fromOAuth(info.getEmail(), fallback, info.getProfileImageUrl(),
+                    info.getProvider(), info.getProviderId());
+            return userRepository.save(user);
+        }
     }
 
     private String resolveUniqueNickname(String base, String providerId) {
