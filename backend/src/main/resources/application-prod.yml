@@ -1,6 +1,11 @@
 spring:
   main:
     lazy-initialization: true
+  mvc:
+    dispatch-options-request: true
+
+server:
+  forward-headers-strategy: native
   datasource:
     url: ${DATABASE_URL}
     driver-class-name: org.postgresql.Driver
