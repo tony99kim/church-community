@@ -29,8 +29,8 @@ function OAuthCallback() {
 
     api.get('/users/me')
       .then(res => {
-        const { id, email, nickname, role, profileImageUrl } = res.data.data;
-        setUser({ id, email, nickname, role, profileImageUrl });
+        const { id, email, nickname, role, profileImageUrl, provider } = res.data.data;
+        setUser({ id, email, nickname, role, profileImageUrl, provider });
         router.replace('/');
       })
       .catch((err) => {
