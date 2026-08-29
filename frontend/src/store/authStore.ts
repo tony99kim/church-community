@@ -7,6 +7,7 @@ interface User {
   nickname: string;
   role: string;
   profileImageUrl?: string;
+  provider?: string;
 }
 
 interface AuthState {
