@@ -15,7 +15,7 @@ const RELATED_PATH: Record<string, (id: number) => string> = {
 };
 
 export default function Header() {
-  const { user, isLoggedIn, logout } = useAuthStore();
+  const { user, isLoggedIn, hydrated, logout } = useAuthStore();
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -104,7 +104,9 @@ export default function Header() {
         <div className="flex-1" />
 
         {/* 우측 액션 */}
-        {isLoggedIn ? (
+        {!hydrated ? (
+          <div className="w-24 h-8" />
+        ) : isLoggedIn ? (
           <div className="flex items-center gap-2">
             <Link
               href="/posts/write"
@@ -237,7 +239,7 @@ export default function Header() {
           <Link href="/items" className="block py-2 text-sm font-medium text-gray-700 hover:text-[#003478]" onClick={() => setMenuOpen(false)}>물품 대여</Link>
           <Link href="/faith" className="block py-2 text-sm font-medium text-gray-700 hover:text-[#003478]" onClick={() => setMenuOpen(false)}>신앙 Q&A</Link>
           <Link href="/service" className="block py-2 text-sm font-medium text-gray-700 hover:text-[#003478]" onClick={() => setMenuOpen(false)}>지역 섬김</Link>
-          {isLoggedIn ? (
+          {!hydrated ? null : isLoggedIn ? (
             <>
               <Link href="/posts/write" className="block py-2 text-sm font-medium text-[#003478]" onClick={() => setMenuOpen(false)}>+ 글쓰기</Link>
               <Link href="/messages" className="flex items-center gap-1.5 py-2 text-sm font-medium text-gray-700 hover:text-[#003478]" onClick={() => setMenuOpen(false)}>
