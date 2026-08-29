@@ -1,5 +1,6 @@
 package com.churchhub.security;
 
+import com.churchhub.util.CookieUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -47,6 +48,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private String resolveToken(HttpServletRequest request) {
+        // Cookie-first, fallback to Authorization header
+        String cookie = CookieUtil.resolve(request, "access_token");
+        if (StringUtils.hasText(cookie)) return cookie;
         String bearerToken = request.getHeader("Authorization");
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);

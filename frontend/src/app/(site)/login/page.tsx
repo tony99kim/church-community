@@ -3,7 +3,7 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import api, { saveTokens } from '@/lib/api';
+import api from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
 
 function EyeIcon({ open }: { open: boolean }) {
@@ -24,7 +24,6 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const { isLoggedIn, setUser } = useAuthStore();
   const [form, setForm] = useState({ email: '', password: '' });
-  const [remember, setRemember] = useState(true);
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -40,9 +39,8 @@ function LoginForm() {
     setError('');
     try {
       const res = await api.post('/auth/login', form);
-      const { accessToken, refreshToken, userId, email, nickname, role, profileImageUrl } = res.data.data;
-      saveTokens(accessToken, refreshToken, remember);
-      setUser({ id: userId, email, nickname, role, profileImageUrl });
+      const { userId, email, nickname, role, profileImageUrl, provider } = res.data.data;
+      setUser({ id: userId, email, nickname, role, profileImageUrl, provider });
       router.push('/');
     } catch {
       setError('이메일 또는 비밀번호가 올바르지 않습니다.');
@@ -103,15 +101,6 @@ function LoginForm() {
                 </button>
               </div>
             </div>
-            <label className="flex items-center gap-2 cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={remember}
-                onChange={(e) => setRemember(e.target.checked)}
-                className="w-4 h-4 rounded border-gray-300 text-[#003478] accent-[#003478]"
-              />
-              <span className="text-sm text-gray-600">로그인 유지</span>
-            </label>
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl">
                 {error}

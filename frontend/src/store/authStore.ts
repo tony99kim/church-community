@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import api, { clearTokens } from '@/lib/api';
+import api from '@/lib/api';
 
 interface User {
   id: number;
@@ -27,7 +27,6 @@ export const useAuthStore = create<AuthState>((set) => ({
   setHydrated: () => set({ hydrated: true }),
   logout: () => {
     api.post('/auth/logout').catch(() => {});
-    clearTokens();
     set({ user: null, isLoggedIn: false });
   },
 }));

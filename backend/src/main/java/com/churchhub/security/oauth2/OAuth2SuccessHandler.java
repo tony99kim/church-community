@@ -3,15 +3,16 @@ package com.churchhub.security.oauth2;
 import com.churchhub.domain.auth.entity.RefreshToken;
 import com.churchhub.domain.auth.repository.RefreshTokenRepository;
 import com.churchhub.security.JwtTokenProvider;
+import com.churchhub.util.CookieUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 
@@ -40,12 +41,11 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         long refreshTtlSec = jwtTokenProvider.getRefreshExpiry() / 1000;
         refreshTokenRepository.save(new RefreshToken(refreshToken, userId, refreshTtlSec));
 
-        String targetUrl = UriComponentsBuilder.fromUriString(redirectUrl)
-                .queryParam("accessToken", accessToken)
-                .queryParam("refreshToken", refreshToken)
-                .queryParam("expiresIn", jwtTokenProvider.getAccessExpiry() / 1000)
-                .build().toUriString();
+        response.addHeader(HttpHeaders.SET_COOKIE,
+                CookieUtil.access(accessToken, jwtTokenProvider.getAccessExpiry() / 1000).toString());
+        response.addHeader(HttpHeaders.SET_COOKIE,
+                CookieUtil.refresh(refreshToken, refreshTtlSec).toString());
 
-        getRedirectStrategy().sendRedirect(request, response, targetUrl);
+        getRedirectStrategy().sendRedirect(request, response, redirectUrl);
     }
 }
