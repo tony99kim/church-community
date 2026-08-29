@@ -59,8 +59,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             throw new OAuth2AuthenticationException(
                     "이미 이메일로 가입된 계정입니다. 이메일 로그인을 이용해 주세요.");
         }
+        String email = info.getEmail() != null ? info.getEmail()
+                : info.getProvider().toLowerCase() + "_" + info.getProviderId() + "@oauth.placeholder";
         String nickname = resolveUniqueNickname(info.getNickname(), info.getProviderId());
-        User user = User.fromOAuth(info.getEmail(), nickname, info.getProfileImageUrl(),
+        User user = User.fromOAuth(email, nickname, info.getProfileImageUrl(),
                 info.getProvider(), info.getProviderId());
         try {
             return userRepository.save(user);
@@ -68,7 +70,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             // nickname collision under concurrent registration — retry with random 5-digit suffix
             String fallback = nickname.substring(0, Math.min(nickname.length(), 14))
                     + "_" + (int)(Math.random() * 90000 + 10000);
-            user = User.fromOAuth(info.getEmail(), fallback, info.getProfileImageUrl(),
+            user = User.fromOAuth(email, fallback, info.getProfileImageUrl(),
                     info.getProvider(), info.getProviderId());
             return userRepository.save(user); // ponytail: 3-collision nickname fallback still possible; DB constraint is final guard
         }
