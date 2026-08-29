@@ -95,8 +95,12 @@ export default function MyPage() {
     if (!hydrated) return;
     if (!isLoggedIn) { router.replace('/login'); return; }
     setNickname(user?.nickname || '');
-    setName((user as { name?: string })?.name || '');
-  }, [hydrated, isLoggedIn, user]);
+    api.get('/users/me').then((res) => {
+      const data = res.data.data;
+      setName(data.name || '');
+      setUser({ ...user!, nickname: data.nickname, provider: data.provider, profileImageUrl: data.profileImageUrl });
+    });
+  }, [hydrated, isLoggedIn]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (tab === 'posts' && user) {
@@ -231,6 +235,8 @@ export default function MyPage() {
     welcomeKits: welcomeKits.length,
   };
 
+  const isLocalUser = !user?.provider || user.provider === 'LOCAL';
+
   const TABS: { key: Tab; label: string }[] = [
     { key: 'info', label: '내 정보' },
     { key: 'posts', label: '작성글' },
@@ -239,7 +245,7 @@ export default function MyPage() {
     { key: 'welcomeKits', label: '웰컴키트' },
     { key: 'faithQuestions', label: '신앙 질문' },
     { key: 'prayers', label: '기도 요청' },
-    { key: 'password', label: '비밀번호' },
+    ...(isLocalUser ? [{ key: 'password' as Tab, label: '비밀번호' }] : []),
   ];
 
   return (
@@ -662,7 +668,7 @@ export default function MyPage() {
         )}
 
         {/* 비밀번호 변경 */}
-        {tab === 'password' && (
+        {tab === 'password' && isLocalUser && (
           <div className="bg-white rounded-2xl border border-gray-200 p-6">
             <h2 className="font-bold text-gray-900 mb-5">비밀번호 변경</h2>
             <form onSubmit={handlePassword} className="space-y-4">

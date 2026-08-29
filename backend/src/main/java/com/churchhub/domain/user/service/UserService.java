@@ -42,6 +42,10 @@ public class UserService {
     public void changePassword(Long userId, UserDto.ChangePasswordRequest request) {
         User user = getUser(userId);
 
+        if (!"LOCAL".equals(user.getProvider())) {
+            throw new BusinessException(ErrorCode.SOCIAL_LOGIN_USER);
+        }
+
         if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
             throw new BusinessException(ErrorCode.WRONG_PASSWORD);
         }
