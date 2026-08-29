@@ -21,6 +21,11 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
+import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -80,6 +85,7 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
             )
             .oauth2Login(oauth2 -> oauth2
+                .authorizationEndpoint(ep -> ep.authorizationRequestResolver(kakaoPromptResolver(http.getSharedObject(ClientRegistrationRepository.class))))
                 .userInfoEndpoint(info -> info.userService(oAuth2UserService))
                 .successHandler(oAuth2SuccessHandler)
                 .failureHandler(oAuth2FailureHandler)
@@ -87,5 +93,26 @@ public class SecurityConfig {
             .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    private OAuth2AuthorizationRequestResolver kakaoPromptResolver(ClientRegistrationRepository repo) {
+        DefaultOAuth2AuthorizationRequestResolver delegate =
+                new DefaultOAuth2AuthorizationRequestResolver(repo, "/oauth2/authorization");
+        return new OAuth2AuthorizationRequestResolver() {
+            @Override
+            public OAuth2AuthorizationRequest resolve(HttpServletRequest request) {
+                return addPrompt(request, delegate.resolve(request));
+            }
+            @Override
+            public OAuth2AuthorizationRequest resolve(HttpServletRequest request, String clientRegistrationId) {
+                return addPrompt(request, delegate.resolve(request, clientRegistrationId));
+            }
+            private OAuth2AuthorizationRequest addPrompt(HttpServletRequest request, OAuth2AuthorizationRequest req) {
+                if (req == null || !request.getServletPath().endsWith("/kakao")) return req;
+                return OAuth2AuthorizationRequest.from(req)
+                        .additionalParameters(p -> p.put("prompt", "login"))
+                        .build();
+            }
+        };
     }
 }
