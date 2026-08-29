@@ -61,7 +61,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, ClientRegistrationRepository clientRegistrationRepository) throws Exception {
         http
             .csrf(AbstractHttpConfigurer::disable)
             .formLogin(AbstractHttpConfigurer::disable)
@@ -85,7 +85,7 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
             )
             .oauth2Login(oauth2 -> oauth2
-                .authorizationEndpoint(ep -> ep.authorizationRequestResolver(kakaoPromptResolver(http.getSharedObject(ClientRegistrationRepository.class))))
+                .authorizationEndpoint(ep -> ep.authorizationRequestResolver(kakaoPromptResolver(clientRegistrationRepository)))
                 .userInfoEndpoint(info -> info.userService(oAuth2UserService))
                 .successHandler(oAuth2SuccessHandler)
                 .failureHandler(oAuth2FailureHandler)
