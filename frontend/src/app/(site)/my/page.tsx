@@ -274,8 +274,8 @@ export default function MyPage() {
         </div>
 
         {/* 탭 */}
-        <div className="flex overflow-x-auto gap-1 bg-white rounded-xl border border-gray-200 p-1 mb-5 scrollbar-hide">
-          {TABS.map((t) => (
+        <div className="flex overflow-x-auto gap-1 bg-white rounded-xl border border-gray-200 p-1 mb-5 scrollbar-hide min-h-[48px]">
+          {hydrated && TABS.map((t) => (
             <button
               key={t.key}
               onClick={() => setTab(t.key)}
