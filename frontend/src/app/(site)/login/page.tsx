@@ -134,7 +134,7 @@ function LoginForm() {
             </div>
             <div className="mt-4 flex flex-col gap-3">
               <a
-                href={`${process.env.NEXT_PUBLIC_API_URL}/oauth2/authorization/google`}
+                href={`${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '')}/oauth2/authorization/google`}
                 className="w-full flex items-center justify-center gap-3 border border-gray-300 rounded-xl py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -146,7 +146,7 @@ function LoginForm() {
                 Google로 로그인
               </a>
               <a
-                href={`${process.env.NEXT_PUBLIC_API_URL}/oauth2/authorization/kakao`}
+                href={`${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '')}/oauth2/authorization/kakao`}
                 className="w-full flex items-center justify-center gap-3 rounded-xl py-3 text-sm font-medium text-gray-800 hover:opacity-90 transition"
                 style={{ backgroundColor: '#FEE500' }}
               >
