@@ -49,6 +49,7 @@ const STATUS_BADGE: Record<string, string> = {
 export default function MyPage() {
   const router = useRouter();
   const { user, isLoggedIn, hydrated, setUser } = useAuthStore();
+  const [resolvedProvider, setResolvedProvider] = useState<string | undefined>(user?.provider);
   const [tab, setTab] = useState<Tab>('info');
   const [posts, setPosts] = useState<Post[]>([]);
   const [postsLoading, setPostsLoading] = useState(false);
@@ -92,12 +93,17 @@ export default function MyPage() {
   const [showConfirm, setShowConfirm] = useState(false);
 
   useEffect(() => {
+    if (user?.provider !== undefined) setResolvedProvider(user.provider);
+  }, [user?.provider]);
+
+  useEffect(() => {
     if (!hydrated) return;
     if (!isLoggedIn) { router.replace('/login'); return; }
     setNickname(user?.nickname || '');
     api.get('/users/me').then((res) => {
       const data = res.data.data;
       setName(data.name || '');
+      setResolvedProvider(data.provider);
       setUser({ ...user!, nickname: data.nickname, provider: data.provider, profileImageUrl: data.profileImageUrl });
     });
   }, [hydrated, isLoggedIn]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -235,7 +241,7 @@ export default function MyPage() {
     welcomeKits: welcomeKits.length,
   };
 
-  const isLocalUser = !user?.provider || user.provider === 'LOCAL';
+  const isLocalUser = !resolvedProvider || resolvedProvider === 'LOCAL';
 
   const TABS: { key: Tab; label: string }[] = [
     { key: 'info', label: '내 정보' },
