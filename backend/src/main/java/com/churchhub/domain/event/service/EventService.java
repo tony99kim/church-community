@@ -44,14 +44,16 @@ public class EventService {
                 .map(e -> EventDto.Response.from(e, false));
     }
 
+    private static final List<EventStatus> HIDDEN_STATUSES =
+            List.of(EventStatus.CANCELLED, EventStatus.DRAFT, EventStatus.ENDED);
+
     public Page<EventDto.Response> getEvents(Pageable pageable) {
-        return eventRepository.findAllByStatusNotIn(
-                List.of(EventStatus.CANCELLED, EventStatus.DRAFT), pageable)
+        return eventRepository.findActiveEvents(HIDDEN_STATUSES, java.time.LocalDateTime.now(), pageable)
                 .map(e -> EventDto.Response.from(e, false));
     }
 
     public Page<EventDto.Response> getEventsByCategory(EventCategory category, Pageable pageable) {
-        return eventRepository.findAllByCategoryOrderByStartDateDesc(category, pageable)
+        return eventRepository.findActiveByCategory(category, HIDDEN_STATUSES, java.time.LocalDateTime.now(), pageable)
                 .map(e -> EventDto.Response.from(e, false));
     }
 

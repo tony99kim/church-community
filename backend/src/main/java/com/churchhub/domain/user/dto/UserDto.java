@@ -50,6 +50,7 @@ public class UserDto {
         private UserStatus status;
         private Long churchId;
         private String churchName;
+        private String provider;
         private LocalDateTime createdAt;
 
         public static Response from(User user) {
@@ -64,6 +65,7 @@ public class UserDto {
                     .status(user.getStatus())
                     .churchId(user.getChurch() != null ? user.getChurch().getId() : null)
                     .churchName(user.getChurch() != null ? user.getChurch().getName() : null)
+                    .provider(user.getProvider())
                     .createdAt(user.getCreatedAt())
                     .build();
         }

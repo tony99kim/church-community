@@ -109,43 +109,32 @@ export default function MyPage() {
   }, [hydrated, isLoggedIn]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    if (tab === 'posts' && user) {
-      setPostsLoading(true);
-      api.get(`/users/${user.id}/posts`, { params: { page: 0, size: 20, sort: 'createdAt,desc' } })
-        .then((res) => setPosts(res.data.data.content))
-        .finally(() => setPostsLoading(false));
-    }
-    if (tab === 'spaceRentals') {
-      setSpaceRentalsLoading(true);
-      api.get('/spaces/rentals/my')
-        .then((res) => setSpaceRentals(res.data.data ?? []))
-        .finally(() => setSpaceRentalsLoading(false));
-    }
-    if (tab === 'itemRentals') {
-      setItemRentalsLoading(true);
-      api.get('/items/rentals/my')
-        .then((res) => setItemRentals(res.data.data ?? []))
-        .finally(() => setItemRentalsLoading(false));
-    }
-    if (tab === 'faithQuestions') {
-      setFaithQuestionsLoading(true);
-      api.get('/faith/questions/my')
-        .then((res) => setFaithQuestions(res.data.data ?? []))
-        .finally(() => setFaithQuestionsLoading(false));
-    }
-    if (tab === 'prayers') {
-      setPrayersLoading(true);
-      api.get('/faith/prayers/my')
-        .then((res) => setMyPrayers(res.data.data ?? []))
-        .finally(() => setPrayersLoading(false));
-    }
-    if (tab === 'welcomeKits') {
-      setWelcomeKitsLoading(true);
-      api.get('/welcome/kits/my')
-        .then((res) => setWelcomeKits(res.data.data ?? []))
-        .finally(() => setWelcomeKitsLoading(false));
-    }
-  }, [tab, user]);
+    if (!user) return;
+    setPostsLoading(true);
+    api.get(`/users/${user.id}/posts`, { params: { page: 0, size: 20, sort: 'createdAt,desc' } })
+      .then((res) => setPosts(res.data.data.content))
+      .finally(() => setPostsLoading(false));
+    setSpaceRentalsLoading(true);
+    api.get('/spaces/rentals/my')
+      .then((res) => setSpaceRentals(res.data.data ?? []))
+      .finally(() => setSpaceRentalsLoading(false));
+    setItemRentalsLoading(true);
+    api.get('/items/rentals/my')
+      .then((res) => setItemRentals(res.data.data ?? []))
+      .finally(() => setItemRentalsLoading(false));
+    setFaithQuestionsLoading(true);
+    api.get('/faith/questions/my')
+      .then((res) => setFaithQuestions(res.data.data ?? []))
+      .finally(() => setFaithQuestionsLoading(false));
+    setPrayersLoading(true);
+    api.get('/faith/prayers/my')
+      .then((res) => setMyPrayers(res.data.data ?? []))
+      .finally(() => setPrayersLoading(false));
+    setWelcomeKitsLoading(true);
+    api.get('/welcome/kits/my')
+      .then((res) => setWelcomeKits(res.data.data ?? []))
+      .finally(() => setWelcomeKitsLoading(false));
+  }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const openItemChat = async (rentalId: number) => {
     if (itemChatId === rentalId) { setItemChatId(null); return; }

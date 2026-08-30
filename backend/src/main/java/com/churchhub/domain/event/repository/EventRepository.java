@@ -17,6 +17,12 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     java.util.List<Event> findAllByCategoryOrderByStartDateDesc(EventCategory category);
     long countByStatus(EventStatus status);
 
+    @Query("SELECT e FROM Event e WHERE e.status NOT IN :statuses AND e.endDate > :now")
+    Page<Event> findActiveEvents(@Param("statuses") java.util.List<EventStatus> statuses, @Param("now") java.time.LocalDateTime now, Pageable pageable);
+
+    @Query("SELECT e FROM Event e WHERE e.category = :category AND e.status NOT IN :statuses AND e.endDate > :now")
+    Page<Event> findActiveByCategory(@Param("category") EventCategory category, @Param("statuses") java.util.List<EventStatus> statuses, @Param("now") java.time.LocalDateTime now, Pageable pageable);
+
     @Modifying
     @Query("UPDATE Event e SET e.currentParticipants = e.currentParticipants + 1 WHERE e.id = :eventId")
     void incrementParticipants(@Param("eventId") Long eventId);
