@@ -8,7 +8,7 @@ import { useAuthStore } from '@/store/authStore';
 import Pagination from '@/components/Pagination';
 
 export default function CommunityPage() {
-  const { isLoggedIn } = useAuthStore();
+  const { isLoggedIn, hydrated } = useAuthStore();
   const [categories, setCategories] = useState<Category[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
   const [activeCategory, setActiveCategory] = useState<number | null>(null);
@@ -83,7 +83,7 @@ export default function CommunityPage() {
             className="px-4 py-2 bg-[#003478] text-white rounded-lg text-sm font-medium hover:bg-blue-900 transition-colors">
             검색
           </button>
-          {activeCategory && (
+          {activeCategory && hydrated && (
             <Link href={isLoggedIn ? `/posts/write?categoryId=${activeCategory}` : '/login'}
               className="px-4 py-2 border border-[#003478] text-[#003478] rounded-lg text-sm font-medium hover:bg-blue-50 transition-colors">
               글쓰기

@@ -17,6 +17,7 @@ interface AuthState {
   setUser: (user: User) => void;
   setHydrated: () => void;
   logout: () => void;
+  clearAuth: () => void; // 토큰 만료 등 서버 호출 없이 로컬 상태만 초기화
 }
 
 const SESSION_KEY = 'ch_user';
@@ -44,6 +45,10 @@ export const useAuthStore = create<AuthState>((set) => ({
   setHydrated: () => set({ hydrated: true }),
   logout: () => {
     api.post('/auth/logout').catch(() => {});
+    clearSessionUser();
+    set({ user: null, isLoggedIn: false });
+  },
+  clearAuth: () => {
     clearSessionUser();
     set({ user: null, isLoggedIn: false });
   },

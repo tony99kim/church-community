@@ -7,19 +7,21 @@ import { useAuthStore } from '@/store/authStore';
 import { toast } from '@/components/Toast';
 
 export default function WelcomePage() {
-  const { isLoggedIn } = useAuthStore();
+  const { isLoggedIn, hydrated } = useAuthStore();
   const [form, setForm] = useState({ name: '', phone: '', address: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [existingKit, setExistingKit] = useState<{ processed: boolean } | null>(null);
+  const [kitLoading, setKitLoading] = useState(true);
 
   useEffect(() => {
-    if (!isLoggedIn) return;
+    if (!hydrated) return;
+    if (!isLoggedIn) { setKitLoading(false); return; }
     api.get('/welcome/kits/my').then(r => {
       const kits = r.data.data;
       if (kits?.length > 0) setExistingKit(kits[0]);
-    }).catch(() => {});
-  }, [isLoggedIn]);
+    }).catch(() => {}).finally(() => setKitLoading(false));
+  }, [hydrated, isLoggedIn]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,7 +47,9 @@ export default function WelcomePage() {
           <section className="bg-white rounded-2xl border border-[#EDEFF1] p-6">
             <h2 className="text-lg font-bold text-gray-800 mb-1">🎁 웰컴 키트 신청</h2>
             <p className="text-sm text-gray-500 mb-4">새로 이사 온 청년, 1인 가구 청년에게 환영 키트를 드립니다.</p>
-            {!isLoggedIn ? (
+            {!hydrated || kitLoading ? (
+              <div className="py-8 text-center text-gray-400 text-sm">불러오는 중...</div>
+            ) : !isLoggedIn ? (
               <div className="text-center py-6">
                 <p className="text-sm text-gray-500 mb-4">웰컴 키트 신청은 로그인 후 이용할 수 있습니다.</p>
                 <Link href="/login" className="inline-block px-5 py-2.5 bg-[#003478] text-white rounded-lg text-sm font-medium hover:bg-blue-900 transition-colors">
