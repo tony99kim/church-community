@@ -205,7 +205,7 @@ function MessagesContent() {
 
   if (!hydrated || loading) {
     return (
-      <div className="flex items-center justify-center" style={{ height: 'calc(100vh - 48px)' }}>
+      <div className="fixed inset-x-0 bottom-0 flex items-center justify-center" style={{ top: '48px' }}>
         <div className="text-center text-gray-400">
           <div className="w-10 h-10 border-2 border-[#003478] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
           <p className="text-sm">불러오는 중...</p>
@@ -223,14 +223,14 @@ function MessagesContent() {
         />
       )}
 
-      {/* 전체 채팅 컨테이너 — 헤더(48px) 제외한 풀스크린 */}
-      <div className="flex bg-white" style={{ height: 'calc(100vh - 48px)' }}>
+      {/* 전체 채팅 컨테이너 — 헤더 아래 뷰포트 고정 */}
+      <div className="fixed inset-x-0 bottom-0 flex bg-white" style={{ top: '48px' }}>
 
         {/* ── 왼쪽: 대화 목록 패널 ── */}
         {/* 모바일: 채팅 열리면 숨김 / 데스크톱: 항상 표시 */}
         <div className={`
           ${selectedId ? 'hidden md:flex' : 'flex'}
-          flex-col w-full md:w-80 lg:w-96 border-r border-[#EDEFF1] bg-white
+          flex-col w-full md:w-80 lg:w-96 border-r border-[#EDEFF1] bg-white overflow-hidden
         `}>
           {/* 목록 헤더 */}
           <div className="px-4 py-3 border-b border-[#EDEFF1] flex items-center justify-between shrink-0">
@@ -302,7 +302,7 @@ function MessagesContent() {
         {/* 모바일: 채팅 선택시에만 표시 / 데스크톱: 항상 표시 */}
         <div className={`
           ${selectedId ? 'flex' : 'hidden md:flex'}
-          flex-col flex-1 min-w-0
+          flex-col flex-1 min-w-0 overflow-hidden
         `}>
           {!selectedId ? (
             /* 데스크톱 빈 상태 */
@@ -402,7 +402,7 @@ function MessagesContent() {
 export default function MessagesPage() {
   return (
     <Suspense fallback={
-      <div className="flex items-center justify-center" style={{ height: 'calc(100vh - 48px)' }}>
+      <div className="fixed inset-x-0 bottom-0 flex items-center justify-center" style={{ top: '48px' }}>
         <div className="w-10 h-10 border-2 border-[#003478] border-t-transparent rounded-full animate-spin" />
       </div>
     }>
