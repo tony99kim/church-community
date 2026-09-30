@@ -18,6 +18,9 @@ export default function AdminFaithPage() {
   const [prayers, setPrayers] = useState<PrayerRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [answerFormId, setAnswerFormId] = useState<number | null>(null);
+  const [answerContent, setAnswerContent] = useState('');
+  const [submittingAnswer, setSubmittingAnswer] = useState(false);
   const [prayingId, setPrayingId] = useState<number | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [sendingMsg, setSendingMsg] = useState(false);
@@ -30,6 +33,29 @@ export default function AdminFaithPage() {
   };
 
   useEffect(() => { fetchAll(); }, []);
+
+  const toggleAnswerForm = (questionId: number) => {
+    if (answerFormId === questionId) { setAnswerFormId(null); setAnswerContent(''); return; }
+    setAnswerFormId(questionId);
+    setAnswerContent('');
+    setExpandedId(null); // 채팅 닫기
+  };
+
+  const submitAnswer = async (questionId: number) => {
+    if (!answerContent.trim()) return;
+    setSubmittingAnswer(true);
+    try {
+      await api.post(`/faith/questions/${questionId}/answers`, { content: answerContent });
+      setAnswerFormId(null);
+      setAnswerContent('');
+      fetchAll();
+      toast('답변이 등록되었습니다');
+    } catch {
+      toast('답변 등록에 실패했습니다', 'error');
+    } finally {
+      setSubmittingAnswer(false);
+    }
+  };
 
   const openChat = async (questionId: number) => {
     if (expandedId === questionId) { setExpandedId(null); return; }
@@ -150,20 +176,48 @@ export default function AdminFaithPage() {
                       </div>
                     )}
                   </div>
-                  <button
-                    onClick={() => openChat(q.id)}
-                    className={`text-xs px-3 py-1.5 rounded-lg border transition shrink-0 ${expandedId === q.id ? 'bg-[#003478] text-white border-[#003478]' : 'text-[#003478] border-blue-200 hover:bg-blue-50'}`}
-                  >
-                    {expandedId === q.id ? '닫기' : '💬 채팅'}
-                  </button>
+                  <div className="flex gap-1.5 shrink-0">
+                    <button
+                      onClick={() => toggleAnswerForm(q.id)}
+                      className={`text-xs px-3 py-1.5 rounded-lg border transition ${answerFormId === q.id ? 'bg-[#003478] text-white border-[#003478]' : 'text-[#003478] border-blue-200 hover:bg-blue-50'}`}
+                    >
+                      {answerFormId === q.id ? '닫기' : q.answers.length > 0 ? '✏️ 답변 추가' : '✏️ 답변 달기'}
+                    </button>
+                    <button
+                      onClick={() => openChat(q.id)}
+                      className={`text-xs px-3 py-1.5 rounded-lg border transition ${expandedId === q.id ? 'bg-gray-600 text-white border-gray-600' : 'text-gray-500 border-gray-200 hover:bg-gray-50'}`}
+                    >
+                      {expandedId === q.id ? '닫기' : '💬'}
+                    </button>
+                  </div>
                 </div>
+                {answerFormId === q.id && (
+                  <div className="mt-3 pt-3 border-t border-[#EDEFF1]">
+                    <textarea
+                      value={answerContent}
+                      onChange={e => setAnswerContent(e.target.value)}
+                      rows={3}
+                      placeholder="공개 답변을 작성하세요..."
+                      className="w-full px-3 py-2.5 border border-[#EDEFF1] rounded-lg text-sm focus:outline-none focus:border-[#003478] resize-none mb-2"
+                    />
+                    <div className="flex justify-end">
+                      <button
+                        onClick={() => submitAnswer(q.id)}
+                        disabled={submittingAnswer || !answerContent.trim()}
+                        className="px-4 py-2 bg-[#003478] text-white rounded-lg text-sm font-medium hover:bg-blue-900 disabled:opacity-50 transition-colors"
+                      >
+                        {submittingAnswer ? '등록 중...' : '답변 등록'}
+                      </button>
+                    </div>
+                  </div>
+                )}
                 {expandedId === q.id && (
                   <ChatBox
                     messages={messages}
                     onSend={(content) => sendMsg(q.id, content)}
                     sending={sendingMsg}
                     adminRole="PASTOR"
-                    placeholder="답변 또는 추가 메시지..."
+                    placeholder="개인 메시지..."
                   />
                 )}
               </div>

@@ -16,8 +16,8 @@ export default function FaithPage() {
   const [prayers, setPrayers] = useState<PrayerRequest[]>([]);
   const [qForm, setQForm] = useState({ content: '', anonymous: false, publicVisible: true });
   const [pForm, setPForm] = useState({ content: '', publicVisible: false });
-  // qVisibility: 'public'(실명공개) | 'anonymous'(익명공개)
-  const [qVisibility, setQVisibility] = useState<'public' | 'anonymous'>('anonymous');
+  // qVisibility: 'public'(실명공개) | 'anonymous'(익명공개) | 'secret'(비밀글)
+  const [qVisibility, setQVisibility] = useState<'public' | 'anonymous' | 'secret'>('anonymous');
   const [pPublic, setPPublic] = useState(false);
   const [loading, setLoading] = useState(true);
   const { isLoggedIn } = useAuthStore();
@@ -39,10 +39,10 @@ export default function FaithPage() {
     await api.post('/faith/questions', {
       content: qForm.content,
       anonymous: qVisibility === 'anonymous',
-      publicVisible: true,
+      publicVisible: qVisibility !== 'secret',
     });
     setQForm({ content: '', anonymous: false, publicVisible: true });
-    setQVisibility('public');
+    setQVisibility('anonymous');
     api.get('/faith/questions').then(r => setQuestions(r.data.data ?? []));
   };
 
@@ -107,16 +107,21 @@ export default function FaithPage() {
                   className="w-full px-4 py-2.5 border border-[#EDEFF1] rounded-lg text-sm focus:outline-none focus:border-[#003478] resize-none mb-3" />
                 <div className="flex items-center justify-between">
                   <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
-                    {(['public', 'anonymous'] as const).map((v) => (
+                    {([['public', '실명 공개'], ['anonymous', '익명'], ['secret', '🔒 비밀글']] as const).map(([v, label]) => (
                       <button key={v} type="button" onClick={() => setQVisibility(v)}
                         className={`px-3 py-1 rounded-md text-xs font-medium transition ${qVisibility === v ? 'bg-white text-[#003478] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
-                        {v === 'public' ? '실명 공개' : '익명'}
+                        {label}
                       </button>
                     ))}
                   </div>
-                  <button type="submit" className="px-4 py-2 bg-[#003478] text-white rounded-lg text-sm font-medium hover:bg-blue-900 transition-colors">
-                    질문하기
-                  </button>
+                  <div className="flex items-center gap-3">
+                    {qVisibility === 'secret' && (
+                      <span className="text-xs text-gray-400">나와 목사님만 볼 수 있어요</span>
+                    )}
+                    <button type="submit" className="px-4 py-2 bg-[#003478] text-white rounded-lg text-sm font-medium hover:bg-blue-900 transition-colors">
+                      질문하기
+                    </button>
+                  </div>
                 </div>
               </form>
             )}
