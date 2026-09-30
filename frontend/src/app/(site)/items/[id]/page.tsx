@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import api from '@/lib/api';
+import { useAuthStore } from '@/store/authStore';
 
 const TERMS = `1. 대여 기간: 신청 시 지정한 기간 내 반납
 2. 파손 시: 수리 또는 동등 물품으로 배상
@@ -13,6 +14,13 @@ const TERMS = `1. 대여 기간: 신청 시 지정한 기간 내 반납
 export default function ItemApplyPage() {
   const { id } = useParams();
   const router = useRouter();
+  const { isLoggedIn, hydrated } = useAuthStore();
+
+  useEffect(() => {
+    if (!hydrated) return;
+    if (!isLoggedIn) router.replace('/login');
+  }, [hydrated, isLoggedIn]);
+
   const [form, setForm] = useState({
     quantity: 1, startDate: '', endDate: '', contactPhone: '', purpose: ''
   });

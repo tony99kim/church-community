@@ -19,6 +19,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -31,10 +33,18 @@ public class FaithService {
     private final UserRepository userRepository;
     private final PrayerRequestRepository prayerRequestRepository;
 
+    private Map<Long, List<FaithAnswer>> buildAnswerMap(List<FaithQuestion> questions) {
+        if (questions.isEmpty()) return Map.of();
+        List<Long> ids = questions.stream().map(FaithQuestion::getId).toList();
+        return answerRepository.findAllByQuestionIds(ids)
+                .stream().collect(Collectors.groupingBy(a -> a.getQuestion().getId()));
+    }
+
     public List<FaithDto.QuestionResponse> getPublicQuestions() {
-        return questionRepository.findAllByPublicVisibleTrueOrderByCreatedAtDesc()
-                .stream().map(q -> FaithDto.QuestionResponse.from(q,
-                        answerRepository.findAllByQuestionIdOrderByCreatedAtAsc(q.getId())))
+        List<FaithQuestion> questions = questionRepository.findAllByPublicVisibleTrueOrderByCreatedAtDesc();
+        Map<Long, List<FaithAnswer>> answerMap = buildAnswerMap(questions);
+        return questions.stream()
+                .map(q -> FaithDto.QuestionResponse.from(q, answerMap.getOrDefault(q.getId(), List.of())))
                 .toList();
     }
 
@@ -66,9 +76,10 @@ public class FaithService {
     }
 
     public List<FaithDto.QuestionResponse> getAllQuestionsForAdmin() {
-        return questionRepository.findAllByOrderByCreatedAtDesc()
-                .stream().map(q -> FaithDto.QuestionResponse.from(q,
-                        answerRepository.findAllByQuestionIdOrderByCreatedAtAsc(q.getId()), true))
+        List<FaithQuestion> questions = questionRepository.findAllByOrderByCreatedAtDesc();
+        Map<Long, List<FaithAnswer>> answerMap = buildAnswerMap(questions);
+        return questions.stream()
+                .map(q -> FaithDto.QuestionResponse.from(q, answerMap.getOrDefault(q.getId(), List.of()), true))
                 .toList();
     }
 
@@ -78,9 +89,10 @@ public class FaithService {
     }
 
     public List<FaithDto.QuestionResponse> getMyQuestions(Long userId) {
-        return questionRepository.findAllByAuthorIdOrderByCreatedAtDesc(userId)
-                .stream().map(q -> FaithDto.QuestionResponse.from(q,
-                        answerRepository.findAllByQuestionIdOrderByCreatedAtAsc(q.getId())))
+        List<FaithQuestion> questions = questionRepository.findAllByAuthorIdOrderByCreatedAtDesc(userId);
+        Map<Long, List<FaithAnswer>> answerMap = buildAnswerMap(questions);
+        return questions.stream()
+                .map(q -> FaithDto.QuestionResponse.from(q, answerMap.getOrDefault(q.getId(), List.of())))
                 .toList();
     }
 

@@ -18,6 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -31,14 +33,20 @@ public class CommentService {
 
     public List<CommentDto.Response> getComments(Long postId) {
         List<Comment> topLevel = commentRepository.findTopLevelCommentsByPostId(postId, CommentStatus.ACTIVE);
-        return topLevel.stream().map(c -> {
-            List<CommentDto.Response> replies = commentRepository
-                    .findRepliesByParentId(c.getId(), CommentStatus.ACTIVE)
-                    .stream()
-                    .map(r -> CommentDto.Response.from(r, List.of()))
-                    .toList();
-            return CommentDto.Response.from(c, replies);
-        }).toList();
+        if (topLevel.isEmpty()) return List.of();
+
+        List<Long> topIds = topLevel.stream().map(Comment::getId).toList();
+        Map<Long, List<CommentDto.Response>> replyMap = commentRepository
+                .findRepliesByParentIds(topIds, CommentStatus.ACTIVE)
+                .stream()
+                .collect(Collectors.groupingBy(
+                        r -> r.getParent().getId(),
+                        Collectors.mapping(r -> CommentDto.Response.from(r, List.of()), Collectors.toList())
+                ));
+
+        return topLevel.stream()
+                .map(c -> CommentDto.Response.from(c, replyMap.getOrDefault(c.getId(), List.of())))
+                .toList();
     }
 
     @Transactional

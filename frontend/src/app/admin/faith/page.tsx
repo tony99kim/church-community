@@ -60,6 +60,8 @@ export default function AdminFaithPage() {
   const openChat = async (questionId: number) => {
     if (expandedId === questionId) { setExpandedId(null); return; }
     setExpandedId(questionId);
+    setMessages([]);
+    setAnswerFormId(null);
     const res = await api.get(`/faith/questions/${questionId}/messages`);
     setMessages(res.data.data ?? []);
   };

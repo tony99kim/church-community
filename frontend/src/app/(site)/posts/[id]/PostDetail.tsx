@@ -134,7 +134,8 @@ export default function PostDetailClient() {
   const [submitting, setSubmitting] = useState(false);
   const [reportingPost, setReportingPost] = useState(false);
 
-  const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
+  const isAdmin = ['SUPER_ADMIN', 'CHURCH_MANAGER', 'PASTOR'].includes(user?.role ?? '');
+  const [liking, setLiking] = useState(false);
 
   const fetchComments = async () => {
     const res = await api.get(`/posts/${id}/comments`);
@@ -156,9 +157,15 @@ export default function PostDetailClient() {
 
   const handleLike = async () => {
     if (!isLoggedIn) { router.push('/login'); return; }
-    const res = await api.post(`/posts/${id}/like`);
-    setLiked(res.data.data);
-    setLikeCount((c) => res.data.data ? c + 1 : c - 1);
+    if (liking) return;
+    setLiking(true);
+    try {
+      const res = await api.post(`/posts/${id}/like`);
+      setLiked(res.data.data);
+      setLikeCount((c) => res.data.data ? c + 1 : c - 1);
+    } catch { /* silent */ } finally {
+      setLiking(false);
+    }
   };
 
   const handleComment = async (e: React.FormEvent) => {
@@ -178,8 +185,12 @@ export default function PostDetailClient() {
   };
 
   const handleCommentEdit = async (commentId: number, content: string) => {
-    await api.put(`/posts/${id}/comments/${commentId}`, { content });
-    await fetchComments();
+    try {
+      await api.put(`/posts/${id}/comments/${commentId}`, { content });
+      await fetchComments();
+    } catch {
+      alert('댓글 수정에 실패했습니다.');
+    }
   };
 
   const handleCommentDelete = async (commentId: number) => {
@@ -305,7 +316,8 @@ export default function PostDetailClient() {
           <div className="px-6 pb-6 flex justify-center">
             <button
               onClick={handleLike}
-              className={`flex items-center gap-2 px-6 py-2 rounded-full border-2 text-sm font-bold transition ${
+              disabled={liking}
+              className={`flex items-center gap-2 px-6 py-2 rounded-full border-2 text-sm font-bold transition disabled:opacity-70 ${
                 liked
                   ? 'border-red-400 bg-red-50 text-red-500'
                   : 'border-[#EDEFF1] text-gray-500 hover:border-red-300 hover:bg-red-50 hover:text-red-400'

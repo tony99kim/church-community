@@ -88,7 +88,7 @@ export default function WritePostPage() {
     }
   };
 
-  const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
+  const isAdmin = ['SUPER_ADMIN', 'CHURCH_MANAGER', 'PASTOR'].includes(user?.role ?? '');
   // 드롭다운에 표시할 최상위 카테고리 (일반 유저는 NOTICE 제외)
   const rootCategories = categories.filter((c) => !c.parentId && (isAdmin || c.type !== 'NOTICE'));
 

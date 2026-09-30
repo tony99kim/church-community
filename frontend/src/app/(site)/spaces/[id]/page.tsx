@@ -36,6 +36,7 @@ export default function SpaceDetailPage() {
   const { isLoggedIn } = useAuthStore();
 
   const [space, setSpace] = useState<Space | null>(null);
+  const [loadError, setLoadError] = useState(false);
   const [slots, setSlots] = useState<SlotInfo[]>([]);
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [calYear, setCalYear] = useState(new Date().getFullYear());
@@ -52,7 +53,9 @@ export default function SpaceDetailPage() {
   const [cancelling, setCancelling] = useState(false);
 
   useEffect(() => {
-    api.get(`/spaces/${id}`).then(r => setSpace(r.data.data));
+    api.get(`/spaces/${id}`)
+      .then(r => setSpace(r.data.data))
+      .catch(() => setLoadError(true));
   }, [id]);
 
   useEffect(() => {
@@ -125,6 +128,7 @@ export default function SpaceDetailPage() {
   const { firstDay, daysInMonth } = getMonthDays(calYear, calMonth);
   const today = new Date().toLocaleDateString('en-CA');
 
+  if (loadError) return <div className="min-h-screen flex items-center justify-center text-gray-400">공간 정보를 불러올 수 없습니다.</div>;
   if (!space) return <div className="min-h-screen flex items-center justify-center text-gray-400">불러오는 중...</div>;
 
   return (
@@ -273,7 +277,7 @@ export default function SpaceDetailPage() {
             <div className="flex gap-2 justify-end mt-4">
               <button type="button" onClick={() => setPendingSlot(null)}
                 className="px-4 py-2 text-sm border border-gray-300 rounded-xl hover:bg-gray-50">취소</button>
-              <button type="button" onClick={handleSubmit} disabled={submitting || !form.purpose || !form.contactPhone}
+              <button type="button" onClick={handleSubmit} disabled={submitting || !form.purpose.trim() || !form.contactPhone.trim()}
                 className="px-4 py-2 text-sm bg-[#003478] text-white rounded-xl font-semibold hover:bg-blue-900 disabled:opacity-50">
                 {submitting ? '신청 중...' : '예약 신청'}
               </button>

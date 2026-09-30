@@ -7,10 +7,16 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ConversationMessageRepository extends JpaRepository<ConversationMessage, Long> {
 
     List<ConversationMessage> findAllByConversationIdOrderByCreatedAtAsc(Long conversationId);
+
+    Optional<ConversationMessage> findTopByConversationIdOrderByCreatedAtDesc(Long conversationId);
+
+    @Query("SELECT m.conversation.id, COUNT(m) FROM ConversationMessage m WHERE m.conversation.id IN :convIds AND m.sender.id != :senderId AND m.read = false GROUP BY m.conversation.id")
+    List<Object[]> countUnreadByConversationIds(@Param("convIds") List<Long> convIds, @Param("senderId") Long senderId);
 
     @Query("SELECT COUNT(m) FROM ConversationMessage m WHERE m.conversation.id = :convId AND m.sender.id != :senderId AND m.read = false")
     long countUnreadInConversation(@Param("convId") Long convId, @Param("senderId") Long senderId);

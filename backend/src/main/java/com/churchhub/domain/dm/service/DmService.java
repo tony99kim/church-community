@@ -17,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,12 +32,19 @@ public class DmService {
 
     public List<DmDto.ConversationResponse> listMyConversations(Long callerId) {
         List<Conversation> convs = conversationRepository.findAllByParticipant(callerId);
+        if (convs.isEmpty()) return List.of();
+
+        List<Long> convIds = convs.stream().map(Conversation::getId).toList();
+        Map<Long, Long> unreadMap = messageRepository.countUnreadByConversationIds(convIds, callerId)
+                .stream().collect(Collectors.toMap(r -> (Long) r[0], r -> (Long) r[1]));
 
         return convs.stream().map(c -> {
-            List<ConversationMessage> msgs = messageRepository.findAllByConversationIdOrderByCreatedAtAsc(c.getId());
-            String preview = msgs.isEmpty() ? "" : msgs.get(msgs.size() - 1).getContent();
-            if (preview.length() > 50) preview = preview.substring(0, 50) + "...";
-            long unread = messageRepository.countUnreadInConversation(c.getId(), callerId);
+            String preview = messageRepository.findTopByConversationIdOrderByCreatedAtDesc(c.getId())
+                    .map(m -> {
+                        String content = m.getContent();
+                        return content.length() > 50 ? content.substring(0, 50) + "..." : content;
+                    }).orElse("");
+            long unread = unreadMap.getOrDefault(c.getId(), 0L);
             return DmDto.ConversationResponse.from(c, preview, unread);
         }).toList();
     }

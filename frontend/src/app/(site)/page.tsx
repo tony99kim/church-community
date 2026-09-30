@@ -12,7 +12,7 @@ export default function HomePage() {
   const [popularPosts, setPopularPosts] = useState<Post[]>([]);
   const [welcomeEvent, setWelcomeEvent] = useState<Event | null>(null);
   const [loaded, setLoaded] = useState(false);
-  const { user, isLoggedIn } = useAuthStore();
+  const { user, isLoggedIn, hydrated } = useAuthStore();
 
   useEffect(() => {
     Promise.all([
@@ -27,7 +27,7 @@ export default function HomePage() {
     <main className="min-h-screen bg-[#f4f6f8]">
       {/* 히어로 */}
       <section className="bg-[#003478] text-white py-20 px-4 text-center">
-        {isLoggedIn && user ? (
+        {hydrated && isLoggedIn && user ? (
           <p className="text-blue-300 text-sm mb-2">안녕하세요, {user.nickname}님 👋</p>
         ) : null}
         <h1 className="text-3xl md:text-5xl font-bold mb-4">염리동 청년 커뮤니티</h1>
