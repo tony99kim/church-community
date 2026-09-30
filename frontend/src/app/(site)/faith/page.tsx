@@ -14,8 +14,8 @@ export default function FaithPage() {
   const [tab, setTab] = useState<Tab>('questions');
   const [questions, setQuestions] = useState<FaithQuestion[]>([]);
   const [prayers, setPrayers] = useState<PrayerRequest[]>([]);
-  const [qForm, setQForm] = useState({ content: '', anonymous: false, publicVisible: true });
-  const [pForm, setPForm] = useState({ content: '', publicVisible: false });
+  const [qForm, setQForm] = useState({ content: '' });
+  const [pForm, setPForm] = useState({ content: '' });
   // qVisibility: 'public'(실명공개) | 'anonymous'(익명공개) | 'secret'(비밀글)
   const [qVisibility, setQVisibility] = useState<'public' | 'anonymous' | 'secret'>('anonymous');
   const [pPublic, setPPublic] = useState(false);
@@ -41,7 +41,7 @@ export default function FaithPage() {
       anonymous: qVisibility === 'anonymous',
       publicVisible: qVisibility !== 'secret',
     });
-    setQForm({ content: '', anonymous: false, publicVisible: true });
+    setQForm({ content: '' });
     setQVisibility('anonymous');
     api.get('/faith/questions').then(r => setQuestions(r.data.data ?? []));
   };
@@ -49,7 +49,7 @@ export default function FaithPage() {
   const submitPrayer = async (e: React.FormEvent) => {
     e.preventDefault();
     await api.post('/faith/prayers', { content: pForm.content, publicVisible: pPublic });
-    setPForm({ content: '', publicVisible: true });
+    setPForm({ content: '' });
     setPPublic(true);
     api.get('/faith/prayers').then(r => setPrayers(r.data.data ?? []));
   };
