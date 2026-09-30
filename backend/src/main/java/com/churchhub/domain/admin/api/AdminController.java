@@ -7,7 +7,6 @@ import com.churchhub.domain.category.dto.CategoryDto;
 import com.churchhub.domain.category.service.CategoryService;
 import com.churchhub.domain.event.dto.EventDto;
 import com.churchhub.domain.event.entity.EventStatus;
-import com.churchhub.domain.event.repository.EventParticipantRepository;
 import com.churchhub.domain.event.service.EventService;
 import com.churchhub.domain.report.dto.ReportDto;
 import com.churchhub.domain.report.entity.ReportStatus;
@@ -38,7 +37,6 @@ public class AdminController {
     private final AdminService adminService;
     private final CategoryService categoryService;
     private final EventService eventService;
-    private final EventParticipantRepository participantRepository;
     private final ReportService reportService;
 
     @Operation(summary = "대시보드 통계")
@@ -166,7 +164,7 @@ public class AdminController {
     @Operation(summary = "전체 행사 참여자 목록")
     @GetMapping("/participants")
     public ResponseEntity<ApiResponse<List<AdminDto.ParticipantResponse>>> getAllParticipants() {
-        List<AdminDto.ParticipantResponse> result = participantRepository.findAllRegistered()
+        List<AdminDto.ParticipantResponse> result = eventService.getAllParticipants()
                 .stream().map(AdminDto.ParticipantResponse::from).toList();
         return ResponseEntity.ok(ApiResponse.success(result));
     }
@@ -174,7 +172,7 @@ public class AdminController {
     @Operation(summary = "특정 행사 참여자 목록")
     @GetMapping("/events/{eventId}/participants")
     public ResponseEntity<ApiResponse<List<AdminDto.ParticipantResponse>>> getEventParticipants(@PathVariable Long eventId) {
-        List<AdminDto.ParticipantResponse> result = participantRepository.findRegisteredByEventId(eventId)
+        List<AdminDto.ParticipantResponse> result = eventService.getParticipantsByEvent(eventId)
                 .stream().map(AdminDto.ParticipantResponse::from).toList();
         return ResponseEntity.ok(ApiResponse.success(result));
     }

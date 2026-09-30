@@ -164,6 +164,14 @@ public class EventService {
         eventRepository.decrementParticipants(eventId);
     }
 
+    public List<EventParticipant> getAllParticipants() {
+        return participantRepository.findAllRegistered();
+    }
+
+    public List<EventParticipant> getParticipantsByEvent(Long eventId) {
+        return participantRepository.findRegisteredByEventId(eventId);
+    }
+
     private Event getEventOrThrow(Long eventId) {
         return eventRepository.findById(eventId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.EVENT_NOT_FOUND));
