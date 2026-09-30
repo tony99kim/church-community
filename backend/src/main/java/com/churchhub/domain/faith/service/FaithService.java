@@ -124,7 +124,8 @@ public class FaithService {
         User caller = userRepository.findById(callerId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
         boolean isAdmin = caller.getRole() == UserRole.SUPER_ADMIN
-                || caller.getRole() == UserRole.PASTOR;
+                || caller.getRole() == UserRole.PASTOR
+                || caller.getRole() == UserRole.CHURCH_MANAGER;
         if (!isAdmin && !question.getAuthor().getId().equals(callerId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN);
         }
@@ -139,7 +140,8 @@ public class FaithService {
         User caller = userRepository.findById(callerId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
         boolean isAdmin = caller.getRole() == UserRole.SUPER_ADMIN
-                || caller.getRole() == UserRole.PASTOR;
+                || caller.getRole() == UserRole.PASTOR
+                || caller.getRole() == UserRole.CHURCH_MANAGER;
         if (!isAdmin && !question.getAuthor().getId().equals(callerId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN);
         }
