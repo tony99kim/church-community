@@ -141,7 +141,7 @@ export default function AdminUsersPage() {
 
   useEffect(() => {
     fetchUsers(0);
-    api.get('/churches').then(r => setChurches(r.data.data ?? []));
+    api.get('/admin/churches').then(r => setChurches(r.data.data ?? []));
   }, []);
 
   useEffect(() => { fetchUsers(page, activeSearch); }, [page]);
