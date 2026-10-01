@@ -84,7 +84,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/v1/welcome/kit").permitAll()
                 .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/api-docs/**", "/webjars/**").permitAll()
                 .requestMatchers("/actuator/health").permitAll()
-                .requestMatchers("/api/v1/admin/**").hasAnyRole("PASTOR", "CHURCH_MANAGER", "SUPER_ADMIN")
+                .requestMatchers("/api/v1/admin/**").hasAnyRole("PASTOR", "EVANGELIST", "CHURCH_MANAGER", "SUPER_ADMIN")
                 .anyRequest().authenticated()
             )
             .exceptionHandling(ex -> ex

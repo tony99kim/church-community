@@ -77,12 +77,14 @@ public class UserDto {
         private Long id;
         private String nickname;
         private String churchName;
+        private String role;
 
         public static PastorInfo from(User u) {
             return PastorInfo.builder()
                     .id(u.getId())
                     .nickname(u.getNickname())
                     .churchName(u.getChurch() != null ? u.getChurch().getName() : null)
+                    .role(u.getRole().name())
                     .build();
         }
     }

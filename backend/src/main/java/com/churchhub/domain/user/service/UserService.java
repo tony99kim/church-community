@@ -55,7 +55,7 @@ public class UserService {
 
     public java.util.List<UserDto.PastorInfo> getPastors() {
         return userRepository.findByRoleInAndStatus(
-                        java.util.List.of(UserRole.PASTOR, UserRole.SUPER_ADMIN), UserStatus.ACTIVE)
+                        java.util.List.of(UserRole.PASTOR, UserRole.EVANGELIST, UserRole.SUPER_ADMIN), UserStatus.ACTIVE)
                 .stream().map(UserDto.PastorInfo::from).toList();
     }
 

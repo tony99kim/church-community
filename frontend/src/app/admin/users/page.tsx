@@ -19,7 +19,8 @@ interface User {
 const ROLE_LABELS: Record<string, string> = {
   USER: '일반',
   CHURCH_MANAGER: '교회관리자',
-  PASTOR: '목사/전도사',
+  PASTOR: '목사',
+  EVANGELIST: '전도사',
   SUPER_ADMIN: '최고관리자',
 };
 
@@ -42,10 +43,18 @@ const ROLES_INFO = [
   },
   {
     key: 'PASTOR',
-    label: '목사/전도사',
+    label: '목사',
     color: 'text-violet-700 bg-violet-50 border-violet-200',
     dot: 'bg-violet-500',
-    desc: '목사·전도사·사역자',
+    desc: '담임목사·부목사',
+    permissions: ['일반 회원의 모든 권한', '신앙 질문 답변 작성', '기도 요청 완료 처리', '소속 교회 공간·물품 관리', '웰컴키트 신청 관리'],
+  },
+  {
+    key: 'EVANGELIST',
+    label: '전도사',
+    color: 'text-indigo-700 bg-indigo-50 border-indigo-200',
+    dot: 'bg-indigo-500',
+    desc: '전도사·사역자',
     permissions: ['일반 회원의 모든 권한', '신앙 질문 답변 작성', '기도 요청 완료 처리', '소속 교회 공간·물품 관리', '웰컴키트 신청 관리'],
   },
   {
@@ -287,6 +296,7 @@ export default function AdminUsersPage() {
                           <option value="USER">일반</option>
                           <option value="CHURCH_MANAGER">교회관리자</option>
                           <option value="PASTOR">목사</option>
+                          <option value="EVANGELIST">전도사</option>
                           <option value="SUPER_ADMIN">최고관리자</option>
                         </select>
                         {u.churchName && (

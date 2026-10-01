@@ -233,6 +233,7 @@ export interface PastorInfo {
   id: number;
   nickname: string;
   churchName: string | null;
+  role: string; // 'PASTOR' | 'EVANGELIST' | 'SUPER_ADMIN'
 }
 
 export interface UserBasicInfo {

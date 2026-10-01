@@ -23,7 +23,8 @@ export default function FaithPage() {
   const [loading, setLoading] = useState(true);
   const { isLoggedIn } = useAuthStore();
   const router = useRouter();
-  const [pastors, setPastors] = useState<PastorInfo[]>([]);
+  const [counselors, setCounselors] = useState<PastorInfo[]>([]);
+  const [selectedChurch, setSelectedChurch] = useState('');
   const [consultForm, setConsultForm] = useState({ pastorId: '', message: '' });
   const [consultLoading, setConsultLoading] = useState(false);
 
@@ -31,7 +32,7 @@ export default function FaithPage() {
     Promise.all([
       api.get('/faith/questions').then(r => setQuestions(r.data.data ?? [])),
       api.get('/faith/prayers').then(r => setPrayers(r.data.data ?? [])),
-      api.get('/users/pastors').then(r => setPastors(r.data.data ?? [])).catch(() => {}),
+      api.get('/users/pastors').then(r => setCounselors(r.data.data ?? [])).catch(() => {}),
     ]).finally(() => setLoading(false));
   }, []);
 
@@ -191,49 +192,111 @@ export default function FaithPage() {
           </div>
         )}
 
-        {tab === 'consult' && (
-          <Card className="max-w-lg mx-auto">
-            <CardContent className="p-6">
-              <div className="text-center mb-6">
-                <div className="text-3xl mb-2">🔒</div>
-                <h2 className="text-base font-bold text-gray-900">비공개 상담</h2>
-                <p className="text-xs text-muted-foreground mt-1">목사님께 개인 메시지를 보내드립니다.<br />내용은 본인과 해당 목사님만 볼 수 있습니다.</p>
-              </div>
-              {!isLoggedIn ? (
-                <p className="text-sm text-muted-foreground text-center py-8">로그인 후 이용할 수 있습니다.</p>
-              ) : pastors.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-8">현재 상담 가능한 목사님이 없습니다.</p>
-              ) : (
-                <form onSubmit={submitConsult} className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1.5">목사님 선택</label>
-                    <select required value={consultForm.pastorId}
-                      onChange={e => setConsultForm(p => ({ ...p, pastorId: e.target.value }))}
-                      className="w-full px-3 py-2.5 border border-border rounded-xl text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all">
-                      <option value="">-- 목사님을 선택하세요 --</option>
-                      {pastors.map(p => (
-                        <option key={p.id} value={p.id}>
-                          {p.nickname}{p.churchName ? ` (${p.churchName})` : ''}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1.5">상담 내용</label>
-                    <textarea required rows={5} value={consultForm.message}
-                      onChange={e => setConsultForm(p => ({ ...p, message: e.target.value }))}
-                      placeholder="상담하고 싶은 내용을 작성해주세요..."
-                      className="w-full px-3 py-2.5 border border-border rounded-xl text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 resize-none transition-all" />
-                  </div>
-                  <button type="submit" disabled={consultLoading || !consultForm.pastorId || !consultForm.message.trim()}
-                    className="w-full py-3 bg-primary text-white rounded-xl text-sm font-bold hover:bg-primary/90 disabled:opacity-50 transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5">
-                    {consultLoading ? '전송 중...' : '메시지 보내기'}
-                  </button>
-                </form>
-              )}
-            </CardContent>
-          </Card>
-        )}
+        {tab === 'consult' && (() => {
+          const ROLE_LABEL: Record<string, string> = { PASTOR: '목사', EVANGELIST: '전도사', SUPER_ADMIN: '관리자' };
+          const churches = Array.from(new Set(counselors.map(c => c.churchName ?? '소속 없음')));
+          const filtered = selectedChurch ? counselors.filter(c => (c.churchName ?? '소속 없음') === selectedChurch) : [];
+          return (
+            <Card className="max-w-lg mx-auto">
+              <CardContent className="p-6">
+                <div className="text-center mb-6">
+                  <div className="text-3xl mb-2">🔒</div>
+                  <h2 className="text-base font-bold text-gray-900">비공개 상담</h2>
+                  <p className="text-xs text-muted-foreground mt-1">목사님·전도사님께 개인 메시지를 보내드립니다.<br />내용은 본인과 해당 분만 볼 수 있습니다.</p>
+                </div>
+                {!isLoggedIn ? (
+                  <p className="text-sm text-muted-foreground text-center py-8">로그인 후 이용할 수 있습니다.</p>
+                ) : counselors.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-8">현재 상담 가능한 분이 없습니다.</p>
+                ) : (
+                  <form onSubmit={submitConsult} className="space-y-4">
+                    {/* 1단계: 교회 선택 */}
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+                        <span className="inline-flex items-center gap-1">
+                          <span className="w-4 h-4 bg-primary text-white rounded-full text-[10px] flex items-center justify-center font-bold">1</span>
+                          교회 선택
+                        </span>
+                      </label>
+                      <div className="flex flex-wrap gap-2">
+                        {churches.map(church => (
+                          <button key={church} type="button"
+                            onClick={() => { setSelectedChurch(church); setConsultForm(p => ({ ...p, pastorId: '' })); }}
+                            className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${
+                              selectedChurch === church
+                                ? 'bg-primary text-white border-primary'
+                                : 'border-border text-gray-600 hover:border-primary hover:text-primary'
+                            }`}>
+                            {church}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* 2단계: 상담자 선택 */}
+                    {selectedChurch && (
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+                          <span className="inline-flex items-center gap-1">
+                            <span className="w-4 h-4 bg-primary text-white rounded-full text-[10px] flex items-center justify-center font-bold">2</span>
+                            상담자 선택
+                          </span>
+                        </label>
+                        <div className="space-y-2">
+                          {filtered.map(c => (
+                            <button key={c.id} type="button"
+                              onClick={() => setConsultForm(p => ({ ...p, pastorId: String(c.id) }))}
+                              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border transition-all text-left ${
+                                consultForm.pastorId === String(c.id)
+                                  ? 'border-primary bg-primary/5'
+                                  : 'border-border hover:border-primary/50 hover:bg-accent'
+                              }`}>
+                              <div className="w-9 h-9 bg-primary/10 rounded-full flex items-center justify-center text-primary text-sm font-bold shrink-0">
+                                {c.nickname[0]}
+                              </div>
+                              <div>
+                                <div className="text-sm font-semibold text-gray-900">{c.nickname}</div>
+                                <div className="text-xs text-muted-foreground">{ROLE_LABEL[c.role] ?? c.role}</div>
+                              </div>
+                              {consultForm.pastorId === String(c.id) && (
+                                <div className="ml-auto w-4 h-4 bg-primary rounded-full flex items-center justify-center shrink-0">
+                                  <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                  </svg>
+                                </div>
+                              )}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 3단계: 메시지 */}
+                    {consultForm.pastorId && (
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+                          <span className="inline-flex items-center gap-1">
+                            <span className="w-4 h-4 bg-primary text-white rounded-full text-[10px] flex items-center justify-center font-bold">3</span>
+                            상담 내용
+                          </span>
+                        </label>
+                        <textarea required rows={5} value={consultForm.message}
+                          onChange={e => setConsultForm(p => ({ ...p, message: e.target.value }))}
+                          placeholder="상담하고 싶은 내용을 작성해주세요..."
+                          className="w-full px-3 py-2.5 border border-border rounded-xl text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 resize-none transition-all" />
+                      </div>
+                    )}
+
+                    <button type="submit" disabled={consultLoading || !consultForm.pastorId || !consultForm.message.trim()}
+                      className="w-full py-3 bg-primary text-white rounded-xl text-sm font-bold hover:bg-primary/90 disabled:opacity-50 transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5">
+                      {consultLoading ? '전송 중...' : '메시지 보내기'}
+                    </button>
+                  </form>
+                )}
+              </CardContent>
+            </Card>
+          );
+        })()}
 
         {tab === 'prayers' && (
           <div className="space-y-4">

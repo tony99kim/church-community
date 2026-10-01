@@ -16,7 +16,7 @@ interface Post {
 type Tab = 'info' | 'posts' | 'password' | 'spaceRentals' | 'itemRentals' | 'faithQuestions' | 'prayers' | 'welcomeKits';
 
 const ROLE_LABEL: Record<string, string> = {
-  SUPER_ADMIN: '최고관리자', CHURCH_MANAGER: '교회관리자', PASTOR: '목사/전도사', USER: '일반회원',
+  SUPER_ADMIN: '최고관리자', CHURCH_MANAGER: '교회관리자', PASTOR: '목사', EVANGELIST: '전도사', USER: '일반회원',
 };
 
 function EyeIcon({ open }: { open: boolean }) {
