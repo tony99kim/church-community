@@ -6,6 +6,8 @@ import api from '@/lib/api';
 import { sanitizeHtml } from '@/lib/sanitize';
 import { useAuthStore } from '@/store/authStore';
 import type { Event } from '@/types';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 const STATUS_LABEL: Record<string, string> = {
   UPCOMING: '모집 중',
@@ -15,10 +17,10 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 const STATUS_COLOR: Record<string, string> = {
-  UPCOMING: 'bg-green-50 text-green-700 border-green-100',
-  ONGOING: 'bg-blue-50 text-blue-600 border-blue-100',
+  UPCOMING: 'bg-green-50 text-green-700 border-green-200',
+  ONGOING: 'bg-blue-50 text-blue-600 border-blue-200',
   ENDED: 'bg-gray-100 text-gray-400 border-gray-200',
-  CANCELLED: 'bg-red-50 text-red-400 border-red-100',
+  CANCELLED: 'bg-red-50 text-red-400 border-red-200',
 };
 
 export default function ServiceDetailPage() {
@@ -63,25 +65,21 @@ export default function ServiceDetailPage() {
   };
 
   if (loading) return (
-    <main className="min-h-screen bg-[#f4f6f8] py-10 px-4">
-      <div className="max-w-2xl mx-auto animate-pulse">
-        <div className="h-5 bg-gray-200 rounded w-24 mb-6" />
-        <div className="bg-white rounded-2xl overflow-hidden">
-          <div className="h-56 bg-gray-100" />
-          <div className="p-6 space-y-3">
-            <div className="h-6 bg-gray-100 rounded w-2/3" />
-            <div className="h-4 bg-gray-50 rounded w-1/2" />
-          </div>
-        </div>
+    <main className="min-h-screen bg-background py-10 px-4">
+      <div className="max-w-2xl mx-auto animate-pulse space-y-4">
+        <div className="h-5 bg-accent rounded w-24" />
+        <div className="h-56 bg-accent rounded-2xl" />
+        <div className="h-6 bg-accent rounded w-2/3" />
       </div>
     </main>
   );
 
   if (notFound || !event) return (
-    <main className="min-h-screen bg-[#f4f6f8] flex items-center justify-center">
+    <main className="min-h-screen bg-background flex items-center justify-center">
       <div className="text-center">
-        <p className="text-gray-400 mb-4">봉사 정보를 찾을 수 없습니다.</p>
-        <button onClick={() => router.back()} className="text-sm text-[#003478] hover:underline">← 돌아가기</button>
+        <div className="text-5xl mb-4">🤝</div>
+        <p className="text-muted-foreground mb-4">봉사 정보를 찾을 수 없습니다.</p>
+        <button onClick={() => router.back()} className="text-sm text-primary hover:underline">← 돌아가기</button>
       </div>
     </main>
   );
@@ -90,66 +88,57 @@ export default function ServiceDetailPage() {
   const isFull = event.maxParticipants !== null && event.currentParticipants >= event.maxParticipants && !event.joined;
 
   return (
-    <main className="min-h-screen bg-[#f4f6f8] py-10 px-4">
+    <main className="min-h-screen bg-background py-10 px-4">
       <div className="max-w-2xl mx-auto">
         {toast && (
           <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white text-sm px-5 py-2.5 rounded-full shadow-lg">
             {toast}
           </div>
         )}
-        <button onClick={() => router.push('/service')} className="text-sm text-gray-400 hover:text-gray-600 mb-6 flex items-center gap-1">
+        <button onClick={() => router.push('/service')} className="text-sm text-muted-foreground hover:text-primary mb-6 flex items-center gap-1 transition">
           ← 봉사 목록
         </button>
 
-        <div className="bg-white rounded-2xl border border-[#EDEFF1] overflow-hidden">
+        <Card className="overflow-hidden">
           {event.thumbnailUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
             <img src={event.thumbnailUrl} alt={event.title} className="w-full h-56 object-cover" />
           ) : (
-            <div className="w-full h-32 bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center text-5xl">
-              🤝
-            </div>
+            <div className="w-full h-36 bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center text-6xl">🤝</div>
           )}
 
-          <div className="p-6">
-            <div className="flex items-center gap-2 mb-3">
-              <span className={`text-xs px-2.5 py-1 rounded border font-semibold ${STATUS_COLOR[event.status] ?? ''}`}>
+          <CardContent className="p-6">
+            <div className="mb-3">
+              <Badge className={`${STATUS_COLOR[event.status] ?? ''} border text-xs`}>
                 {STATUS_LABEL[event.status] ?? event.status}
-              </span>
+              </Badge>
             </div>
+            <h1 className="text-xl font-extrabold text-gray-900 mb-5">{event.title}</h1>
 
-            <h1 className="text-xl font-bold text-gray-900 mb-5">{event.title}</h1>
-
-            <div className="space-y-3 text-sm mb-6">
-              <div className="flex items-start gap-3">
-                <span className="text-lg shrink-0">📍</span>
-                <div>
-                  <div className="text-xs text-gray-400 font-medium mb-0.5">장소</div>
-                  <div className="text-gray-800">{event.location}</div>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <span className="text-lg shrink-0">📅</span>
-                <div>
-                  <div className="text-xs text-gray-400 font-medium mb-0.5">일정</div>
-                  <div className="text-gray-800">
-                    {new Date(event.startDate).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' })}
-                    {event.startDate.slice(0, 10) !== event.endDate.slice(0, 10) && (
-                      <> ~ {new Date(event.endDate).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })}</>
-                    )}
+            <div className="space-y-2 mb-6">
+              {[
+                { icon: '📍', label: '장소', value: event.location },
+                { icon: '📅', label: '일정', value: `${new Date(event.startDate).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' })}${event.startDate.slice(0, 10) !== event.endDate.slice(0, 10) ? ` ~ ${new Date(event.endDate).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })}` : ''}` },
+              ].map(row => (
+                <div key={row.label} className="flex items-start gap-3 p-3 bg-accent rounded-xl text-sm">
+                  <span className="text-lg shrink-0">{row.icon}</span>
+                  <div>
+                    <div className="text-xs text-muted-foreground font-medium">{row.label}</div>
+                    <div className="text-gray-800">{row.value}</div>
                   </div>
                 </div>
-              </div>
+              ))}
               {event.maxParticipants !== null && (
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-3 p-3 bg-accent rounded-xl text-sm">
                   <span className="text-lg shrink-0">👥</span>
                   <div className="flex-1">
-                    <div className="text-xs text-gray-400 font-medium mb-0.5">신청 현황</div>
+                    <div className="text-xs text-muted-foreground font-medium">신청 현황</div>
                     <div className="text-gray-800 flex items-center gap-2">
                       {event.currentParticipants} / {event.maxParticipants}명
                       {isFull && <span className="text-xs text-red-400 font-semibold">마감</span>}
                     </div>
-                    <div className="w-full bg-gray-100 rounded-full h-1.5 mt-1.5">
-                      <div className="bg-[#003478] h-1.5 rounded-full transition-all"
+                    <div className="w-full bg-white rounded-full h-1.5 mt-1.5">
+                      <div className="bg-primary h-1.5 rounded-full transition-all"
                         style={{ width: `${Math.min(100, Math.round(event.currentParticipants / event.maxParticipants * 100))}%` }} />
                     </div>
                   </div>
@@ -158,37 +147,32 @@ export default function ServiceDetailPage() {
             </div>
 
             {event.description && (
-              <div className="border-t border-[#EDEFF1] pt-5 mb-6">
-                <div
-                  className="prose prose-sm max-w-none text-gray-700 leading-relaxed"
-                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(event.description) }}
-                />
+              <div className="border-t border-border pt-5 mb-6">
+                <div className="prose prose-sm max-w-none text-gray-700 leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(event.description) }} />
               </div>
             )}
 
             {canJoin && (
-              <div className="flex justify-center pt-2">
-                <button
-                  onClick={handleJoin}
-                  disabled={actionLoading || (isFull && !event.joined)}
-                  className={`px-10 py-3 rounded-full text-sm font-bold border-2 transition disabled:opacity-50 ${
+              <div className="flex justify-center">
+                <button onClick={handleJoin} disabled={actionLoading || (isFull && !event.joined)}
+                  className={`px-10 py-3 rounded-xl text-sm font-bold transition-all disabled:opacity-50 ${
                     event.joined
-                      ? 'border-red-400 bg-red-50 text-red-500 hover:bg-red-100'
+                      ? 'border-2 border-red-400 bg-red-50 text-red-500 hover:bg-red-100'
                       : isFull
-                      ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
-                      : 'border-[#003478] bg-[#003478] text-white hover:bg-[#002560]'
-                  }`}
-                >
+                      ? 'border-2 border-border bg-accent text-muted-foreground cursor-not-allowed'
+                      : 'bg-primary text-white hover:bg-primary/90 shadow-md shadow-primary/20 hover:-translate-y-0.5'
+                  }`}>
                   {actionLoading ? '처리 중...' : event.joined ? '참여 취소' : isFull ? '정원 마감' : '봉사 신청하기'}
                 </button>
               </div>
             )}
 
             {!canJoin && event.status === 'ENDED' && (
-              <div className="text-center py-4 text-sm text-gray-400">이미 종료된 봉사입니다.</div>
+              <div className="text-center py-4 text-sm text-muted-foreground">이미 종료된 봉사입니다.</div>
             )}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
     </main>
   );

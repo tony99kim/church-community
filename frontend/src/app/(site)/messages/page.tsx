@@ -21,7 +21,7 @@ function formatConvTime(dateStr: string | null): string {
 function Avatar({ name, size = 'md' }: { name: string; size?: 'sm' | 'md' | 'lg' }) {
   const cls = size === 'sm' ? 'w-8 h-8 text-xs' : size === 'lg' ? 'w-11 h-11 text-base' : 'w-10 h-10 text-sm';
   return (
-    <div className={`${cls} bg-[#003478] rounded-full flex items-center justify-center text-white font-bold shrink-0`}>
+    <div className={`${cls} bg-primary rounded-full flex items-center justify-center text-white font-bold shrink-0`}>
       {name?.[0] ?? '?'}
     </div>
   );
@@ -84,7 +84,7 @@ function NewConversationModal({ onClose, onCreated }: {
                 value={keyword}
                 onChange={e => setKeyword(e.target.value)}
                 placeholder="닉네임으로 검색..."
-                className="w-full pl-9 pr-4 py-2.5 border border-[#EDEFF1] rounded-xl text-sm focus:outline-none focus:border-[#003478]"
+                className="w-full pl-9 pr-4 py-2.5 border border-border rounded-xl text-sm focus:outline-none focus:border-primary"
               />
             </div>
             {searching && <p className="text-xs text-gray-400 text-center py-3">검색 중...</p>}
@@ -107,7 +107,7 @@ function NewConversationModal({ onClose, onCreated }: {
           </>
         ) : (
           <>
-            <div className="flex items-center gap-3 mb-4 p-3 bg-blue-50 rounded-xl">
+            <div className="flex items-center gap-3 mb-4 p-3 bg-primary/5 rounded-xl">
               <Avatar name={selectedUser.nickname} size="sm" />
               <span className="text-sm font-semibold text-gray-900 flex-1">{selectedUser.nickname}</span>
               <button onClick={() => setSelectedUser(null)} className="text-xs text-gray-400 hover:text-gray-600 underline">변경</button>
@@ -119,12 +119,12 @@ function NewConversationModal({ onClose, onCreated }: {
               onChange={e => setMessage(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend())}
               placeholder="첫 메시지를 입력하세요..."
-              className="w-full px-4 py-2.5 border border-[#EDEFF1] rounded-xl text-sm focus:outline-none focus:border-[#003478] resize-none mb-3"
+              className="w-full px-4 py-2.5 border border-border rounded-xl text-sm focus:outline-none focus:border-primary resize-none mb-3"
             />
             <button
               onClick={handleSend}
               disabled={sending || !message.trim()}
-              className="w-full py-2.5 bg-[#003478] text-white rounded-xl text-sm font-semibold hover:bg-blue-900 disabled:opacity-50 transition"
+              className="w-full py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 disabled:opacity-50 transition"
             >
               {sending ? '전송 중...' : '보내기'}
             </button>
@@ -207,7 +207,7 @@ function MessagesContent() {
     return (
       <div className="fixed inset-x-0 bottom-0 flex items-center justify-center" style={{ top: '48px' }}>
         <div className="text-center text-gray-400">
-          <div className="w-10 h-10 border-2 border-[#003478] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+          <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3" />
           <p className="text-sm">불러오는 중...</p>
         </div>
       </div>
@@ -230,14 +230,14 @@ function MessagesContent() {
         {/* 모바일: 채팅 열리면 숨김 / 데스크톱: 항상 표시 */}
         <div className={`
           ${selectedId ? 'hidden md:flex' : 'flex'}
-          flex-col w-full md:w-80 lg:w-96 border-r border-[#EDEFF1] bg-white overflow-hidden
+          flex-col w-full md:w-80 lg:w-96 border-r border-border bg-white overflow-hidden
         `}>
           {/* 목록 헤더 */}
-          <div className="px-4 py-3 border-b border-[#EDEFF1] flex items-center justify-between shrink-0">
+          <div className="px-4 py-3 border-b border-border flex items-center justify-between shrink-0">
             <h1 className="text-lg font-bold text-gray-900">메시지</h1>
             <button
               onClick={() => setShowNewModal(true)}
-              className="w-8 h-8 flex items-center justify-center rounded-full bg-[#003478] text-white hover:bg-blue-900 transition text-xl leading-none"
+              className="w-8 h-8 flex items-center justify-center rounded-full bg-primary text-white hover:bg-primary/90 transition text-xl leading-none"
               title="새 대화"
             >
               +
@@ -252,7 +252,7 @@ function MessagesContent() {
               <p className="text-xs text-gray-400 mb-4">새 대화를 시작해보세요</p>
               <button
                 onClick={() => setShowNewModal(true)}
-                className="px-5 py-2 bg-[#003478] text-white text-sm rounded-xl hover:bg-blue-900 transition"
+                className="px-5 py-2 bg-primary text-white text-sm rounded-xl hover:bg-primary/90 transition"
               >
                 + 새 대화 시작
               </button>
@@ -267,7 +267,7 @@ function MessagesContent() {
                   <li key={c.id}>
                     <button
                       onClick={() => openConversation(c.id)}
-                      className={`w-full text-left px-4 py-3.5 flex items-center gap-3 transition hover:bg-gray-50 active:bg-gray-100 ${isSelected ? 'bg-blue-50' : ''}`}
+                      className={`w-full text-left px-4 py-3.5 flex items-center gap-3 transition hover:bg-accent active:bg-accent ${isSelected ? 'bg-primary/5' : ''}`}
                     >
                       <Avatar name={name} size="md" />
                       <div className="flex-1 min-w-0">
@@ -312,7 +312,7 @@ function MessagesContent() {
               <p className="text-xs text-gray-400 mb-4">또는 새 대화를 시작하세요</p>
               <button
                 onClick={() => setShowNewModal(true)}
-                className="px-5 py-2 border border-[#003478] text-[#003478] text-sm rounded-xl hover:bg-blue-50 transition"
+                className="px-5 py-2 border border-primary text-primary text-sm rounded-xl hover:bg-primary/5 transition"
               >
                 + 새 대화 시작
               </button>
@@ -320,7 +320,7 @@ function MessagesContent() {
           ) : (
             <>
               {/* 채팅 헤더 */}
-              <div className="px-4 py-3 border-b border-[#EDEFF1] flex items-center gap-3 bg-white shrink-0">
+              <div className="px-4 py-3 border-b border-border flex items-center gap-3 bg-white shrink-0">
                 {/* 모바일 뒤로가기 버튼 */}
                 <button
                   onClick={() => setSelectedId(null)}
@@ -337,7 +337,7 @@ function MessagesContent() {
               </div>
 
               {/* 메시지 목록 */}
-              <div className="flex-1 overflow-y-auto px-4 py-4 space-y-2 bg-gray-50">
+              <div className="flex-1 overflow-y-auto px-4 py-4 space-y-2 bg-accent/40">
                 {messages.length === 0 && (
                   <p className="text-xs text-gray-400 text-center py-8">첫 메시지를 보내보세요 👋</p>
                 )}
@@ -355,8 +355,8 @@ function MessagesContent() {
                         <div className={`flex items-end gap-1.5 ${isMine ? 'flex-row-reverse' : 'flex-row'}`}>
                           <div className={`px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap break-words ${
                             isMine
-                              ? 'bg-[#003478] text-white rounded-br-sm'
-                              : 'bg-white text-gray-800 rounded-bl-sm shadow-sm border border-gray-100'
+                              ? 'bg-primary text-white rounded-br-sm'
+                              : 'bg-white text-gray-800 rounded-bl-sm shadow-sm border border-border'
                           }`}>
                             {m.content}
                           </div>
@@ -372,19 +372,19 @@ function MessagesContent() {
               </div>
 
               {/* 입력창 */}
-              <div className="px-4 py-3 bg-white border-t border-[#EDEFF1] flex items-center gap-2 shrink-0">
+              <div className="px-4 py-3 bg-white border-t border-border flex items-center gap-2 shrink-0">
                 <input
                   ref={inputRef}
                   value={msgInput}
                   onChange={e => setMsgInput(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), sendMessage())}
                   placeholder="메시지 입력..."
-                  className="flex-1 bg-gray-100 rounded-full px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478] focus:bg-white transition"
+                  className="flex-1 bg-accent rounded-full px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition"
                 />
                 <button
                   onClick={sendMessage}
                   disabled={sending || !msgInput.trim()}
-                  className="w-10 h-10 flex items-center justify-center bg-[#003478] text-white rounded-full hover:bg-blue-900 disabled:opacity-40 transition shrink-0"
+                  className="w-10 h-10 flex items-center justify-center bg-primary text-white rounded-full hover:bg-primary/90 disabled:opacity-40 transition shrink-0"
                 >
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
@@ -403,7 +403,7 @@ export default function MessagesPage() {
   return (
     <Suspense fallback={
       <div className="fixed inset-x-0 bottom-0 flex items-center justify-center" style={{ top: '48px' }}>
-        <div className="w-10 h-10 border-2 border-[#003478] border-t-transparent rounded-full animate-spin" />
+        <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
       </div>
     }>
       <MessagesContent />

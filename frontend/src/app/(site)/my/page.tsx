@@ -6,23 +6,17 @@ import Link from 'next/link';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
 import { SpaceRental, ItemRental, FaithQuestion, PrayerRequest, WelcomeKit, ChatMessage } from '@/types';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 interface Post {
-  id: number;
-  title: string;
-  categoryName: string;
-  viewCount: number;
-  commentCount: number;
-  createdAt: string;
+  id: number; title: string; categoryName: string; viewCount: number; commentCount: number; createdAt: string;
 }
 
 type Tab = 'info' | 'posts' | 'password' | 'spaceRentals' | 'itemRentals' | 'faithQuestions' | 'prayers' | 'welcomeKits';
 
 const ROLE_LABEL: Record<string, string> = {
-  SUPER_ADMIN: '최고관리자',
-  CHURCH_MANAGER: '교회관리자',
-  PASTOR: '목사/전도사',
-  USER: '일반회원',
+  SUPER_ADMIN: '최고관리자', CHURCH_MANAGER: '교회관리자', PASTOR: '목사/전도사', USER: '일반회원',
 };
 
 function EyeIcon({ open }: { open: boolean }) {
@@ -40,10 +34,10 @@ function EyeIcon({ open }: { open: boolean }) {
 
 const STATUS_LABEL: Record<string, string> = { PENDING: '대기중', APPROVED: '승인', REJECTED: '거절', CANCELLED: '취소' };
 const STATUS_BADGE: Record<string, string> = {
-  PENDING: 'bg-amber-50 text-amber-600',
-  APPROVED: 'bg-green-50 text-green-600',
-  REJECTED: 'bg-red-50 text-red-500',
-  CANCELLED: 'bg-gray-100 text-gray-400',
+  PENDING: 'bg-amber-50 text-amber-600 border-amber-200',
+  APPROVED: 'bg-green-50 text-green-600 border-green-200',
+  REJECTED: 'bg-red-50 text-red-500 border-red-200',
+  CANCELLED: 'bg-accent text-muted-foreground border-border',
 };
 
 export default function MyPage() {
@@ -64,27 +58,23 @@ export default function MyPage() {
   const [welcomeKits, setWelcomeKits] = useState<WelcomeKit[]>([]);
   const [welcomeKitsLoading, setWelcomeKitsLoading] = useState(false);
 
-  // 물품 채팅
   const [itemChatId, setItemChatId] = useState<number | null>(null);
   const [itemMessages, setItemMessages] = useState<ChatMessage[]>([]);
   const [itemMsgInput, setItemMsgInput] = useState('');
   const [sendingItemMsg, setSendingItemMsg] = useState(false);
   const itemChatBottomRef = useRef<HTMLDivElement>(null);
 
-  // 신앙질문 채팅
   const [faithChatId, setFaithChatId] = useState<number | null>(null);
   const [faithMessages, setFaithMessages] = useState<ChatMessage[]>([]);
   const [faithMsgInput, setFaithMsgInput] = useState('');
   const [sendingFaithMsg, setSendingFaithMsg] = useState(false);
   const faithChatBottomRef = useRef<HTMLDivElement>(null);
 
-  // 프로필 수정
   const [nickname, setNickname] = useState('');
   const [name, setName] = useState('');
   const [nicknameMsg, setNicknameMsg] = useState('');
   const [nicknameLoading, setNicknameLoading] = useState(false);
 
-  // 비밀번호 변경
   const [pwForm, setPwForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
   const [pwMsg, setPwMsg] = useState('');
   const [pwLoading, setPwLoading] = useState(false);
@@ -112,28 +102,17 @@ export default function MyPage() {
     if (!user) return;
     setPostsLoading(true);
     api.get(`/users/${user.id}/posts`, { params: { page: 0, size: 20, sort: 'createdAt,desc' } })
-      .then((res) => setPosts(res.data.data.content))
-      .finally(() => setPostsLoading(false));
+      .then((res) => setPosts(res.data.data.content)).finally(() => setPostsLoading(false));
     setSpaceRentalsLoading(true);
-    api.get('/spaces/rentals/my')
-      .then((res) => setSpaceRentals(res.data.data ?? []))
-      .finally(() => setSpaceRentalsLoading(false));
+    api.get('/spaces/rentals/my').then((res) => setSpaceRentals(res.data.data ?? [])).finally(() => setSpaceRentalsLoading(false));
     setItemRentalsLoading(true);
-    api.get('/items/rentals/my')
-      .then((res) => setItemRentals(res.data.data ?? []))
-      .finally(() => setItemRentalsLoading(false));
+    api.get('/items/rentals/my').then((res) => setItemRentals(res.data.data ?? [])).finally(() => setItemRentalsLoading(false));
     setFaithQuestionsLoading(true);
-    api.get('/faith/questions/my')
-      .then((res) => setFaithQuestions(res.data.data ?? []))
-      .finally(() => setFaithQuestionsLoading(false));
+    api.get('/faith/questions/my').then((res) => setFaithQuestions(res.data.data ?? [])).finally(() => setFaithQuestionsLoading(false));
     setPrayersLoading(true);
-    api.get('/faith/prayers/my')
-      .then((res) => setMyPrayers(res.data.data ?? []))
-      .finally(() => setPrayersLoading(false));
+    api.get('/faith/prayers/my').then((res) => setMyPrayers(res.data.data ?? [])).finally(() => setPrayersLoading(false));
     setWelcomeKitsLoading(true);
-    api.get('/welcome/kits/my')
-      .then((res) => setWelcomeKits(res.data.data ?? []))
-      .finally(() => setWelcomeKitsLoading(false));
+    api.get('/welcome/kits/my').then((res) => setWelcomeKits(res.data.data ?? [])).finally(() => setWelcomeKitsLoading(false));
   }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const openItemChat = async (rentalId: number) => {
@@ -154,9 +133,7 @@ export default function MyPage() {
       const res = await api.get(`/items/rentals/${rentalId}/messages`);
       setItemMessages(res.data.data ?? []);
       setTimeout(() => itemChatBottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
-    } finally {
-      setSendingItemMsg(false);
-    }
+    } finally { setSendingItemMsg(false); }
   };
 
   const openFaithChat = async (questionId: number) => {
@@ -177,15 +154,12 @@ export default function MyPage() {
       const res = await api.get(`/faith/questions/${questionId}/messages`);
       setFaithMessages(res.data.data ?? []);
       setTimeout(() => faithChatBottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
-    } finally {
-      setSendingFaithMsg(false);
-    }
+    } finally { setSendingFaithMsg(false); }
   };
 
   const handleNickname = async (e: React.FormEvent) => {
     e.preventDefault();
-    setNicknameLoading(true);
-    setNicknameMsg('');
+    setNicknameLoading(true); setNicknameMsg('');
     try {
       const res = await api.put('/users/me', { nickname, name });
       setUser({ ...user!, nickname: res.data.data.nickname });
@@ -193,41 +167,26 @@ export default function MyPage() {
     } catch (err: unknown) {
       const e = err as { response?: { data?: { message?: string } } };
       setNicknameMsg(e.response?.data?.message || '변경에 실패했습니다.');
-    } finally {
-      setNicknameLoading(false);
-    }
+    } finally { setNicknameLoading(false); }
   };
 
   const handlePassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (pwForm.newPassword !== pwForm.confirmPassword) {
-      setPwMsg('새 비밀번호가 일치하지 않습니다.');
-      return;
-    }
-    setPwLoading(true);
-    setPwMsg('');
+    if (pwForm.newPassword !== pwForm.confirmPassword) { setPwMsg('새 비밀번호가 일치하지 않습니다.'); return; }
+    setPwLoading(true); setPwMsg('');
     try {
-      await api.put('/users/me/password', {
-        currentPassword: pwForm.currentPassword,
-        newPassword: pwForm.newPassword,
-      });
+      await api.put('/users/me/password', { currentPassword: pwForm.currentPassword, newPassword: pwForm.newPassword });
       setPwMsg('✅ 비밀번호가 변경되었습니다.');
       setPwForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch (err: unknown) {
       const e = err as { response?: { data?: { message?: string } } };
       setPwMsg(e.response?.data?.message || '비밀번호 변경에 실패했습니다.');
-    } finally {
-      setPwLoading(false);
-    }
+    } finally { setPwLoading(false); }
   };
 
   const tabCount: Partial<Record<Tab, number>> = {
-    posts: posts.length,
-    spaceRentals: spaceRentals.length,
-    itemRentals: itemRentals.length,
-    faithQuestions: faithQuestions.length,
-    prayers: myPrayers.length,
-    welcomeKits: welcomeKits.length,
+    posts: posts.length, spaceRentals: spaceRentals.length, itemRentals: itemRentals.length,
+    faithQuestions: faithQuestions.length, prayers: myPrayers.length, welcomeKits: welcomeKits.length,
   };
 
   const isLocalUser = !resolvedProvider || resolvedProvider === 'LOCAL';
@@ -244,35 +203,42 @@ export default function MyPage() {
   ];
 
   return (
-    <div className="bg-[#f4f6f8] min-h-screen">
+    <div className="bg-background min-h-screen">
       <div className="max-w-2xl mx-auto px-4 py-8">
         {/* 프로필 헤더 */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-5 flex items-center gap-4">
-          <div className="w-16 h-16 bg-[#003478] rounded-full flex items-center justify-center text-white text-2xl font-bold shrink-0">
-            {user?.nickname?.[0]}
-          </div>
-          <div>
-            <div className="text-lg font-bold text-gray-900">{user?.nickname}</div>
-            <div className="text-sm text-gray-500">{user?.email}</div>
-            <div className="text-xs mt-1">
-              <span className="bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">
-                {ROLE_LABEL[user?.role ?? ''] ?? '일반회원'}
-              </span>
+        <Card className="mb-5 overflow-hidden">
+          <div className="h-16 bg-gradient-to-r from-primary to-primary/70" />
+          <CardContent className="p-5 pt-0 relative">
+            <div className="flex items-end gap-4 -mt-8 mb-3">
+              {user?.profileImageUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={user.profileImageUrl} alt={user.nickname} className="w-16 h-16 rounded-full border-4 border-white shadow-md object-cover shrink-0" />
+              ) : (
+                <div className="w-16 h-16 bg-primary rounded-full border-4 border-white shadow-md flex items-center justify-center text-white text-2xl font-extrabold shrink-0">
+                  {user?.nickname?.[0]}
+                </div>
+              )}
+              <div className="pb-1">
+                <div className="text-lg font-extrabold text-gray-900">{user?.nickname}</div>
+                <div className="text-sm text-muted-foreground">{user?.email}</div>
+              </div>
             </div>
-          </div>
-        </div>
+            <Badge className="bg-primary/10 text-primary border-0">
+              {ROLE_LABEL[user?.role ?? ''] ?? '일반회원'}
+            </Badge>
+          </CardContent>
+        </Card>
 
         {/* 탭 */}
-        <div className="flex overflow-x-auto gap-1 bg-white rounded-xl border border-gray-200 p-1 mb-5 scrollbar-hide min-h-[48px]">
+        <div className="flex overflow-x-auto gap-1 bg-white rounded-xl border border-border p-1 mb-5 scrollbar-hide min-h-[48px]">
           {hydrated && TABS.map((t) => (
-            <button
-              key={t.key}
-              onClick={() => setTab(t.key)}
-              className={`shrink-0 px-3 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap flex items-center gap-1 ${tab === t.key ? 'bg-[#003478] text-white' : 'text-gray-600 hover:bg-gray-50'}`}
-            >
+            <button key={t.key} onClick={() => setTab(t.key)}
+              className={`shrink-0 px-3 py-2 rounded-lg text-sm font-semibold transition whitespace-nowrap flex items-center gap-1 ${
+                tab === t.key ? 'bg-primary text-white' : 'text-muted-foreground hover:bg-accent'
+              }`}>
               {t.label}
               {tabCount[t.key] !== undefined && tabCount[t.key]! > 0 && (
-                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${tab === t.key ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500'}`}>
+                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${tab === t.key ? 'bg-white/20 text-white' : 'bg-accent text-muted-foreground'}`}>
                   {tabCount[t.key]}
                 </span>
               )}
@@ -282,74 +248,63 @@ export default function MyPage() {
 
         {/* 내 정보 */}
         {tab === 'info' && (
-          <div className="bg-white rounded-2xl border border-gray-200 p-6">
-            <h2 className="font-bold text-gray-900 mb-5">내 정보 수정</h2>
-            <form onSubmit={handleNickname} className="space-y-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">이름</label>
-                <input
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="실명"
-                  className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]"
-                />
-                <p className="text-xs text-gray-400 mt-1">행사 참여 명단 등 관리 목적으로만 사용됩니다.</p>
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">닉네임</label>
-                <input
-                  value={nickname}
-                  onChange={(e) => setNickname(e.target.value)}
-                  placeholder="닉네임"
-                  className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]"
-                  required
-                />
-                <p className="text-xs text-gray-400 mt-1">게시글, 댓글 등 모든 활동에 닉네임으로 표시됩니다.</p>
-              </div>
-              {nicknameMsg && (
-                <p className={`text-sm ${nicknameMsg.startsWith('✅') ? 'text-green-600' : 'text-red-500'}`}>{nicknameMsg}</p>
-              )}
-              <button
-                type="submit"
-                disabled={nicknameLoading}
-                className="w-full bg-[#003478] text-white py-3 rounded-xl text-sm font-semibold hover:bg-blue-900 disabled:opacity-50 transition"
-              >
-                {nicknameLoading ? '저장 중...' : '저장'}
-              </button>
-            </form>
-          </div>
+          <Card>
+            <CardContent className="p-6">
+              <h2 className="font-bold text-gray-900 mb-5">내 정보 수정</h2>
+              <form onSubmit={handleNickname} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">이름</label>
+                  <input value={name} onChange={(e) => setName(e.target.value)} placeholder="실명"
+                    className="w-full border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition" />
+                  <p className="text-xs text-muted-foreground mt-1">행사 참여 명단 등 관리 목적으로만 사용됩니다.</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">닉네임</label>
+                  <input value={nickname} onChange={(e) => setNickname(e.target.value)} placeholder="닉네임"
+                    className="w-full border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition"
+                    required />
+                  <p className="text-xs text-muted-foreground mt-1">게시글, 댓글 등 모든 활동에 닉네임으로 표시됩니다.</p>
+                </div>
+                {nicknameMsg && (
+                  <p className={`text-sm ${nicknameMsg.startsWith('✅') ? 'text-green-600' : 'text-red-500'}`}>{nicknameMsg}</p>
+                )}
+                <button type="submit" disabled={nicknameLoading}
+                  className="w-full bg-primary text-white py-3 rounded-xl text-sm font-bold hover:bg-primary/90 disabled:opacity-50 transition shadow-md shadow-primary/20">
+                  {nicknameLoading ? '저장 중...' : '저장'}
+                </button>
+              </form>
+            </CardContent>
+          </Card>
         )}
 
         {/* 내가 쓴 글 */}
         {tab === 'posts' && (
-          <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100">
-              <h2 className="font-bold text-gray-900">내가 쓴 글 <span className="text-[#003478]">{posts.length}</span></h2>
+          <Card className="overflow-hidden">
+            <div className="px-6 py-4 border-b border-border">
+              <h2 className="font-bold text-gray-900">내가 쓴 글 <span className="text-primary">{posts.length}</span></h2>
             </div>
             {postsLoading ? (
-              <div className="p-8 text-center text-gray-400">불러오는 중...</div>
+              <div className="p-8 text-center text-muted-foreground">불러오는 중...</div>
             ) : posts.length === 0 ? (
               <div className="p-12 text-center">
                 <div className="text-4xl mb-3">📭</div>
-                <p className="text-gray-400 text-sm">작성한 게시글이 없습니다.</p>
-                <Link href="/posts/write" className="inline-block mt-4 text-[#003478] text-sm font-medium hover:underline">
-                  첫 글 작성하기 →
-                </Link>
+                <p className="text-muted-foreground text-sm">작성한 게시글이 없습니다.</p>
+                <Link href="/posts/write" className="inline-block mt-4 text-primary text-sm font-semibold hover:underline">첫 글 작성하기 →</Link>
               </div>
             ) : (
-              <ul className="divide-y divide-gray-50">
+              <ul className="divide-y divide-border">
                 {posts.map((post) => (
                   <li key={post.id}>
-                    <Link href={`/posts/${post.id}`} className="flex items-center px-6 py-3.5 hover:bg-gray-50 transition">
+                    <Link href={`/posts/${post.id}`} className="flex items-center px-6 py-3.5 hover:bg-accent transition">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="text-xs bg-blue-50 text-blue-600 border border-blue-100 px-2 py-0.5 rounded-full shrink-0">{post.categoryName}</span>
+                          <Badge className="bg-primary/10 text-primary border-0 text-[10px] shrink-0">{post.categoryName}</Badge>
                           <span className="text-sm font-medium text-gray-900 truncate">{post.title}</span>
                           {post.commentCount > 0 && (
                             <span className="text-xs text-red-400 shrink-0">[{post.commentCount}]</span>
                           )}
                         </div>
-                        <div className="text-xs text-gray-400">
+                        <div className="text-xs text-muted-foreground">
                           {new Date(post.createdAt).toLocaleDateString('ko-KR')} · 조회 {post.viewCount}
                         </div>
                       </div>
@@ -358,111 +313,95 @@ export default function MyPage() {
                 ))}
               </ul>
             )}
-          </div>
+          </Card>
         )}
 
         {/* 공간 신청 내역 */}
         {tab === 'spaceRentals' && (
-          <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100">
+          <Card className="overflow-hidden">
+            <div className="px-6 py-4 border-b border-border">
               <h2 className="font-bold text-gray-900">공간 신청 내역</h2>
             </div>
             {spaceRentalsLoading ? (
-              <div className="p-8 text-center text-gray-400">불러오는 중...</div>
+              <div className="p-8 text-center text-muted-foreground">불러오는 중...</div>
             ) : spaceRentals.length === 0 ? (
               <div className="p-12 text-center">
                 <div className="text-4xl mb-3">📋</div>
-                <p className="text-gray-400 text-sm">신청한 공간 대여가 없습니다.</p>
-                <Link href="/spaces" className="inline-block mt-4 text-[#003478] text-sm font-medium hover:underline">
-                  공간 예약하러 가기 →
-                </Link>
+                <p className="text-muted-foreground text-sm">신청한 공간 대여가 없습니다.</p>
+                <Link href="/spaces" className="inline-block mt-4 text-primary text-sm font-semibold hover:underline">공간 예약하러 가기 →</Link>
               </div>
             ) : (
-              <ul className="divide-y divide-gray-50">
+              <ul className="divide-y divide-border">
                 {spaceRentals.map((r) => (
                   <li key={r.id} className="px-6 py-4">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_BADGE[r.status]}`}>
-                            {STATUS_LABEL[r.status]}
-                          </span>
+                          <Badge className={`${STATUS_BADGE[r.status]} border text-xs`}>{STATUS_LABEL[r.status]}</Badge>
                           <span className="text-sm font-medium text-gray-900 truncate">{r.spaceName}</span>
                         </div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-muted-foreground">
                           {r.startDateTime.slice(0, 10)} {r.startDateTime.slice(11, 16)} ~ {r.endDateTime.slice(11, 16)}
                         </div>
-                        <div className="text-xs text-gray-400 mt-0.5">목적: {r.purpose}</div>
-                        {r.rejectReason && (
-                          <div className="text-xs text-red-400 mt-0.5">거절 사유: {r.rejectReason}</div>
-                        )}
+                        <div className="text-xs text-muted-foreground mt-0.5">목적: {r.purpose}</div>
+                        {r.rejectReason && <div className="text-xs text-red-400 mt-0.5">거절 사유: {r.rejectReason}</div>}
                       </div>
-                      <div className="text-xs text-gray-400 shrink-0">
-                        {new Date(r.createdAt).toLocaleDateString('ko-KR')}
-                      </div>
+                      <div className="text-xs text-muted-foreground shrink-0">{new Date(r.createdAt).toLocaleDateString('ko-KR')}</div>
                     </div>
                   </li>
                 ))}
               </ul>
             )}
-          </div>
+          </Card>
         )}
 
         {/* 물품 신청 내역 */}
         {tab === 'itemRentals' && (
-          <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100">
+          <Card className="overflow-hidden">
+            <div className="px-6 py-4 border-b border-border">
               <h2 className="font-bold text-gray-900">물품 신청 내역</h2>
             </div>
             {itemRentalsLoading ? (
-              <div className="p-8 text-center text-gray-400">불러오는 중...</div>
+              <div className="p-8 text-center text-muted-foreground">불러오는 중...</div>
             ) : itemRentals.length === 0 ? (
               <div className="p-12 text-center">
                 <div className="text-4xl mb-3">📦</div>
-                <p className="text-gray-400 text-sm">신청한 물품 대여가 없습니다.</p>
-                <Link href="/items" className="inline-block mt-4 text-[#003478] text-sm font-medium hover:underline">
-                  물품 대여 신청하러 가기 →
-                </Link>
+                <p className="text-muted-foreground text-sm">신청한 물품 대여가 없습니다.</p>
+                <Link href="/items" className="inline-block mt-4 text-primary text-sm font-semibold hover:underline">물품 대여 신청하러 가기 →</Link>
               </div>
             ) : (
-              <ul className="divide-y divide-gray-50">
+              <ul className="divide-y divide-border">
                 {itemRentals.map((r) => (
                   <li key={r.id} className="px-6 py-4">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_BADGE[r.status]}`}>
-                            {STATUS_LABEL[r.status]}
-                          </span>
+                          <Badge className={`${STATUS_BADGE[r.status]} border text-xs`}>{STATUS_LABEL[r.status]}</Badge>
                           <span className="text-sm font-medium text-gray-900 truncate">{r.itemName}</span>
                         </div>
-                        <div className="text-xs text-gray-500">
-                          {r.startDate} ~ {r.endDate} · {r.quantity}개
-                        </div>
-                        {r.purpose && <div className="text-xs text-gray-400 mt-0.5">목적: {r.purpose}</div>}
-                        {r.rejectReason && (
-                          <div className="text-xs text-red-400 mt-0.5">거절 사유: {r.rejectReason}</div>
-                        )}
+                        <div className="text-xs text-muted-foreground">{r.startDate} ~ {r.endDate} · {r.quantity}개</div>
+                        {r.purpose && <div className="text-xs text-muted-foreground mt-0.5">목적: {r.purpose}</div>}
+                        {r.rejectReason && <div className="text-xs text-red-400 mt-0.5">거절 사유: {r.rejectReason}</div>}
                       </div>
                       <div className="flex flex-col items-end gap-1 shrink-0">
-                        <div className="text-xs text-gray-400">{new Date(r.createdAt).toLocaleDateString('ko-KR')}</div>
+                        <div className="text-xs text-muted-foreground">{new Date(r.createdAt).toLocaleDateString('ko-KR')}</div>
                         <button onClick={() => openItemChat(r.id)}
-                          className={`text-xs px-2 py-1 rounded-lg border transition ${itemChatId === r.id ? 'bg-[#003478] text-white border-[#003478]' : 'border-gray-200 text-gray-500 hover:border-[#003478]'}`}>
+                          className={`text-xs px-2 py-1 rounded-lg border transition ${itemChatId === r.id ? 'bg-primary text-white border-primary' : 'border-border text-muted-foreground hover:border-primary'}`}>
                           💬 {itemChatId === r.id ? '닫기' : '채팅'}
                         </button>
                       </div>
                     </div>
                     {itemChatId === r.id && (
-                      <div className="mt-3 border-t border-gray-100 pt-3">
-                        <div className="bg-gray-50 rounded-xl p-3 max-h-48 overflow-y-auto space-y-2 mb-2">
+                      <div className="mt-3 border-t border-border pt-3">
+                        <div className="bg-accent rounded-xl p-3 max-h-48 overflow-y-auto space-y-2 mb-2">
                           {itemMessages.length === 0 ? (
-                            <p className="text-xs text-gray-400 text-center py-3">아직 메시지가 없습니다.</p>
+                            <p className="text-xs text-muted-foreground text-center py-3">아직 메시지가 없습니다.</p>
                           ) : itemMessages.map(m => (
                             <div key={m.id} className={`flex ${m.senderRole === 'USER' ? 'justify-end' : 'justify-start'}`}>
-                              <div className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm ${m.senderRole === 'USER' ? 'bg-[#003478] text-white' : 'bg-white border border-gray-200 text-gray-800'}`}>
-                                {m.senderRole !== 'USER' && <div className="text-[10px] text-gray-400 mb-0.5">{m.senderNickname}</div>}
+                              <div className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm ${m.senderRole === 'USER' ? 'bg-primary text-white' : 'bg-white border border-border text-gray-800'}`}>
+                                {m.senderRole !== 'USER' && <div className="text-[10px] text-muted-foreground mb-0.5">{m.senderNickname}</div>}
                                 <p>{m.content}</p>
-                                <div className={`text-[10px] mt-0.5 ${m.senderRole === 'USER' ? 'text-blue-200' : 'text-gray-400'}`}>
+                                <div className={`text-[10px] mt-0.5 ${m.senderRole === 'USER' ? 'text-blue-200' : 'text-muted-foreground'}`}>
                                   {new Date(m.createdAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
                                 </div>
                               </div>
@@ -471,15 +410,12 @@ export default function MyPage() {
                           <div ref={itemChatBottomRef} />
                         </div>
                         <div className="flex gap-2">
-                          <input
-                            value={itemMsgInput}
-                            onChange={e => setItemMsgInput(e.target.value)}
+                          <input value={itemMsgInput} onChange={e => setItemMsgInput(e.target.value)}
                             onKeyDown={e => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), sendItemMsg(r.id))}
                             placeholder="메시지를 입력하세요..."
-                            className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]"
-                          />
+                            className="flex-1 border border-border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition" />
                           <button onClick={() => sendItemMsg(r.id)} disabled={sendingItemMsg || !itemMsgInput.trim()}
-                            className="px-3 py-2 bg-[#003478] text-white rounded-xl text-sm font-medium hover:bg-blue-900 disabled:opacity-50">
+                            className="px-3 py-2 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 disabled:opacity-50 transition">
                             전송
                           </button>
                         </div>
@@ -489,112 +425,103 @@ export default function MyPage() {
                 ))}
               </ul>
             )}
-          </div>
+          </Card>
         )}
 
         {/* 웰컴키트 신청 내역 */}
         {tab === 'welcomeKits' && (
-          <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100">
+          <Card className="overflow-hidden">
+            <div className="px-6 py-4 border-b border-border">
               <h2 className="font-bold text-gray-900">웰컴키트 신청 내역</h2>
             </div>
             {welcomeKitsLoading ? (
-              <div className="p-8 text-center text-gray-400">불러오는 중...</div>
+              <div className="p-8 text-center text-muted-foreground">불러오는 중...</div>
             ) : welcomeKits.length === 0 ? (
               <div className="p-12 text-center">
                 <div className="text-4xl mb-3">🎁</div>
-                <p className="text-gray-400 text-sm">웰컴키트 신청 내역이 없습니다.</p>
-                <Link href="/welcome" className="inline-block mt-4 text-[#003478] text-sm font-medium hover:underline">
-                  웰컴키트 신청하러 가기 →
-                </Link>
+                <p className="text-muted-foreground text-sm">웰컴키트 신청 내역이 없습니다.</p>
+                <Link href="/welcome" className="inline-block mt-4 text-primary text-sm font-semibold hover:underline">웰컴키트 신청하러 가기 →</Link>
               </div>
             ) : (
-              <ul className="divide-y divide-gray-50">
+              <ul className="divide-y divide-border">
                 {welcomeKits.map((kit) => (
                   <li key={kit.id} className="px-6 py-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${kit.processed ? 'bg-green-50 text-green-600' : 'bg-amber-50 text-amber-600'}`}>
-                            {kit.processed ? '처리 완료' : '처리 중'}
-                          </span>
-                          <span className="text-xs text-gray-400">{new Date(kit.createdAt).toLocaleDateString('ko-KR')}</span>
-                        </div>
-                        {kit.address && <div className="text-xs text-gray-500">📍 {kit.address}</div>}
-                        {kit.message && <div className="text-xs text-gray-400 mt-0.5 italic">"{kit.message}"</div>}
-                        {kit.adminMessage ? (
-                          <div className="mt-2 bg-blue-50 rounded-lg px-3 py-2">
-                            <div className="text-xs text-[#003478] font-semibold mb-0.5">담당자 메시지</div>
-                            <p className="text-sm text-gray-700">{kit.adminMessage}</p>
-                          </div>
-                        ) : (
-                          <Link href="/messages"
-                            className="mt-2 inline-flex items-center gap-1.5 text-xs text-[#003478] hover:underline">
-                            💬 담당자로부터 메시지가 오면 여기서 확인하세요 →
-                          </Link>
-                        )}
-                      </div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge className={`border text-xs ${kit.processed ? 'bg-green-50 text-green-600 border-green-200' : 'bg-amber-50 text-amber-600 border-amber-200'}`}>
+                        {kit.processed ? '처리 완료' : '처리 중'}
+                      </Badge>
+                      <span className="text-xs text-muted-foreground">{new Date(kit.createdAt).toLocaleDateString('ko-KR')}</span>
                     </div>
+                    {kit.address && <div className="text-xs text-muted-foreground">📍 {kit.address}</div>}
+                    {kit.message && <div className="text-xs text-muted-foreground mt-0.5 italic">"{kit.message}"</div>}
+                    {kit.adminMessage ? (
+                      <div className="mt-2 bg-primary/5 border border-primary/20 rounded-xl px-3 py-2">
+                        <div className="text-xs text-primary font-semibold mb-0.5">담당자 메시지</div>
+                        <p className="text-sm text-gray-700">{kit.adminMessage}</p>
+                      </div>
+                    ) : (
+                      <Link href="/messages" className="mt-2 inline-flex items-center gap-1.5 text-xs text-primary hover:underline">
+                        💬 담당자로부터 메시지가 오면 여기서 확인하세요 →
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>
             )}
-          </div>
+          </Card>
         )}
 
         {/* 신앙 질문 내역 */}
         {tab === 'faithQuestions' && (
-          <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100">
+          <Card className="overflow-hidden">
+            <div className="px-6 py-4 border-b border-border">
               <h2 className="font-bold text-gray-900">내 신앙 질문</h2>
             </div>
             {faithQuestionsLoading ? (
-              <div className="p-8 text-center text-gray-400">불러오는 중...</div>
+              <div className="p-8 text-center text-muted-foreground">불러오는 중...</div>
             ) : faithQuestions.length === 0 ? (
               <div className="p-12 text-center">
                 <div className="text-4xl mb-3">✝️</div>
-                <p className="text-gray-400 text-sm">남긴 신앙 질문이 없습니다.</p>
-                <Link href="/faith" className="inline-block mt-4 text-[#003478] text-sm font-medium hover:underline">
-                  신앙 Q&A 바로가기 →
-                </Link>
+                <p className="text-muted-foreground text-sm">남긴 신앙 질문이 없습니다.</p>
+                <Link href="/faith" className="inline-block mt-4 text-primary text-sm font-semibold hover:underline">신앙 Q&A 바로가기 →</Link>
               </div>
             ) : (
-              <ul className="divide-y divide-gray-50">
+              <ul className="divide-y divide-border">
                 {faithQuestions.map((q) => (
                   <li key={q.id} className="px-6 py-4">
                     <div className="flex items-start justify-between gap-2 mb-1">
-                      <div className="flex items-center gap-2 text-xs text-gray-400">
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <span>{q.anonymous ? '익명' : '실명'}</span>
                         <span>·</span>
                         <span>{new Date(q.createdAt).toLocaleDateString('ko-KR')}</span>
                         {q.answers.length > 0 && (
-                          <span className="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded text-[10px]">답변 {q.answers.length}개</span>
+                          <Badge className="bg-primary/10 text-primary border-0 text-[10px]">답변 {q.answers.length}개</Badge>
                         )}
                       </div>
                       <button onClick={() => openFaithChat(q.id)}
-                        className={`text-xs px-2 py-1 rounded-lg border transition shrink-0 ${faithChatId === q.id ? 'bg-[#003478] text-white border-[#003478]' : 'border-gray-200 text-gray-500 hover:border-[#003478]'}`}>
+                        className={`text-xs px-2 py-1 rounded-lg border transition shrink-0 ${faithChatId === q.id ? 'bg-primary text-white border-primary' : 'border-border text-muted-foreground hover:border-primary'}`}>
                         💬 {faithChatId === q.id ? '닫기' : '채팅'}
                       </button>
                     </div>
                     <p className="text-sm text-gray-800 mb-2">{q.content}</p>
                     {q.answers.map(a => (
-                      <div key={a.id} className="bg-blue-50 rounded-lg p-3 mt-1">
-                        <div className="text-xs text-[#003478] font-medium mb-1">목사님 답변 — {a.pastorNickname}</div>
+                      <div key={a.id} className="bg-primary/5 border border-primary/15 rounded-xl p-3 mt-1">
+                        <div className="text-xs text-primary font-medium mb-1">목사님 답변 — {a.pastorNickname}</div>
                         <p className="text-sm text-gray-700">{a.content}</p>
                       </div>
                     ))}
                     {faithChatId === q.id && (
-                      <div className="mt-3 border-t border-gray-100 pt-3">
+                      <div className="mt-3 border-t border-border pt-3">
                         <div className="text-xs font-semibold text-gray-600 mb-2">목사님과 대화</div>
-                        <div className="bg-gray-50 rounded-xl p-3 max-h-48 overflow-y-auto space-y-2 mb-2">
+                        <div className="bg-accent rounded-xl p-3 max-h-48 overflow-y-auto space-y-2 mb-2">
                           {faithMessages.length === 0 ? (
-                            <p className="text-xs text-gray-400 text-center py-3">아직 메시지가 없습니다.</p>
+                            <p className="text-xs text-muted-foreground text-center py-3">아직 메시지가 없습니다.</p>
                           ) : faithMessages.map(m => (
                             <div key={m.id} className={`flex ${m.senderRole === 'USER' ? 'justify-end' : 'justify-start'}`}>
-                              <div className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm ${m.senderRole === 'USER' ? 'bg-[#003478] text-white' : 'bg-white border border-gray-200 text-gray-800'}`}>
-                                {m.senderRole !== 'USER' && <div className="text-[10px] text-gray-400 mb-0.5">{m.senderNickname}</div>}
+                              <div className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm ${m.senderRole === 'USER' ? 'bg-primary text-white' : 'bg-white border border-border text-gray-800'}`}>
+                                {m.senderRole !== 'USER' && <div className="text-[10px] text-muted-foreground mb-0.5">{m.senderNickname}</div>}
                                 <p>{m.content}</p>
-                                <div className={`text-[10px] mt-0.5 ${m.senderRole === 'USER' ? 'text-blue-200' : 'text-gray-400'}`}>
+                                <div className={`text-[10px] mt-0.5 ${m.senderRole === 'USER' ? 'text-blue-200' : 'text-muted-foreground'}`}>
                                   {new Date(m.createdAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
                                 </div>
                               </div>
@@ -603,15 +530,12 @@ export default function MyPage() {
                           <div ref={faithChatBottomRef} />
                         </div>
                         <div className="flex gap-2">
-                          <input
-                            value={faithMsgInput}
-                            onChange={e => setFaithMsgInput(e.target.value)}
+                          <input value={faithMsgInput} onChange={e => setFaithMsgInput(e.target.value)}
                             onKeyDown={e => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), sendFaithMsg(q.id))}
                             placeholder="질문을 이어가세요..."
-                            className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]"
-                          />
+                            className="flex-1 border border-border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition" />
                           <button onClick={() => sendFaithMsg(q.id)} disabled={sendingFaithMsg || !faithMsgInput.trim()}
-                            className="px-3 py-2 bg-[#003478] text-white rounded-xl text-sm font-medium hover:bg-blue-900 disabled:opacity-50">
+                            className="px-3 py-2 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 disabled:opacity-50 transition">
                             전송
                           </button>
                         </div>
@@ -621,115 +545,82 @@ export default function MyPage() {
                 ))}
               </ul>
             )}
-          </div>
+          </Card>
         )}
 
         {/* 기도 요청 내역 */}
         {tab === 'prayers' && (
-          <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100">
+          <Card className="overflow-hidden">
+            <div className="px-6 py-4 border-b border-border">
               <h2 className="font-bold text-gray-900">내 기도 요청</h2>
             </div>
             {prayersLoading ? (
-              <div className="p-8 text-center text-gray-400">불러오는 중...</div>
+              <div className="p-8 text-center text-muted-foreground">불러오는 중...</div>
             ) : myPrayers.length === 0 ? (
               <div className="p-12 text-center">
                 <div className="text-4xl mb-3">🙏</div>
-                <p className="text-gray-400 text-sm">남긴 기도 요청이 없습니다.</p>
-                <Link href="/faith" className="inline-block mt-4 text-[#003478] text-sm font-medium hover:underline">
-                  기도 요청하러 가기 →
-                </Link>
+                <p className="text-muted-foreground text-sm">남긴 기도 요청이 없습니다.</p>
+                <Link href="/faith" className="inline-block mt-4 text-primary text-sm font-semibold hover:underline">기도 요청하러 가기 →</Link>
               </div>
             ) : (
-              <ul className="divide-y divide-gray-50">
+              <ul className="divide-y divide-border">
                 {myPrayers.map((p) => (
                   <li key={p.id} className="px-6 py-4">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <div className="flex items-center gap-2 mb-1 text-xs text-gray-400">
+                        <div className="flex items-center gap-2 mb-1 text-xs text-muted-foreground">
                           <span>{p.publicVisible ? '공개' : '나만 보기'}</span>
                           <span>·</span>
                           <span>{new Date(p.createdAt).toLocaleDateString('ko-KR')}</span>
                         </div>
                         <p className="text-sm text-gray-800">{p.content}</p>
                       </div>
-                      <div className="text-xs text-gray-400 shrink-0">🙏 {p.prayerCount}</div>
+                      <div className="text-xs text-muted-foreground shrink-0">🙏 {p.prayerCount}</div>
                     </div>
                   </li>
                 ))}
               </ul>
             )}
-          </div>
+          </Card>
         )}
 
         {/* 비밀번호 변경 */}
         {tab === 'password' && isLocalUser && (
-          <div className="bg-white rounded-2xl border border-gray-200 p-6">
-            <h2 className="font-bold text-gray-900 mb-5">비밀번호 변경</h2>
-            <form onSubmit={handlePassword} className="space-y-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">현재 비밀번호</label>
-                <div className="relative">
-                  <input
-                    type={showCurrent ? 'text' : 'password'}
-                    value={pwForm.currentPassword}
-                    onChange={(e) => setPwForm({ ...pwForm, currentPassword: e.target.value })}
-                    placeholder="현재 비밀번호"
-                    className="w-full border border-gray-300 rounded-xl px-4 py-3 pr-11 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]"
-                    required
-                  />
-                  <button type="button" onClick={() => setShowCurrent(v => !v)} tabIndex={-1}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition">
-                    <EyeIcon open={showCurrent} />
-                  </button>
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">새 비밀번호</label>
-                <div className="relative">
-                  <input
-                    type={showNew ? 'text' : 'password'}
-                    value={pwForm.newPassword}
-                    onChange={(e) => setPwForm({ ...pwForm, newPassword: e.target.value })}
-                    placeholder="8자 이상, 대소문자·숫자·특수문자(@$!%*?&) 포함"
-                    className="w-full border border-gray-300 rounded-xl px-4 py-3 pr-11 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]"
-                    required
-                  />
-                  <button type="button" onClick={() => setShowNew(v => !v)} tabIndex={-1}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition">
-                    <EyeIcon open={showNew} />
-                  </button>
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">새 비밀번호 확인</label>
-                <div className="relative">
-                  <input
-                    type={showConfirm ? 'text' : 'password'}
-                    value={pwForm.confirmPassword}
-                    onChange={(e) => setPwForm({ ...pwForm, confirmPassword: e.target.value })}
-                    placeholder="새 비밀번호 재입력"
-                    className="w-full border border-gray-300 rounded-xl px-4 py-3 pr-11 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]"
-                    required
-                  />
-                  <button type="button" onClick={() => setShowConfirm(v => !v)} tabIndex={-1}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition">
-                    <EyeIcon open={showConfirm} />
-                  </button>
-                </div>
-              </div>
-              {pwMsg && (
-                <p className={`text-sm ${pwMsg.startsWith('✅') ? 'text-green-600' : 'text-red-500'}`}>{pwMsg}</p>
-              )}
-              <button
-                type="submit"
-                disabled={pwLoading}
-                className="w-full bg-[#003478] text-white py-3 rounded-xl text-sm font-semibold hover:bg-blue-900 disabled:opacity-50 transition"
-              >
-                {pwLoading ? '변경 중...' : '비밀번호 변경'}
-              </button>
-            </form>
-          </div>
+          <Card>
+            <CardContent className="p-6">
+              <h2 className="font-bold text-gray-900 mb-5">비밀번호 변경</h2>
+              <form onSubmit={handlePassword} className="space-y-4">
+                {[
+                  { label: '현재 비밀번호', key: 'currentPassword', show: showCurrent, setShow: setShowCurrent, placeholder: '현재 비밀번호' },
+                  { label: '새 비밀번호', key: 'newPassword', show: showNew, setShow: setShowNew, placeholder: '8자 이상, 대소문자·숫자·특수문자(@$!%*?&) 포함' },
+                  { label: '새 비밀번호 확인', key: 'confirmPassword', show: showConfirm, setShow: setShowConfirm, placeholder: '새 비밀번호 재입력' },
+                ].map(f => (
+                  <div key={f.key}>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">{f.label}</label>
+                    <div className="relative">
+                      <input type={f.show ? 'text' : 'password'}
+                        value={pwForm[f.key as keyof typeof pwForm]}
+                        onChange={(e) => setPwForm({ ...pwForm, [f.key]: e.target.value })}
+                        placeholder={f.placeholder}
+                        className="w-full border border-border rounded-xl px-4 py-3 pr-11 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition"
+                        required />
+                      <button type="button" onClick={() => f.setShow(v => !v)} tabIndex={-1}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-gray-600 transition">
+                        <EyeIcon open={f.show} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                {pwMsg && (
+                  <p className={`text-sm ${pwMsg.startsWith('✅') ? 'text-green-600' : 'text-red-500'}`}>{pwMsg}</p>
+                )}
+                <button type="submit" disabled={pwLoading}
+                  className="w-full bg-primary text-white py-3 rounded-xl text-sm font-bold hover:bg-primary/90 disabled:opacity-50 transition shadow-md shadow-primary/20">
+                  {pwLoading ? '변경 중...' : '비밀번호 변경'}
+                </button>
+              </form>
+            </CardContent>
+          </Card>
         )}
       </div>
     </div>

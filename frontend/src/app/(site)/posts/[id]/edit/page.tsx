@@ -31,12 +31,9 @@ export default function EditPostPage() {
       const post = postRes.data.data;
       const all: Category[] = catRes.data.data;
       setCategories(all);
-
-      // 현재 게시글 카테고리 찾기
       const matched = all.find((c: Category) => c.name === post.categoryName);
       if (matched) {
         if (matched.parentId) {
-          // 자식 카테고리면 부모를 선택, 자식을 sub로 설정
           setForm({ title: post.title, content: post.content, categoryId: String(matched.parentId), thumbnailUrl: post.thumbnailUrl ?? '' });
           setSubCategoryId(String(matched.id));
         } else {
@@ -94,39 +91,37 @@ export default function EditPostPage() {
   const isAdmin = ['SUPER_ADMIN', 'CHURCH_MANAGER', 'PASTOR'].includes(user?.role ?? '');
   const rootCategories = categories.filter((c) => !c.parentId && (isAdmin || c.type !== 'NOTICE'));
 
-  if (loading) return <div className="p-12 text-center text-gray-400">불러오는 중...</div>;
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
 
   return (
-    <div className="bg-[#f4f6f8] min-h-screen">
+    <div className="bg-background min-h-screen">
       <div className="max-w-3xl mx-auto px-4 py-6">
         <div className="flex items-center justify-between mb-5">
-          <Link href={`/posts/${id}`} className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-[#003478] transition">
+          <Link href={`/posts/${id}`} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition">
             ← 돌아가기
           </Link>
           <h1 className="text-lg font-bold text-gray-900">게시글 수정</h1>
           <div className="w-16" />
         </div>
 
-        <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-2xl border border-border overflow-hidden shadow-sm">
           <form onSubmit={handleSubmit}>
-            <div className="px-6 pt-6 pb-4 border-b border-gray-100 space-y-4">
+            <div className="px-6 pt-6 pb-4 border-b border-border space-y-4">
               <div className="flex items-center gap-3 flex-wrap">
                 <label className="text-sm font-semibold text-gray-700 w-16 shrink-0">카테고리</label>
-                <select
-                  value={form.categoryId}
-                  onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
-                  className="border border-gray-300 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478] bg-white min-w-[140px]"
-                >
+                <select value={form.categoryId} onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
+                  className="border border-border rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white min-w-[140px] transition">
                   {rootCategories.map((cat) => (
                     <option key={cat.id} value={cat.id}>{cat.name}</option>
                   ))}
                 </select>
                 {isLocalParent && childCategories.length > 0 && (
-                  <select
-                    value={subCategoryId}
-                    onChange={(e) => setSubCategoryId(e.target.value)}
-                    className="border border-gray-300 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478] bg-white min-w-[120px]"
-                  >
+                  <select value={subCategoryId} onChange={(e) => setSubCategoryId(e.target.value)}
+                    className="border border-border rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white min-w-[120px] transition">
                     {childCategories.map((c) => (
                       <option key={c.id} value={c.id}>{c.name}</option>
                     ))}
@@ -136,35 +131,25 @@ export default function EditPostPage() {
 
               <div className="flex items-center gap-3">
                 <label className="text-sm font-semibold text-gray-700 w-16 shrink-0">제목</label>
-                <input
-                  value={form.title}
-                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })}
                   placeholder="제목을 입력하세요"
-                  className="flex-1 border-0 border-b border-gray-200 px-0 py-2 text-base font-medium focus:outline-none focus:border-[#003478] transition placeholder-gray-300"
-                  required
-                />
+                  className="flex-1 border-0 border-b border-border px-0 py-2 text-base font-medium focus:outline-none focus:border-primary transition placeholder-muted-foreground"
+                  required />
               </div>
 
               <div className="flex items-start gap-3">
                 <label className="text-sm font-semibold text-gray-700 w-16 shrink-0 pt-1">썸네일</label>
                 <div className="flex items-center gap-3">
                   {form.thumbnailUrl && (
-                    <div className="relative w-20 h-14 rounded-lg overflow-hidden border border-gray-200">
+                    <div className="relative w-20 h-14 rounded-xl overflow-hidden border border-border">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={form.thumbnailUrl} alt="썸네일" className="w-full h-full object-cover" />
-                      <button
-                        type="button"
-                        onClick={() => setForm((f) => ({ ...f, thumbnailUrl: '' }))}
-                        className="absolute top-0.5 right-0.5 w-4 h-4 bg-black/50 text-white rounded-full text-[10px] flex items-center justify-center"
-                      >×</button>
+                      <button type="button" onClick={() => setForm((f) => ({ ...f, thumbnailUrl: '' }))}
+                        className="absolute top-0.5 right-0.5 w-4 h-4 bg-black/50 text-white rounded-full text-[10px] flex items-center justify-center">×</button>
                     </div>
                   )}
-                  <button
-                    type="button"
-                    onClick={() => thumbRef.current?.click()}
-                    disabled={thumbUploading}
-                    className="text-xs text-gray-500 border border-dashed border-gray-300 rounded-lg px-3 py-2 hover:border-[#003478] hover:text-[#003478] transition disabled:opacity-50"
-                  >
+                  <button type="button" onClick={() => thumbRef.current?.click()} disabled={thumbUploading}
+                    className="text-xs text-muted-foreground border border-dashed border-border rounded-xl px-3 py-2 hover:border-primary hover:text-primary transition disabled:opacity-50">
                     {thumbUploading ? '업로드 중...' : '+ 이미지 선택'}
                   </button>
                   <input ref={thumbRef} type="file" accept="image/*" className="hidden" onChange={handleThumb} />
@@ -172,19 +157,17 @@ export default function EditPostPage() {
               </div>
             </div>
 
-            <RichEditor
-              content={form.content}
-              onChange={(html) => setForm((f) => ({ ...f, content: html }))}
-              placeholder="내용을 입력하세요..."
-            />
+            <RichEditor content={form.content} onChange={(html) => setForm((f) => ({ ...f, content: html }))} placeholder="내용을 입력하세요..." />
 
-            <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex items-center justify-between">
+            <div className="px-6 py-4 border-t border-border bg-accent/50 flex items-center justify-between">
               {error && <p className="text-sm text-red-500">{error}</p>}
               <div className="flex gap-2 ml-auto">
-                <Link href={`/posts/${id}`} className="px-5 py-2.5 text-sm text-gray-600 border border-gray-300 rounded-xl hover:bg-gray-100 transition">
+                <Link href={`/posts/${id}`}
+                  className="px-5 py-2.5 text-sm text-gray-600 border border-border rounded-xl hover:bg-accent transition">
                   취소
                 </Link>
-                <button type="submit" disabled={submitting} className="px-6 py-2.5 text-sm bg-[#003478] text-white rounded-xl font-semibold hover:bg-blue-900 disabled:opacity-50 transition">
+                <button type="submit" disabled={submitting}
+                  className="px-6 py-2.5 text-sm bg-primary text-white rounded-xl font-bold hover:bg-primary/90 disabled:opacity-50 transition shadow-md shadow-primary/20">
                   {submitting ? '저장 중...' : '저장하기'}
                 </button>
               </div>

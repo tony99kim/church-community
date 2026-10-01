@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
+import { Card, CardContent } from '@/components/ui/card';
 
 function EyeIcon({ open }: { open: boolean }) {
   return open ? (
@@ -21,8 +22,8 @@ function EyeIcon({ open }: { open: boolean }) {
 
 function ConditionRow({ ok, label }: { ok: boolean; label: string }) {
   return (
-    <div className={`flex items-center gap-1.5 text-xs ${ok ? 'text-green-600' : 'text-red-400'}`}>
-      <span className="font-bold">{ok ? '✓' : '✗'}</span>
+    <div className={`flex items-center gap-1.5 text-xs ${ok ? 'text-green-600' : 'text-muted-foreground'}`}>
+      <span className="font-bold">{ok ? '✓' : '·'}</span>
       <span>{label}</span>
     </div>
   );
@@ -101,11 +102,7 @@ export default function RegisterPage() {
     setError('');
     try {
       await api.post('/auth/register', {
-        email: form.email,
-        password: form.password,
-        name: form.name,
-        nickname: form.nickname,
-        phone: form.phone,
+        email: form.email, password: form.password, name: form.name, nickname: form.nickname, phone: form.phone,
       });
       router.push('/login?registered=1');
     } catch (err: unknown) {
@@ -119,167 +116,126 @@ export default function RegisterPage() {
   const canSubmit = !loading && emailStatus !== 'dup' && nicknameStatus !== 'dup' && pwAllOk && !pwMismatch;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#f4f6f8] px-4 py-10">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-accent/20 px-4 py-10">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center justify-center mb-2">
-            <div className="w-10 h-10 bg-[#003478] rounded-xl flex items-center justify-center">
-              <span className="text-white text-lg font-bold">C</span>
+          <Link href="/" className="inline-flex items-center justify-center mb-4">
+            <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/30">
+              <span className="text-white text-xl font-extrabold">C</span>
             </div>
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900">ChurchHub 회원가입</h1>
-          <p className="text-gray-500 text-sm mt-1">지역 청년 커뮤니티에 함께해요</p>
+          <h1 className="text-2xl font-extrabold text-gray-900">ChurchHub 회원가입</h1>
+          <p className="text-muted-foreground text-sm mt-1">지역 청년 커뮤니티에 함께해요</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
-          <form onSubmit={handleSubmit} className="space-y-5">
-
-            {/* 이메일 */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">이메일 <span className="text-red-500">*</span></label>
-              <input
-                type="email"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                placeholder="example@email.com"
-                className={`w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478] transition ${
-                  emailStatus === 'dup' ? 'border-red-400 bg-red-50' : emailStatus === 'ok' ? 'border-green-400' : 'border-gray-300'
-                }`}
-                required
-              />
-              {emailStatus === 'checking' && <p className="text-xs text-gray-400 mt-1">확인 중...</p>}
-              {emailStatus === 'ok' && <p className="text-xs text-green-600 mt-1">✓ 사용 가능한 이메일입니다.</p>}
-              {emailStatus === 'dup' && <p className="text-xs text-red-500 mt-1">✗ 이미 사용 중인 이메일입니다.</p>}
-            </div>
-
-            {/* 비밀번호 */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">비밀번호 <span className="text-red-500">*</span></label>
-              <div className="relative">
-                <input
-                  type={showPw ? 'text' : 'password'}
-                  value={form.password}
-                  onChange={(e) => { setForm({ ...form, password: e.target.value }); setShowPwConditions(true); }}
-                  onFocus={() => setShowPwConditions(true)}
-                  placeholder="비밀번호를 입력하세요"
-                  className={`w-full border rounded-xl px-4 py-3 pr-11 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478] transition ${
-                    pw && pwAllOk ? 'border-green-400' : pw && showPwConditions ? 'border-orange-300' : 'border-gray-300'
+        <Card className="shadow-xl shadow-primary/5">
+          <CardContent className="p-8">
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">이메일 <span className="text-red-500">*</span></label>
+                <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  placeholder="example@email.com"
+                  className={`w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition ${
+                    emailStatus === 'dup' ? 'border-red-400 bg-red-50' : emailStatus === 'ok' ? 'border-green-400' : 'border-border'
                   }`}
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPw(v => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
-                  tabIndex={-1}
-                >
-                  <EyeIcon open={showPw} />
-                </button>
+                  required />
+                {emailStatus === 'checking' && <p className="text-xs text-muted-foreground mt-1">확인 중...</p>}
+                {emailStatus === 'ok' && <p className="text-xs text-green-600 mt-1">✓ 사용 가능한 이메일입니다.</p>}
+                {emailStatus === 'dup' && <p className="text-xs text-red-500 mt-1">✗ 이미 사용 중인 이메일입니다.</p>}
               </div>
-              {showPwConditions && (
-                <div className="mt-2 p-3 bg-gray-50 rounded-xl grid grid-cols-2 gap-1">
-                  <ConditionRow ok={pwConditions.length} label="8자 이상" />
-                  <ConditionRow ok={pwConditions.upper} label="대문자 포함" />
-                  <ConditionRow ok={pwConditions.lower} label="소문자 포함" />
-                  <ConditionRow ok={pwConditions.number} label="숫자 포함" />
-                  <ConditionRow ok={pwConditions.special} label="특수문자(@$!%*?&)" />
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">비밀번호 <span className="text-red-500">*</span></label>
+                <div className="relative">
+                  <input type={showPw ? 'text' : 'password'} value={form.password}
+                    onChange={(e) => { setForm({ ...form, password: e.target.value }); setShowPwConditions(true); }}
+                    onFocus={() => setShowPwConditions(true)}
+                    placeholder="비밀번호를 입력하세요"
+                    className={`w-full border rounded-xl px-4 py-3 pr-11 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition ${
+                      pw && pwAllOk ? 'border-green-400' : pw && showPwConditions ? 'border-orange-300' : 'border-border'
+                    }`}
+                    required />
+                  <button type="button" onClick={() => setShowPw(v => !v)} tabIndex={-1}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-gray-600 transition">
+                    <EyeIcon open={showPw} />
+                  </button>
                 </div>
-              )}
-            </div>
+                {showPwConditions && (
+                  <div className="mt-2 p-3 bg-accent rounded-xl grid grid-cols-2 gap-1">
+                    <ConditionRow ok={pwConditions.length} label="8자 이상" />
+                    <ConditionRow ok={pwConditions.upper} label="대문자 포함" />
+                    <ConditionRow ok={pwConditions.lower} label="소문자 포함" />
+                    <ConditionRow ok={pwConditions.number} label="숫자 포함" />
+                    <ConditionRow ok={pwConditions.special} label="특수문자(@$!%*?&)" />
+                  </div>
+                )}
+              </div>
 
-            {/* 비밀번호 확인 */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">비밀번호 확인 <span className="text-red-500">*</span></label>
-              <div className="relative">
-                <input
-                  type={showConfirm ? 'text' : 'password'}
-                  value={form.confirmPassword}
-                  onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
-                  placeholder="비밀번호를 다시 입력하세요"
-                  className={`w-full border rounded-xl px-4 py-3 pr-11 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478] transition ${
-                    pwMatch ? 'border-green-400' : pwMismatch ? 'border-red-400 bg-red-50' : 'border-gray-300'
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">비밀번호 확인 <span className="text-red-500">*</span></label>
+                <div className="relative">
+                  <input type={showConfirm ? 'text' : 'password'} value={form.confirmPassword}
+                    onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
+                    placeholder="비밀번호를 다시 입력하세요"
+                    className={`w-full border rounded-xl px-4 py-3 pr-11 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition ${
+                      pwMatch ? 'border-green-400' : pwMismatch ? 'border-red-400 bg-red-50' : 'border-border'
+                    }`}
+                    required />
+                  <button type="button" onClick={() => setShowConfirm(v => !v)} tabIndex={-1}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-gray-600 transition">
+                    <EyeIcon open={showConfirm} />
+                  </button>
+                </div>
+                {pwMatch && <p className="text-xs text-green-600 mt-1">✓ 비밀번호가 일치합니다.</p>}
+                {pwMismatch && <p className="text-xs text-red-500 mt-1">✗ 비밀번호가 일치하지 않습니다.</p>}
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">이름 <span className="text-red-500">*</span></label>
+                <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  placeholder="실명을 입력하세요"
+                  className="w-full border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition"
+                  required />
+                <p className="text-xs text-muted-foreground mt-1">행사 참여 명단 등 관리 목적으로만 사용됩니다.</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">닉네임 <span className="text-red-500">*</span></label>
+                <input type="text" value={form.nickname} onChange={(e) => setForm({ ...form, nickname: e.target.value })}
+                  placeholder="커뮤니티에서 사용할 이름"
+                  className={`w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition ${
+                    nicknameStatus === 'dup' ? 'border-red-400 bg-red-50' : nicknameStatus === 'ok' ? 'border-green-400' : 'border-border'
                   }`}
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirm(v => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
-                  tabIndex={-1}
-                >
-                  <EyeIcon open={showConfirm} />
-                </button>
+                  required />
+                {nicknameStatus === 'checking' && <p className="text-xs text-muted-foreground mt-1">확인 중...</p>}
+                {nicknameStatus === 'ok' && <p className="text-xs text-green-600 mt-1">✓ 사용 가능한 닉네임입니다.</p>}
+                {nicknameStatus === 'dup' && <p className="text-xs text-red-500 mt-1">✗ 이미 사용 중인 닉네임입니다.</p>}
+                <p className="text-xs text-muted-foreground mt-1">게시글, 댓글 등 모든 활동에 닉네임으로 표시됩니다.</p>
               </div>
-              {pwMatch && <p className="text-xs text-green-600 mt-1">✓ 비밀번호가 일치합니다.</p>}
-              {pwMismatch && <p className="text-xs text-red-500 mt-1">✗ 비밀번호가 일치하지 않습니다.</p>}
-            </div>
 
-            {/* 이름 */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">이름 <span className="text-red-500">*</span></label>
-              <input
-                type="text"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="실명을 입력하세요"
-                className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478] transition"
-                required
-              />
-              <p className="text-xs text-gray-400 mt-1">행사 참여 명단 등 관리 목적으로만 사용됩니다.</p>
-            </div>
-
-            {/* 닉네임 */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">닉네임 <span className="text-red-500">*</span></label>
-              <input
-                type="text"
-                value={form.nickname}
-                onChange={(e) => setForm({ ...form, nickname: e.target.value })}
-                placeholder="커뮤니티에서 사용할 이름"
-                className={`w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478] transition ${
-                  nicknameStatus === 'dup' ? 'border-red-400 bg-red-50' : nicknameStatus === 'ok' ? 'border-green-400' : 'border-gray-300'
-                }`}
-                required
-              />
-              {nicknameStatus === 'checking' && <p className="text-xs text-gray-400 mt-1">확인 중...</p>}
-              {nicknameStatus === 'ok' && <p className="text-xs text-green-600 mt-1">✓ 사용 가능한 닉네임입니다.</p>}
-              {nicknameStatus === 'dup' && <p className="text-xs text-red-500 mt-1">✗ 이미 사용 중인 닉네임입니다.</p>}
-              <p className="text-xs text-gray-400 mt-1">게시글, 댓글 등 모든 활동에 닉네임으로 표시됩니다.</p>
-            </div>
-
-            {/* 전화번호 */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">전화번호 <span className="text-red-500">*</span></label>
-              <input
-                type="tel"
-                value={form.phone}
-                onChange={(e) => setForm({ ...form, phone: formatPhone(e.target.value) })}
-                placeholder="010-0000-0000"
-                className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478] transition"
-                maxLength={13}
-                required
-              />
-            </div>
-
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl">
-                {error}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">전화번호 <span className="text-red-500">*</span></label>
+                <input type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: formatPhone(e.target.value) })}
+                  placeholder="010-0000-0000"
+                  className="w-full border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition"
+                  maxLength={13} required />
               </div>
-            )}
 
-            <button
-              type="submit"
-              disabled={!canSubmit}
-              className="w-full bg-[#003478] text-white py-3 rounded-xl text-sm font-semibold hover:bg-blue-900 disabled:opacity-50 transition"
-            >
-              {loading ? '처리 중...' : '회원가입'}
-            </button>
-          </form>
-          <div className="mt-6 text-center text-sm text-gray-500">
-            이미 계정이 있으신가요?{' '}
-            <Link href="/login" className="text-[#003478] font-semibold hover:underline">로그인</Link>
-          </div>
-        </div>
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl">{error}</div>
+              )}
+
+              <button type="submit" disabled={!canSubmit}
+                className="w-full bg-primary text-white py-3 rounded-xl text-sm font-bold hover:bg-primary/90 disabled:opacity-50 transition-all shadow-md shadow-primary/20 hover:-translate-y-0.5">
+                {loading ? '처리 중...' : '회원가입'}
+              </button>
+            </form>
+            <div className="mt-6 text-center text-sm text-muted-foreground">
+              이미 계정이 있으신가요?{' '}
+              <Link href="/login" className="text-primary font-bold hover:underline">로그인</Link>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

@@ -9,6 +9,7 @@ import { useAuthStore } from '@/store/authStore';
 import Sidebar from '@/components/Sidebar';
 import ReportModal from '@/components/ReportModal';
 import type { Post, Comment } from '@/types';
+import { Badge } from '@/components/ui/badge';
 
 function formatDate(dateStr: string) {
   const d = new Date(dateStr.includes('Z') || dateStr.includes('+') ? dateStr : dateStr + 'Z');
@@ -46,36 +47,34 @@ function CommentItem({
   };
 
   return (
-    <div className={comment.parentId ? 'ml-8 pl-4 border-l-2 border-[#EDEFF1] mt-2' : 'py-4 border-b border-[#EDEFF1] last:border-0'}>
+    <div className={comment.parentId ? 'ml-8 pl-4 border-l-2 border-border mt-2' : 'py-4 border-b border-border last:border-0'}>
       {comment.deleted ? (
-        <p className="text-sm text-gray-400 italic">삭제된 댓글입니다.</p>
+        <p className="text-sm text-muted-foreground italic">삭제된 댓글입니다.</p>
       ) : (
         <>
           <div className="flex items-start justify-between gap-2 mb-2">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 bg-[#003478] rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0">
+              <div className="w-7 h-7 bg-primary rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0">
                 {comment.authorNickname?.[0] ?? '?'}
               </div>
               <span className="text-sm font-bold text-gray-900">{comment.authorNickname}</span>
               {onDm && currentUserId && currentUserId !== comment.authorId && comment.authorId && (
-                <button
-                  onClick={() => onDm(comment.authorId!)}
-                  className="text-[10px] px-1.5 py-0.5 border border-[#EDEFF1] rounded-full text-gray-400 hover:border-[#003478] hover:text-[#003478] transition"
-                >
+                <button onClick={() => onDm(comment.authorId!)}
+                  className="text-[10px] px-1.5 py-0.5 border border-border rounded-full text-muted-foreground hover:border-primary hover:text-primary transition">
                   DM
                 </button>
               )}
-              <span className="text-xs text-gray-400">{new Date(comment.createdAt).toLocaleDateString('ko-KR')}</span>
+              <span className="text-xs text-muted-foreground">{new Date(comment.createdAt).toLocaleDateString('ko-KR')}</span>
             </div>
             <div className="flex items-center gap-2 text-xs">
               {canModify && !editing && (
-                <button onClick={() => { setEditText(comment.content); setEditing(true); }} className="text-gray-400 hover:text-[#003478]">수정</button>
+                <button onClick={() => { setEditText(comment.content); setEditing(true); }} className="text-muted-foreground hover:text-primary transition">수정</button>
               )}
               {canDelete && (
-                <button onClick={() => onDelete(comment.id)} className="text-gray-400 hover:text-red-500">삭제</button>
+                <button onClick={() => onDelete(comment.id)} className="text-muted-foreground hover:text-red-500 transition">삭제</button>
               )}
               {canReport && (
-                <button onClick={() => setReporting(true)} className="text-gray-300 hover:text-red-400">신고</button>
+                <button onClick={() => setReporting(true)} className="text-muted-foreground hover:text-red-400 transition">신고</button>
               )}
             </div>
             {reporting && (
@@ -85,15 +84,12 @@ function CommentItem({
 
           {editing ? (
             <div className="ml-9 space-y-2">
-              <textarea
-                value={editText}
-                onChange={(e) => setEditText(e.target.value)}
-                rows={2}
-                className="w-full border border-[#EDEFF1] rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478] resize-none"
-              />
+              <textarea value={editText} onChange={(e) => setEditText(e.target.value)} rows={2}
+                className="w-full border border-border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none transition" />
               <div className="flex gap-2 justify-end">
-                <button onClick={() => setEditing(false)} className="text-xs text-gray-500 border border-[#EDEFF1] px-3 py-1.5 rounded-lg hover:bg-gray-50">취소</button>
-                <button onClick={handleSave} disabled={saving} className="text-xs bg-[#003478] text-white px-3 py-1.5 rounded-lg hover:bg-[#002560] disabled:opacity-50">
+                <button onClick={() => setEditing(false)} className="text-xs text-muted-foreground border border-border px-3 py-1.5 rounded-lg hover:bg-accent transition">취소</button>
+                <button onClick={handleSave} disabled={saving}
+                  className="text-xs bg-primary text-white px-3 py-1.5 rounded-lg hover:bg-primary/90 disabled:opacity-50 transition">
                   {saving ? '저장 중...' : '저장'}
                 </button>
               </div>
@@ -103,10 +99,8 @@ function CommentItem({
           )}
 
           {!editing && (
-            <button
-              onClick={() => onReply(comment.id, comment.authorNickname ?? '')}
-              className="ml-9 text-xs text-gray-400 hover:text-[#003478] font-medium transition"
-            >
+            <button onClick={() => onReply(comment.id, comment.authorNickname ?? '')}
+              className="ml-9 text-xs text-muted-foreground hover:text-primary font-medium transition">
               답글
             </button>
           )}
@@ -133,9 +127,9 @@ export default function PostDetailClient() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [reportingPost, setReportingPost] = useState(false);
+  const [liking, setLiking] = useState(false);
 
   const isAdmin = ['SUPER_ADMIN', 'CHURCH_MANAGER', 'PASTOR'].includes(user?.role ?? '');
-  const [liking, setLiking] = useState(false);
 
   const fetchComments = async () => {
     const res = await api.get(`/posts/${id}/comments`);
@@ -224,17 +218,17 @@ export default function PostDetailClient() {
 
   if (loading) return (
     <div className="flex gap-6 max-w-6xl mx-auto px-4 py-5 animate-pulse">
-      <div className="w-64 shrink-0 hidden lg:block"><div className="h-40 bg-gray-100 rounded-xl" /></div>
+      <div className="w-64 shrink-0 hidden lg:block"><div className="h-40 bg-accent rounded-xl" /></div>
       <div className="flex-1 space-y-4">
-        <div className="h-8 bg-gray-100 rounded w-3/4" />
-        <div className="h-4 bg-gray-100 rounded w-1/4" />
-        <div className="h-48 bg-gray-100 rounded" />
+        <div className="h-8 bg-accent rounded w-3/4" />
+        <div className="h-4 bg-accent rounded w-1/4" />
+        <div className="h-48 bg-accent rounded" />
       </div>
     </div>
   );
 
   if (!post) return (
-    <div className="max-w-6xl mx-auto px-4 py-8 text-center text-gray-400">게시글을 찾을 수 없습니다.</div>
+    <div className="max-w-6xl mx-auto px-4 py-8 text-center text-muted-foreground">게시글을 찾을 수 없습니다.</div>
   );
 
   return (
@@ -245,23 +239,21 @@ export default function PostDetailClient() {
       <Sidebar activeCategoryId={null} />
 
       <div className="flex-1 min-w-0">
-        <Link href="/posts" className="inline-flex items-center gap-1 text-xs text-gray-400 hover:text-[#003478] transition mb-3">
+        <Link href="/posts" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition mb-3">
           ← 목록으로
         </Link>
 
-        <article className="bg-white border border-[#EDEFF1] rounded-xl overflow-hidden mb-4">
-          <div className="px-6 pt-6 pb-4 border-b border-[#EDEFF1]">
+        <article className="bg-white border border-border rounded-xl overflow-hidden mb-4">
+          <div className="px-6 pt-6 pb-4 border-b border-border">
             <div className="flex items-start gap-4">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="text-xs bg-blue-50 text-[#003478] border border-blue-100 px-2.5 py-1 rounded font-bold">
-                    {post.categoryName}
-                  </span>
+                  <Badge className="bg-primary/10 text-primary border-0 text-xs">{post.categoryName}</Badge>
                 </div>
-                <h1 className="text-xl font-bold text-gray-900 leading-snug mb-4">{post.title}</h1>
+                <h1 className="text-xl font-extrabold text-gray-900 leading-snug mb-4">{post.title}</h1>
               </div>
               {post.thumbnailUrl && (
-                <div className="w-28 h-20 rounded-xl overflow-hidden border border-gray-100 shrink-0">
+                <div className="w-28 h-20 rounded-xl overflow-hidden border border-border shrink-0">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={post.thumbnailUrl} alt="썸네일" className="w-full h-full object-cover" />
                 </div>
@@ -269,80 +261,69 @@ export default function PostDetailClient() {
             </div>
             <div className="flex items-center justify-between flex-wrap gap-3">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 bg-[#003478] rounded-full flex items-center justify-center text-white text-sm font-bold">
+                <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white text-sm font-bold">
                   {post.authorNickname?.[0]}
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-bold text-gray-900">{post.authorNickname}</span>
                     {isLoggedIn && user?.id !== post.authorId && post.authorId && (
-                      <button
-                        onClick={() => startDm(post.authorId!, `안녕하세요! "${post.title}" 게시글 보고 연락드려요.`)}
-                        className="text-[10px] px-2 py-0.5 border border-[#EDEFF1] rounded-full text-gray-400 hover:border-[#003478] hover:text-[#003478] transition"
-                      >
+                      <button onClick={() => startDm(post.authorId!, `안녕하세요! "${post.title}" 게시글 보고 연락드려요.`)}
+                        className="text-[10px] px-2 py-0.5 border border-border rounded-full text-muted-foreground hover:border-primary hover:text-primary transition">
                         DM
                       </button>
                     )}
                   </div>
-                  <div className="text-xs text-gray-400">{formatDate(post.createdAt)}</div>
+                  <div className="text-xs text-muted-foreground">{formatDate(post.createdAt)}</div>
                 </div>
               </div>
-              <div className="flex items-center gap-3 text-xs text-gray-400">
+              <div className="flex items-center gap-3 text-xs text-muted-foreground">
                 <span>👁 {post.viewCount}</span>
                 <span>❤ {likeCount}</span>
                 <span>💬 {comments.length}</span>
                 {(user?.id === post.authorId || isAdmin) && (
-                  <div className="flex gap-2 ml-1 pl-3 border-l border-[#EDEFF1]">
+                  <div className="flex gap-2 ml-1 pl-3 border-l border-border">
                     {user?.id === post.authorId && (
-                      <Link href={`/posts/${id}/edit`} className="text-gray-400 hover:text-[#003478] transition">수정</Link>
+                      <Link href={`/posts/${id}/edit`} className="text-muted-foreground hover:text-primary transition">수정</Link>
                     )}
-                    <button onClick={handlePostDelete} className="text-gray-400 hover:text-red-500 transition">삭제</button>
+                    <button onClick={handlePostDelete} className="text-muted-foreground hover:text-red-500 transition">삭제</button>
                   </div>
                 )}
                 {isLoggedIn && user?.id !== post.authorId && !isAdmin && (
-                  <button onClick={() => setReportingPost(true)} className="text-gray-300 hover:text-red-400 transition ml-1">신고</button>
+                  <button onClick={() => setReportingPost(true)} className="text-muted-foreground hover:text-red-400 transition ml-1">신고</button>
                 )}
               </div>
             </div>
           </div>
 
           <div className="px-6 py-6">
-            <div
-              className="text-gray-800 leading-loose text-sm min-h-[120px] prose prose-sm max-w-none prose-img:rounded-xl prose-img:my-3"
-              dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.content ?? '') }}
-            />
+            <div className="text-gray-800 leading-loose text-sm min-h-[120px] prose prose-sm max-w-none prose-img:rounded-xl prose-img:my-3"
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.content ?? '') }} />
           </div>
 
           <div className="px-6 pb-6 flex justify-center">
-            <button
-              onClick={handleLike}
-              disabled={liking}
-              className={`flex items-center gap-2 px-6 py-2 rounded-full border-2 text-sm font-bold transition disabled:opacity-70 ${
+            <button onClick={handleLike} disabled={liking}
+              className={`flex items-center gap-2 px-6 py-2.5 rounded-full border-2 text-sm font-bold transition disabled:opacity-70 ${
                 liked
                   ? 'border-red-400 bg-red-50 text-red-500'
-                  : 'border-[#EDEFF1] text-gray-500 hover:border-red-300 hover:bg-red-50 hover:text-red-400'
-              }`}
-            >
+                  : 'border-border text-muted-foreground hover:border-red-300 hover:bg-red-50 hover:text-red-400'
+              }`}>
               {liked ? '❤️' : '🤍'} 좋아요 {likeCount}
             </button>
           </div>
         </article>
 
-        <div className="bg-white border border-[#EDEFF1] rounded-xl overflow-hidden">
-          <div className="px-6 py-4 border-b border-[#EDEFF1]">
-            <h2 className="font-bold text-gray-900 text-sm">댓글 <span className="text-[#003478]">{comments.length}</span></h2>
+        <div className="bg-white border border-border rounded-xl overflow-hidden">
+          <div className="px-6 py-4 border-b border-border">
+            <h2 className="font-bold text-gray-900 text-sm">댓글 <span className="text-primary">{comments.length}</span></h2>
           </div>
 
           <div className="px-6">
             {comments.length === 0 ? (
-              <div className="py-10 text-center text-gray-400 text-sm">첫 댓글을 작성해보세요 ✨</div>
+              <div className="py-10 text-center text-muted-foreground text-sm">첫 댓글을 작성해보세요 ✨</div>
             ) : (
               comments.map((comment) => (
-                <CommentItem
-                  key={comment.id}
-                  comment={comment}
-                  currentUserId={user?.id}
-                  isAdmin={isAdmin}
+                <CommentItem key={comment.id} comment={comment} currentUserId={user?.id} isAdmin={isAdmin}
                   onReply={(cid, nickname) => { setReplyTo(cid); setReplyNickname(nickname); }}
                   onDelete={handleCommentDelete}
                   onEdit={handleCommentEdit}
@@ -352,35 +333,28 @@ export default function PostDetailClient() {
             )}
           </div>
 
-          <div className="px-6 py-4 border-t border-[#EDEFF1] bg-gray-50">
+          <div className="px-6 py-4 border-t border-border bg-accent/50">
             {isLoggedIn ? (
               <form onSubmit={handleComment} className="space-y-2">
                 {replyTo && (
-                  <div className="flex items-center gap-2 text-xs text-[#003478] bg-blue-50 border border-blue-100 px-3 py-2 rounded-lg">
+                  <div className="flex items-center gap-2 text-xs text-primary bg-primary/5 border border-primary/20 px-3 py-2 rounded-xl">
                     <span>↩ <strong>{replyNickname}</strong>님에게 답글</span>
-                    <button type="button" onClick={() => { setReplyTo(null); setReplyNickname(''); }} className="ml-auto text-gray-400 hover:text-gray-600">✕</button>
+                    <button type="button" onClick={() => { setReplyTo(null); setReplyNickname(''); }} className="ml-auto text-muted-foreground hover:text-gray-600">✕</button>
                   </div>
                 )}
                 <div className="flex gap-2">
-                  <textarea
-                    value={commentText}
-                    onChange={(e) => setCommentText(e.target.value)}
-                    placeholder="댓글을 입력하세요..."
-                    rows={2}
-                    className="flex-1 border border-[#EDEFF1] bg-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478] resize-none"
-                    required
-                  />
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="bg-[#003478] text-white px-5 rounded-xl text-sm font-bold hover:bg-[#002560] transition self-end py-2.5 disabled:opacity-50"
-                  >
+                  <textarea value={commentText} onChange={(e) => setCommentText(e.target.value)}
+                    placeholder="댓글을 입력하세요..." rows={2}
+                    className="flex-1 border border-border bg-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none transition"
+                    required />
+                  <button type="submit" disabled={submitting}
+                    className="bg-primary text-white px-5 rounded-xl text-sm font-bold hover:bg-primary/90 transition self-end py-2.5 disabled:opacity-50">
                     {submitting ? '...' : '등록'}
                   </button>
                 </div>
               </form>
             ) : (
-              <Link href="/login" className="flex items-center justify-center gap-2 py-3 text-sm text-gray-500 hover:text-[#003478] border border-dashed border-[#EDEFF1] rounded-xl transition">
+              <Link href="/login" className="flex items-center justify-center gap-2 py-3 text-sm text-muted-foreground hover:text-primary border border-dashed border-border rounded-xl transition">
                 🔐 로그인 후 댓글을 작성할 수 있어요
               </Link>
             )}
