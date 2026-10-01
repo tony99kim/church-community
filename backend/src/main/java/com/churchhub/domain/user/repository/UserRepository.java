@@ -25,6 +25,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     List<User> findByRoleInAndStatus(List<UserRole> roles, UserStatus status);
 
+    @Query("SELECT u FROM User u WHERE u.status != 'DELETED' " +
+           "AND (:role IS NULL OR u.role = :role) " +
+           "AND (:churchId IS NULL OR u.church.id = :churchId) " +
+           "AND (:keyword IS NULL OR LOWER(u.nickname) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    Page<User> findWithFilters(@Param("role") UserRole role, @Param("churchId") Long churchId, @Param("keyword") String keyword, Pageable pageable);
+
     @Query("SELECT u FROM User u WHERE u.status = 'ACTIVE' AND u.id != :excludeId AND LOWER(u.nickname) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<User> searchActiveByNickname(@Param("keyword") String keyword, @Param("excludeId") Long excludeId, Pageable pageable);
 

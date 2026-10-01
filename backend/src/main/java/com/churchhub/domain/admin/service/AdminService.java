@@ -39,13 +39,9 @@ public class AdminService {
                 .build();
     }
 
-    public Page<UserDto.Response> getUsers(Pageable pageable, String keyword) {
-        if (keyword != null && !keyword.isBlank()) {
-            return userRepository.searchByKeyword(keyword.trim(), com.churchhub.domain.user.entity.UserStatus.DELETED, pageable)
-                    .map(UserDto.Response::from);
-        }
-        return userRepository.findAllByStatusNot(com.churchhub.domain.user.entity.UserStatus.DELETED, pageable)
-                .map(UserDto.Response::from);
+    public Page<UserDto.Response> getUsers(Pageable pageable, String keyword, UserRole role, Long churchId) {
+        String kw = (keyword != null && !keyword.isBlank()) ? keyword.trim() : null;
+        return userRepository.findWithFilters(role, churchId, kw, pageable).map(UserDto.Response::from);
     }
 
     @Transactional

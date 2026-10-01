@@ -124,12 +124,16 @@ export default function AdminUsersPage() {
   // 검색/필터
   const [searchInput, setSearchInput] = useState('');
   const [activeSearch, setActiveSearch] = useState('');
+  const [filterRole, setFilterRole] = useState('');
+  const [filterChurchId, setFilterChurchId] = useState('');
 
-  const fetchUsers = (p = 0, keyword = activeSearch) => {
+  const fetchUsers = (p = 0, keyword = activeSearch, role = filterRole, churchId = filterChurchId) => {
     setLoading(true);
     setError(null);
     const params: Record<string, unknown> = { page: p, size: 15, sort: 'createdAt,desc' };
     if (keyword) params.search = keyword;
+    if (role) params.role = role;
+    if (churchId) params.churchId = Number(churchId);
     api.get('/admin/users', { params })
       .then((res) => {
         setUsers(res.data.data.content);
@@ -153,11 +157,25 @@ export default function AdminUsersPage() {
     fetchUsers(0, searchInput);
   };
 
+  const handleFilterRole = (role: string) => {
+    setFilterRole(role);
+    setPage(0);
+    fetchUsers(0, activeSearch, role, filterChurchId);
+  };
+
+  const handleFilterChurch = (churchId: string) => {
+    setFilterChurchId(churchId);
+    setPage(0);
+    fetchUsers(0, activeSearch, filterRole, churchId);
+  };
+
   const handleClearSearch = () => {
     setSearchInput('');
     setActiveSearch('');
+    setFilterRole('');
+    setFilterChurchId('');
     setPage(0);
-    fetchUsers(0, '');
+    fetchUsers(0, '', '', '');
   };
 
   const handleStatusToggle = async (u: User) => {
@@ -216,8 +234,8 @@ export default function AdminUsersPage() {
         </div>
       </div>
 
-      {/* 검색 */}
-      <form onSubmit={handleSearch} className="flex gap-2 mb-4">
+      {/* 검색 + 필터 */}
+      <form onSubmit={handleSearch} className="flex gap-2 mb-3">
         <input
           type="text"
           value={searchInput}
@@ -231,7 +249,7 @@ export default function AdminUsersPage() {
         >
           검색
         </button>
-        {activeSearch && (
+        {(activeSearch || filterRole || filterChurchId) && (
           <button
             type="button"
             onClick={handleClearSearch}
@@ -241,9 +259,31 @@ export default function AdminUsersPage() {
           </button>
         )}
       </form>
-      {activeSearch && (
+      <div className="flex gap-2 mb-4">
+        <select
+          value={filterRole}
+          onChange={e => handleFilterRole(e.target.value)}
+          className="border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white"
+        >
+          <option value="">전체 권한</option>
+          {Object.entries(ROLE_LABELS).map(([k, v]) => (
+            <option key={k} value={k}>{v}</option>
+          ))}
+        </select>
+        <select
+          value={filterChurchId}
+          onChange={e => handleFilterChurch(e.target.value)}
+          className="border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white"
+        >
+          <option value="">전체 교회</option>
+          {churches.map(c => (
+            <option key={c.id} value={c.id}>{c.name}</option>
+          ))}
+        </select>
+      </div>
+      {(activeSearch || filterRole || filterChurchId) && (
         <p className="text-xs text-gray-400 mb-3">
-          &quot;{activeSearch}&quot; 검색 결과 — {users.length}명
+          필터 적용 중 — {users.length}명
         </p>
       )}
 

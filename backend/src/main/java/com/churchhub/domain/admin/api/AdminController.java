@@ -49,8 +49,10 @@ public class AdminController {
     @GetMapping("/users")
     public ResponseEntity<ApiResponse<Page<UserDto.Response>>> getUsers(
             @RequestParam(required = false) String search,
+            @RequestParam(required = false) com.churchhub.domain.user.entity.UserRole role,
+            @RequestParam(required = false) Long churchId,
             Pageable pageable) {
-        return ResponseEntity.ok(ApiResponse.success(adminService.getUsers(pageable, search)));
+        return ResponseEntity.ok(ApiResponse.success(adminService.getUsers(pageable, search, role, churchId)));
     }
 
     @Operation(summary = "회원 상태 변경 (정지/활성)")
