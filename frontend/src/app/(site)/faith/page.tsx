@@ -193,7 +193,7 @@ export default function FaithPage() {
         )}
 
         {tab === 'consult' && (() => {
-          const ROLE_LABEL: Record<string, string> = { PASTOR: '목사', EVANGELIST: '전도사', SUPER_ADMIN: '관리자' };
+          const ROLE_LABEL: Record<string, string> = { PASTOR: '목사', EVANGELIST: '전도사' };
           const churches = Array.from(new Set(counselors.map(c => c.churchName ?? '소속 없음')));
           const filtered = selectedChurch ? counselors.filter(c => (c.churchName ?? '소속 없음') === selectedChurch) : [];
           return (
