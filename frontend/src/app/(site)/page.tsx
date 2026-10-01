@@ -42,7 +42,7 @@ export default function HomePage() {
               안녕하세요, <span className="font-semibold">{user.nickname}</span>님 👋
             </div>
           )}
-          <h1 className="text-4xl md:text-6xl font-extrabold mb-4 leading-tight tracking-tight">
+          <h1 className="serif text-4xl md:text-6xl font-extrabold mb-4 leading-tight">
             염리동 청년<br className="md:hidden" /> 커뮤니티
           </h1>
           <p className="text-lg md:text-xl text-blue-200 mb-10 max-w-xl mx-auto leading-relaxed">

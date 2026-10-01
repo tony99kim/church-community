@@ -13,9 +13,9 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                  <span className="text-white text-sm font-extrabold">C</span>
+                  <span className="serif text-white text-sm font-bold">✝</span>
                 </div>
-                <span className="font-extrabold text-primary text-base">ChurchHub</span>
+                <span className="serif font-bold text-primary text-lg tracking-tight">ChurchHub</span>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed max-w-xs">
                 염리동 12개 교회 청년들이 함께 만들어가는<br />따뜻한 동네 공동체 플랫폼입니다.

@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 @plugin "@tailwindcss/typography";
 
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800&family=Nanum+Myeongjo:wght@400;700;800&display=swap');
 
 * {
   box-sizing: border-box;
@@ -13,16 +13,21 @@
 
 body {
   font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  color: #1a1a1a;
-  background: #f4f6f8;
+  color: #2a2118;
+  background: #F5F0E8;
+}
+
+/* 제목류에 세리프체 적용 */
+.serif {
+  font-family: 'Nanum Myeongjo', Georgia, 'Times New Roman', serif;
 }
 
 input, textarea, select {
-  color: #1a1a1a !important;
+  color: #2a2118 !important;
 }
 
 input::placeholder, textarea::placeholder {
-  color: #aaa !important;
+  color: #b5a898 !important;
 }
 
 a {
@@ -30,7 +35,7 @@ a {
 }
 
 @theme inline {
-  --font-heading: var(--font-sans);
+  --font-heading: 'Nanum Myeongjo', Georgia, serif;
   --font-sans: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -73,38 +78,55 @@ a {
 }
 
 :root {
-  --background: oklch(0.98 0.003 240);
-  --foreground: oklch(0.15 0.01 240);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.15 0.01 240);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.15 0.01 240);
-  /* ChurchHub navy #003478 → oklch */
+  /* 따뜻한 크림 배경 */
+  --background: oklch(0.972 0.010 75);
+  --foreground: oklch(0.18 0.025 60);
+
+  /* 카드: 살짝 따뜻한 흰색 */
+  --card: oklch(0.993 0.006 75);
+  --card-foreground: oklch(0.18 0.025 60);
+
+  --popover: oklch(0.993 0.006 75);
+  --popover-foreground: oklch(0.18 0.025 60);
+
+  /* 네이비 그대로 유지 */
   --primary: oklch(0.285 0.105 255);
   --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.96 0.008 240);
+
+  /* 세컨더리: 따뜻한 크림 */
+  --secondary: oklch(0.955 0.018 75);
   --secondary-foreground: oklch(0.285 0.105 255);
-  --muted: oklch(0.96 0.005 240);
-  --muted-foreground: oklch(0.52 0.02 240);
-  --accent: oklch(0.94 0.015 255);
-  --accent-foreground: oklch(0.285 0.105 255);
+
+  /* muted: 따뜻한 회베이지 */
+  --muted: oklch(0.950 0.018 75);
+  --muted-foreground: oklch(0.50 0.025 60);
+
+  /* accent: 앰버/골드 워밍 톤 */
+  --accent: oklch(0.930 0.040 75);
+  --accent-foreground: oklch(0.38 0.06 60);
+
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.91 0.008 240);
-  --input: oklch(0.91 0.008 240);
+
+  /* 테두리: 베이지톤 */
+  --border: oklch(0.875 0.022 75);
+  --input: oklch(0.875 0.022 75);
   --ring: oklch(0.285 0.105 255);
+
   --chart-1: oklch(0.285 0.105 255);
-  --chart-2: oklch(0.55 0.18 255);
+  --chart-2: oklch(0.65 0.13 75);
   --chart-3: oklch(0.7 0.12 255);
-  --chart-4: oklch(0.5 0.15 200);
+  --chart-4: oklch(0.55 0.12 50);
   --chart-5: oklch(0.65 0.1 180);
-  --radius: 0.75rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
+
+  --radius: 0.625rem;
+
+  --sidebar: oklch(0.985 0.006 75);
+  --sidebar-foreground: oklch(0.18 0.025 60);
   --sidebar-primary: oklch(0.285 0.105 255);
   --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.94 0.015 255);
-  --sidebar-accent-foreground: oklch(0.285 0.105 255);
-  --sidebar-border: oklch(0.91 0.008 240);
+  --sidebar-accent: oklch(0.93 0.040 75);
+  --sidebar-accent-foreground: oklch(0.38 0.06 60);
+  --sidebar-border: oklch(0.875 0.022 75);
   --sidebar-ring: oklch(0.285 0.105 255);
 }
 

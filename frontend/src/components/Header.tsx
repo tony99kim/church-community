@@ -79,26 +79,26 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-[#EDEFF1] shadow-sm">
+    <header className="sticky top-0 z-50 bg-card border-b border-border shadow-sm">
       <div className="max-w-6xl mx-auto px-4 h-12 flex items-center gap-4">
         {/* 로고 */}
         <Link href="/" className="flex items-center gap-1.5 shrink-0">
-          <div className="w-7 h-7 bg-[#003478] rounded-lg flex items-center justify-center">
-            <span className="text-white text-xs font-bold">C</span>
+          <div className="w-7 h-7 bg-primary rounded-lg flex items-center justify-center">
+            <span className="text-white text-xs font-bold serif">✝</span>
           </div>
-          <span className="font-bold text-[#003478] text-sm hidden sm:block">ChurchHub</span>
+          <span className="serif font-bold text-primary text-base hidden sm:block tracking-tight">ChurchHub</span>
         </Link>
 
         {/* 네비게이션 */}
         <nav className="hidden md:flex items-center gap-1 ml-2">
-          <Link href="/welcome" className="text-sm text-gray-600 hover:text-[#003478] font-medium px-3 py-1.5 rounded-lg hover:bg-gray-50 transition">처음 오셨나요?</Link>
-          <Link href="/churches" className="text-sm text-gray-600 hover:text-[#003478] font-medium px-3 py-1.5 rounded-lg hover:bg-gray-50 transition">함께하는 교회</Link>
-          <Link href="/events" className="text-sm text-gray-600 hover:text-[#003478] font-medium px-3 py-1.5 rounded-lg hover:bg-gray-50 transition">행사 안내</Link>
-          <Link href="/community" className="text-sm text-gray-600 hover:text-[#003478] font-medium px-3 py-1.5 rounded-lg hover:bg-gray-50 transition">커뮤니티</Link>
-          <Link href="/spaces" className="text-sm text-gray-600 hover:text-[#003478] font-medium px-3 py-1.5 rounded-lg hover:bg-gray-50 transition">공간 대여</Link>
-          <Link href="/items" className="text-sm text-gray-600 hover:text-[#003478] font-medium px-3 py-1.5 rounded-lg hover:bg-gray-50 transition">물품 대여</Link>
-          <Link href="/faith" className="text-sm text-gray-600 hover:text-[#003478] font-medium px-3 py-1.5 rounded-lg hover:bg-gray-50 transition">신앙 Q&A</Link>
-          <Link href="/service" className="text-sm text-gray-600 hover:text-[#003478] font-medium px-3 py-1.5 rounded-lg hover:bg-gray-50 transition">지역 섬김</Link>
+          <Link href="/welcome" className="text-sm text-gray-600 hover:text-primary font-medium px-3 py-1.5 rounded-lg hover:bg-accent transition">처음 오셨나요?</Link>
+          <Link href="/churches" className="text-sm text-gray-600 hover:text-primary font-medium px-3 py-1.5 rounded-lg hover:bg-accent transition">함께하는 교회</Link>
+          <Link href="/events" className="text-sm text-gray-600 hover:text-primary font-medium px-3 py-1.5 rounded-lg hover:bg-accent transition">행사 안내</Link>
+          <Link href="/community" className="text-sm text-gray-600 hover:text-primary font-medium px-3 py-1.5 rounded-lg hover:bg-accent transition">커뮤니티</Link>
+          <Link href="/spaces" className="text-sm text-gray-600 hover:text-primary font-medium px-3 py-1.5 rounded-lg hover:bg-accent transition">공간 대여</Link>
+          <Link href="/items" className="text-sm text-gray-600 hover:text-primary font-medium px-3 py-1.5 rounded-lg hover:bg-accent transition">물품 대여</Link>
+          <Link href="/faith" className="text-sm text-gray-600 hover:text-primary font-medium px-3 py-1.5 rounded-lg hover:bg-accent transition">신앙 Q&A</Link>
+          <Link href="/service" className="text-sm text-gray-600 hover:text-primary font-medium px-3 py-1.5 rounded-lg hover:bg-accent transition">지역 섬김</Link>
         </nav>
 
         <div className="flex-1" />
@@ -110,13 +110,13 @@ export default function Header() {
           <div className="flex items-center gap-2">
             <Link
               href="/posts/write"
-              className="hidden sm:flex items-center bg-[#003478] text-white text-xs font-bold px-4 py-1.5 rounded-full hover:bg-[#002560] transition"
+              className="hidden sm:flex items-center bg-primary text-white text-xs font-bold px-4 py-1.5 rounded-full hover:bg-primary/90 transition"
             >
               + 글쓰기
             </Link>
 
             {/* DM 메시지 아이콘 */}
-            <Link href="/messages" className="relative p-1.5 text-gray-500 hover:text-[#003478] transition">
+            <Link href="/messages" className="relative p-1.5 text-gray-500 hover:text-primary transition">
               <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
@@ -129,7 +129,7 @@ export default function Header() {
 
             {/* 알림 벨 */}
             <div className="relative" ref={notiRef}>
-              <button onClick={openNoti} className="relative p-1.5 text-gray-500 hover:text-[#003478] transition">
+              <button onClick={openNoti} className="relative p-1.5 text-gray-500 hover:text-primary transition">
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                 </svg>
@@ -141,11 +141,11 @@ export default function Header() {
               </button>
 
               {notiOpen && (
-                <div className="absolute right-0 top-9 w-80 max-w-[calc(100vw-1rem)] bg-white border border-[#EDEFF1] rounded-xl shadow-lg z-50 overflow-hidden">
-                  <div className="flex items-center justify-between px-4 py-3 border-b border-[#EDEFF1]">
+                <div className="absolute right-0 top-9 w-80 max-w-[calc(100vw-1rem)] bg-white border border-border rounded-xl shadow-lg z-50 overflow-hidden">
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-border">
                     <span className="text-sm font-bold text-gray-900">알림</span>
                     {unreadCount > 0 && (
-                      <button onClick={markAllRead} className="text-xs text-[#003478] hover:underline">
+                      <button onClick={markAllRead} className="text-xs text-primary hover:underline">
                         모두 읽음
                       </button>
                     )}
@@ -158,7 +158,7 @@ export default function Header() {
                         <button
                           key={n.id}
                           onClick={() => handleNotiClick(n)}
-                          className={`w-full text-left px-4 py-3 border-b border-[#EDEFF1] hover:bg-gray-50 transition ${!n.read ? 'bg-blue-50/50' : ''}`}
+                          className={`w-full text-left px-4 py-3 border-b border-border hover:bg-accent transition ${!n.read ? 'bg-primary/5' : ''}`}
                         >
                           <p className="text-xs text-gray-800 leading-relaxed">{n.content}</p>
                           <p className="text-[10px] text-gray-400 mt-1">{formatDate(n.createdAt)}</p>
@@ -175,21 +175,21 @@ export default function Header() {
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
                 className="flex items-center gap-1.5"
               >
-                <div className="w-7 h-7 bg-[#003478] rounded-full flex items-center justify-center text-white text-xs font-bold">
+                <div className="w-7 h-7 bg-primary rounded-full flex items-center justify-center text-white text-xs font-bold">
                   {user?.nickname?.[0]}
                 </div>
               </button>
               {userMenuOpen && (
-                <div className="absolute right-0 top-9 bg-white border border-[#EDEFF1] rounded-xl shadow-lg py-1 w-40 z-50">
-                  <div className="px-4 py-2 border-b border-[#EDEFF1]">
+                <div className="absolute right-0 top-9 bg-white border border-border rounded-xl shadow-lg py-1 w-40 z-50">
+                  <div className="px-4 py-2 border-b border-border">
                     <div className="text-xs font-bold text-gray-900 truncate">{user?.nickname}</div>
                     <div className="text-xs text-gray-400 truncate">{user?.email}</div>
                   </div>
-                  <Link href="/my" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={() => setUserMenuOpen(false)}>
+                  <Link href="/my" className="block px-4 py-2 text-sm text-gray-700 hover:bg-accent" onClick={() => setUserMenuOpen(false)}>
                     내 정보
                   </Link>
                   {isAdmin && (
-                    <Link href="/admin" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={() => setUserMenuOpen(false)}>
+                    <Link href="/admin" className="block px-4 py-2 text-sm text-gray-700 hover:bg-accent" onClick={() => setUserMenuOpen(false)}>
                       관리자 패널
                     </Link>
                   )}
@@ -205,10 +205,10 @@ export default function Header() {
           </div>
         ) : (
           <div className="flex items-center gap-2">
-            <Link href="/login" className="text-sm text-[#003478] font-bold border-2 border-[#003478] px-4 py-1 rounded-full hover:bg-blue-50 transition">
+            <Link href="/login" className="text-sm text-primary font-bold border-2 border-[#003478] px-4 py-1 rounded-full hover:bg-blue-50 transition">
               로그인
             </Link>
-            <Link href="/register" className="hidden sm:block text-sm text-white bg-[#003478] font-bold px-4 py-1 rounded-full hover:bg-[#002560] transition">
+            <Link href="/register" className="hidden sm:block text-sm text-white bg-primary font-bold px-4 py-1 rounded-full hover:bg-primary/90 transition">
               회원가입
             </Link>
           </div>
@@ -230,29 +230,29 @@ export default function Header() {
 
       {/* 모바일 드롭다운 */}
       {menuOpen && (
-        <div className="md:hidden bg-white border-t border-[#EDEFF1] px-4 py-3 space-y-1">
-          <Link href="/welcome" className="block py-2 text-sm font-medium text-gray-700 hover:text-[#003478]" onClick={() => setMenuOpen(false)}>처음 오셨나요?</Link>
-          <Link href="/churches" className="block py-2 text-sm font-medium text-gray-700 hover:text-[#003478]" onClick={() => setMenuOpen(false)}>함께하는 교회</Link>
-          <Link href="/events" className="block py-2 text-sm font-medium text-gray-700 hover:text-[#003478]" onClick={() => setMenuOpen(false)}>행사 안내</Link>
-          <Link href="/community" className="block py-2 text-sm font-medium text-gray-700 hover:text-[#003478]" onClick={() => setMenuOpen(false)}>커뮤니티</Link>
-          <Link href="/spaces" className="block py-2 text-sm font-medium text-gray-700 hover:text-[#003478]" onClick={() => setMenuOpen(false)}>공간 대여</Link>
-          <Link href="/items" className="block py-2 text-sm font-medium text-gray-700 hover:text-[#003478]" onClick={() => setMenuOpen(false)}>물품 대여</Link>
-          <Link href="/faith" className="block py-2 text-sm font-medium text-gray-700 hover:text-[#003478]" onClick={() => setMenuOpen(false)}>신앙 Q&A</Link>
-          <Link href="/service" className="block py-2 text-sm font-medium text-gray-700 hover:text-[#003478]" onClick={() => setMenuOpen(false)}>지역 섬김</Link>
+        <div className="md:hidden bg-white border-t border-border px-4 py-3 space-y-1">
+          <Link href="/welcome" className="block py-2 text-sm font-medium text-gray-700 hover:text-primary" onClick={() => setMenuOpen(false)}>처음 오셨나요?</Link>
+          <Link href="/churches" className="block py-2 text-sm font-medium text-gray-700 hover:text-primary" onClick={() => setMenuOpen(false)}>함께하는 교회</Link>
+          <Link href="/events" className="block py-2 text-sm font-medium text-gray-700 hover:text-primary" onClick={() => setMenuOpen(false)}>행사 안내</Link>
+          <Link href="/community" className="block py-2 text-sm font-medium text-gray-700 hover:text-primary" onClick={() => setMenuOpen(false)}>커뮤니티</Link>
+          <Link href="/spaces" className="block py-2 text-sm font-medium text-gray-700 hover:text-primary" onClick={() => setMenuOpen(false)}>공간 대여</Link>
+          <Link href="/items" className="block py-2 text-sm font-medium text-gray-700 hover:text-primary" onClick={() => setMenuOpen(false)}>물품 대여</Link>
+          <Link href="/faith" className="block py-2 text-sm font-medium text-gray-700 hover:text-primary" onClick={() => setMenuOpen(false)}>신앙 Q&A</Link>
+          <Link href="/service" className="block py-2 text-sm font-medium text-gray-700 hover:text-primary" onClick={() => setMenuOpen(false)}>지역 섬김</Link>
           {!hydrated ? null : isLoggedIn ? (
             <>
-              <Link href="/posts/write" className="block py-2 text-sm font-medium text-[#003478]" onClick={() => setMenuOpen(false)}>+ 글쓰기</Link>
-              <Link href="/messages" className="flex items-center gap-1.5 py-2 text-sm font-medium text-gray-700 hover:text-[#003478]" onClick={() => setMenuOpen(false)}>
+              <Link href="/posts/write" className="block py-2 text-sm font-medium text-primary" onClick={() => setMenuOpen(false)}>+ 글쓰기</Link>
+              <Link href="/messages" className="flex items-center gap-1.5 py-2 text-sm font-medium text-gray-700 hover:text-primary" onClick={() => setMenuOpen(false)}>
                 메시지{dmUnreadCount > 0 && <span className="w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">{dmUnreadCount > 9 ? '9+' : dmUnreadCount}</span>}
               </Link>
-              <Link href="/my" className="block py-2 text-sm font-medium text-gray-700 hover:text-[#003478]" onClick={() => setMenuOpen(false)}>내 정보</Link>
-              {isAdmin && <Link href="/admin" className="block py-2 text-sm font-medium text-gray-700 hover:text-[#003478]" onClick={() => setMenuOpen(false)}>관리자</Link>}
+              <Link href="/my" className="block py-2 text-sm font-medium text-gray-700 hover:text-primary" onClick={() => setMenuOpen(false)}>내 정보</Link>
+              {isAdmin && <Link href="/admin" className="block py-2 text-sm font-medium text-gray-700 hover:text-primary" onClick={() => setMenuOpen(false)}>관리자</Link>}
               <button onClick={() => { logout(); setMenuOpen(false); }} className="block py-2 text-sm font-medium text-red-500 w-full text-left">로그아웃</button>
             </>
           ) : (
             <>
-              <Link href="/login" className="block py-2 text-sm font-medium text-[#003478]" onClick={() => setMenuOpen(false)}>로그인</Link>
-              <Link href="/register" className="block py-2 text-sm font-medium text-gray-700 hover:text-[#003478]" onClick={() => setMenuOpen(false)}>회원가입</Link>
+              <Link href="/login" className="block py-2 text-sm font-medium text-primary" onClick={() => setMenuOpen(false)}>로그인</Link>
+              <Link href="/register" className="block py-2 text-sm font-medium text-gray-700 hover:text-primary" onClick={() => setMenuOpen(false)}>회원가입</Link>
             </>
           )}
         </div>
