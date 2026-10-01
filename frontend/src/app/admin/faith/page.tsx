@@ -116,11 +116,11 @@ export default function AdminFaithPage() {
       {/* 메인 탭 */}
       <div className="flex gap-1 mb-4 bg-gray-100 rounded-xl p-1 w-fit">
         <button onClick={() => setTab('questions')}
-          className={`px-4 py-1.5 rounded-lg text-sm font-medium transition ${tab === 'questions' ? 'bg-white text-[#003478] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
+          className={`px-4 py-1.5 rounded-lg text-sm font-medium transition ${tab === 'questions' ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
           {unansweredCount > 0 ? `신앙 질문 (미답변 ${unansweredCount})` : `신앙 질문 (${questions.length})`}
         </button>
         <button onClick={() => setTab('prayers')}
-          className={`px-4 py-1.5 rounded-lg text-sm font-medium transition ${tab === 'prayers' ? 'bg-white text-[#003478] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
+          className={`px-4 py-1.5 rounded-lg text-sm font-medium transition ${tab === 'prayers' ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
           {unprayedCount > 0 ? `기도 요청 (미기도 ${unprayedCount})` : `기도 요청 (${prayers.length})`}
         </button>
       </div>
@@ -135,7 +135,7 @@ export default function AdminFaithPage() {
               { key: 'answered', label: `답변완료 (${questions.length - unansweredCount})` },
             ] as { key: QFilter; label: string }[]).map(f => (
               <button key={f.key} onClick={() => setQFilter(f.key)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition ${qFilter === f.key ? 'bg-[#003478] text-white border-[#003478]' : 'bg-white text-gray-500 border-gray-200 hover:border-[#003478]'}`}>
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition ${qFilter === f.key ? 'bg-primary text-white border-primary' : 'bg-white text-gray-500 border-gray-200 hover:border-primary'}`}>
                 {f.label}
               </button>
             ))}
@@ -143,11 +143,11 @@ export default function AdminFaithPage() {
 
           <div className="space-y-3">
             {filteredQuestions.length === 0 ? (
-              <div className="bg-white border border-[#EDEFF1] rounded-xl py-12 text-center text-gray-400 text-sm">
+              <div className="bg-white border border-border rounded-xl py-12 text-center text-gray-400 text-sm">
                 {qFilter === 'unanswered' ? '미답변 질문이 없습니다.' : qFilter === 'answered' ? '답변된 질문이 없습니다.' : '등록된 질문이 없습니다.'}
               </div>
             ) : filteredQuestions.map(q => (
-              <div key={q.id} className={`bg-white border rounded-xl p-4 ${q.answers.length === 0 ? 'border-amber-200' : 'border-[#EDEFF1]'}`}>
+              <div key={q.id} className={`bg-white border rounded-xl p-4 ${q.answers.length === 0 ? 'border-amber-200' : 'border-border'}`}>
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 mb-1 text-xs text-gray-400">
@@ -170,8 +170,8 @@ export default function AdminFaithPage() {
                     {q.answers.length > 0 && (
                       <div className="space-y-2 mb-2">
                         {q.answers.map(a => (
-                          <div key={a.id} className="bg-blue-50 rounded-lg p-3">
-                            <div className="text-xs text-[#003478] font-medium mb-1">답변 — {a.pastorNickname}</div>
+                          <div key={a.id} className="bg-primary/5 rounded-lg p-3">
+                            <div className="text-xs text-primary font-medium mb-1">답변 — {a.pastorNickname}</div>
                             <p className="text-sm text-gray-700">{a.content}</p>
                           </div>
                         ))}
@@ -181,7 +181,7 @@ export default function AdminFaithPage() {
                   <div className="flex gap-1.5 shrink-0">
                     <button
                       onClick={() => toggleAnswerForm(q.id)}
-                      className={`text-xs px-3 py-1.5 rounded-lg border transition ${answerFormId === q.id ? 'bg-[#003478] text-white border-[#003478]' : 'text-[#003478] border-blue-200 hover:bg-blue-50'}`}
+                      className={`text-xs px-3 py-1.5 rounded-lg border transition ${answerFormId === q.id ? 'bg-primary text-white border-primary' : 'text-primary border-primary/20 hover:bg-primary/5'}`}
                     >
                       {answerFormId === q.id ? '닫기' : q.answers.length > 0 ? '✏️ 답변 추가' : '✏️ 답변 달기'}
                     </button>
@@ -194,19 +194,19 @@ export default function AdminFaithPage() {
                   </div>
                 </div>
                 {answerFormId === q.id && (
-                  <div className="mt-3 pt-3 border-t border-[#EDEFF1]">
+                  <div className="mt-3 pt-3 border-t border-border">
                     <textarea
                       value={answerContent}
                       onChange={e => setAnswerContent(e.target.value)}
                       rows={3}
                       placeholder="공개 답변을 작성하세요..."
-                      className="w-full px-3 py-2.5 border border-[#EDEFF1] rounded-lg text-sm focus:outline-none focus:border-[#003478] resize-none mb-2"
+                      className="w-full px-3 py-2.5 border border-border rounded-lg text-sm focus:outline-none focus:border-primary resize-none mb-2"
                     />
                     <div className="flex justify-end">
                       <button
                         onClick={() => submitAnswer(q.id)}
                         disabled={submittingAnswer || !answerContent.trim()}
-                        className="px-4 py-2 bg-[#003478] text-white rounded-lg text-sm font-medium hover:bg-blue-900 disabled:opacity-50 transition-colors"
+                        className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors"
                       >
                         {submittingAnswer ? '등록 중...' : '답변 등록'}
                       </button>
@@ -238,7 +238,7 @@ export default function AdminFaithPage() {
               { key: 'prayed', label: `기도 완료 (${prayers.length - unprayedCount})` },
             ] as { key: PFilter; label: string }[]).map(f => (
               <button key={f.key} onClick={() => setPFilter(f.key)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition ${pFilter === f.key ? 'bg-[#003478] text-white border-[#003478]' : 'bg-white text-gray-500 border-gray-200 hover:border-[#003478]'}`}>
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition ${pFilter === f.key ? 'bg-primary text-white border-primary' : 'bg-white text-gray-500 border-gray-200 hover:border-primary'}`}>
                 {f.label}
               </button>
             ))}
@@ -246,13 +246,13 @@ export default function AdminFaithPage() {
 
           <div className="space-y-3">
             {filteredPrayers.length === 0 ? (
-              <div className="bg-white border border-[#EDEFF1] rounded-xl py-12 text-center text-gray-400 text-sm">
+              <div className="bg-white border border-border rounded-xl py-12 text-center text-gray-400 text-sm">
                 {pFilter === 'unprayed' ? '기도가 필요한 요청이 없습니다.' : pFilter === 'prayed' ? '기도 완료된 요청이 없습니다.' : '등록된 기도 요청이 없습니다.'}
               </div>
             ) : filteredPrayers.map(p => {
               const prayed = p.adminPrayed;
               return (
-                <div key={p.id} className={`bg-white border rounded-xl p-4 ${prayed ? 'border-green-200 bg-green-50/30' : 'border-[#EDEFF1]'}`}>
+                <div key={p.id} className={`bg-white border rounded-xl p-4 ${prayed ? 'border-green-200 bg-green-50/30' : 'border-border'}`}>
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1 text-xs text-gray-400">

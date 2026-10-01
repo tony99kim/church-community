@@ -215,7 +215,7 @@ export default function AdminSpacesPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-xl font-bold">공간 관리</h1>
         {tab === 'spaces' && (
-          <button onClick={openCreate} className="bg-[#003478] text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-blue-900">
+          <button onClick={openCreate} className="bg-primary text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-primary/90">
             + 공간 추가
           </button>
         )}
@@ -225,7 +225,7 @@ export default function AdminSpacesPage() {
       <div className="flex gap-1 mb-6 bg-gray-100 rounded-xl p-1 w-fit">
         {(['spaces', 'rentals'] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
-            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition ${tab === t ? 'bg-white text-[#003478] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
+            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition ${tab === t ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
             {t === 'spaces' ? `공간 목록 (${spaces.length})` : `예약 현황 (대기 ${rentals.filter(r => r.status === 'PENDING').length} · 확정 ${rentals.filter(r => r.status === 'APPROVED').length})`}
           </button>
         ))}
@@ -234,7 +234,7 @@ export default function AdminSpacesPage() {
       {/* 공간 목록 탭 — 교회별 그룹 */}
       {tab === 'spaces' && (() => {
         if (spaces.length === 0) return (
-          <div className="bg-white border border-[#EDEFF1] rounded-xl py-16 text-center text-gray-400 text-sm">
+          <div className="bg-white border border-border rounded-xl py-16 text-center text-gray-400 text-sm">
             등록된 공간이 없습니다. 공간을 추가해주세요.
           </div>
         );
@@ -254,7 +254,7 @@ export default function AdminSpacesPage() {
                 </div>
                 <div className="space-y-2">
                   {list.map(s => (
-                    <div key={s.id} className="bg-white border border-[#EDEFF1] rounded-xl p-4 flex items-center justify-between">
+                    <div key={s.id} className="bg-white border border-border rounded-xl p-4 flex items-center justify-between">
                       <div>
                         <div className="flex items-center gap-2">
                           <span className="font-medium text-sm">{s.name}</span>
@@ -267,7 +267,7 @@ export default function AdminSpacesPage() {
                       </div>
                       <div className="flex gap-2 shrink-0 ml-4">
                         <button onClick={() => openBlockManager(s.id)} className="text-xs text-orange-600 border border-orange-200 px-2 py-1 rounded-lg hover:bg-orange-50">차단 관리</button>
-                        <button onClick={() => openEdit(s)} className="text-xs text-[#003478] hover:underline">수정</button>
+                        <button onClick={() => openEdit(s)} className="text-xs text-primary hover:underline">수정</button>
                         <button onClick={() => handleDelete(s.id)} className="text-xs text-red-500 hover:underline">삭제</button>
                       </div>
                     </div>
@@ -318,13 +318,13 @@ export default function AdminSpacesPage() {
               </div>
               <div className="flex items-center gap-2">
                 <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)}
-                  className="border border-gray-300 rounded-xl px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]" />
+                  className="border border-gray-300 rounded-xl px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
                 <span className="text-gray-400 text-sm">~</span>
                 <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)}
-                  className="border border-gray-300 rounded-xl px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]" />
+                  className="border border-gray-300 rounded-xl px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
               </div>
               <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
-                className="border border-gray-300 rounded-xl px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]">
+                className="border border-gray-300 rounded-xl px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20">
                 <option value="ALL">전체 상태</option>
                 <option value="PENDING">대기중</option>
                 <option value="APPROVED">승인</option>
@@ -335,9 +335,9 @@ export default function AdminSpacesPage() {
             </div>
 
             {/* 테이블 */}
-            <div className="bg-white border border-[#EDEFF1] rounded-xl overflow-hidden">
+            <div className="bg-white border border-border rounded-xl overflow-hidden">
               <table className="w-full text-sm">
-                <thead className="bg-[#f4f6f8] border-b border-[#EDEFF1]">
+                <thead className="bg-[#f4f6f8] border-b border-border">
                   <tr>
                     {['공간명','신청자','날짜/시간','인원','목적','연락처','상태','액션','메시지'].map(h => (
                       <th key={h} className="px-3 py-2 text-left text-xs font-semibold text-gray-600 whitespace-nowrap">{h}</th>
@@ -365,7 +365,7 @@ export default function AdminSpacesPage() {
                         {r.status === 'PENDING' && (
                           <div className="flex gap-1">
                             <button onClick={() => approve(r.id)}
-                              className="px-2 py-1 text-xs bg-[#003478] text-white rounded-lg hover:bg-blue-900 whitespace-nowrap">승인</button>
+                              className="px-2 py-1 text-xs bg-primary text-white rounded-lg hover:bg-primary/90 whitespace-nowrap">승인</button>
                             <button onClick={() => openReject(r.id)}
                               className="px-2 py-1 text-xs border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-600 whitespace-nowrap">거절</button>
                           </div>
@@ -373,11 +373,11 @@ export default function AdminSpacesPage() {
                       </td>
                       <td className="px-3 py-2">
                         <button onClick={() => openMessage(r)}
-                          className="px-2 py-1 text-xs border border-blue-200 text-[#003478] rounded-lg hover:bg-blue-50 whitespace-nowrap">
+                          className="px-2 py-1 text-xs border border-primary/20 text-primary rounded-lg hover:bg-primary/5 whitespace-nowrap">
                           {r.adminMessage ? '수정' : '메시지'}
                         </button>
                         {r.adminMessage && (
-                          <div className="text-[10px] text-blue-600 mt-0.5 max-w-[100px] truncate" title={r.adminMessage}>
+                          <div className="text-[10px] text-primary mt-0.5 max-w-[100px] truncate" title={r.adminMessage}>
                             {r.adminMessage}
                           </div>
                         )}
@@ -408,12 +408,12 @@ export default function AdminSpacesPage() {
             <textarea rows={4} value={messageInput}
               onChange={e => setMessageInput(e.target.value)}
               placeholder="예: 승인되었습니다. 사용 전 관리자실에 열쇠를 수령해 주세요."
-              className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478] resize-none mb-4" />
+              className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none mb-4" />
             <div className="flex gap-2 justify-end">
               <button onClick={() => setMessageRentalId(null)}
                 className="px-4 py-2 text-sm border border-gray-300 rounded-xl hover:bg-gray-50">취소</button>
               <button onClick={confirmMessage} disabled={sendingMessage}
-                className="px-4 py-2 text-sm bg-[#003478] text-white rounded-xl font-semibold hover:bg-blue-900 disabled:opacity-50">
+                className="px-4 py-2 text-sm bg-primary text-white rounded-xl font-semibold hover:bg-primary/90 disabled:opacity-50">
                 {sendingMessage ? '전송 중...' : '전송'}
               </button>
             </div>
@@ -434,7 +434,7 @@ export default function AdminSpacesPage() {
                     required={me?.role !== 'CHURCH_MANAGER'}
                     value={form.churchId}
                     onChange={e => setForm(p => ({ ...p, churchId: e.target.value }))}
-                    className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]"
+                    className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                   >
                     <option value="">교회 선택</option>
                     {churches.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -444,12 +444,12 @@ export default function AdminSpacesPage() {
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">공간명 *</label>
                 <input required value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
-                  className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]" placeholder="예: 1층 강당" />
+                  className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" placeholder="예: 1층 강당" />
               </div>
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">설명</label>
                 <textarea rows={3} value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
-                  className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478] resize-none" placeholder="예: 프로젝터, 테이블 8개 구비, 냉난방 완비" />
+                  className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none" placeholder="예: 프로젝터, 테이블 8개 구비, 냉난방 완비" />
               </div>
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">공간 이미지</label>
@@ -463,7 +463,7 @@ export default function AdminSpacesPage() {
                     </div>
                   )}
                   <button type="button" onClick={() => thumbRef.current?.click()} disabled={thumbUploading}
-                    className="text-xs text-gray-500 border border-dashed border-gray-300 rounded-lg px-3 py-2 hover:border-[#003478] hover:text-[#003478] transition disabled:opacity-50">
+                    className="text-xs text-gray-500 border border-dashed border-gray-300 rounded-lg px-3 py-2 hover:border-primary hover:text-primary transition disabled:opacity-50">
                     {thumbUploading ? '업로드 중...' : '+ 이미지 선택'}
                   </button>
                   <input ref={thumbRef} type="file" accept="image/*" className="hidden" onChange={handleThumb} />
@@ -472,22 +472,22 @@ export default function AdminSpacesPage() {
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">사용 용도</label>
                 <input value={form.usageTypes} onChange={e => setForm(p => ({ ...p, usageTypes: e.target.value }))}
-                  className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]" placeholder="예: 모임, 세미나, 예배" />
+                  className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" placeholder="예: 모임, 세미나, 예배" />
               </div>
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">최대 수용 인원</label>
                 <input type="number" min="1" value={form.capacity} onChange={e => setForm(p => ({ ...p, capacity: e.target.value }))}
-                  className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]" />
+                  className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
               </div>
               {editId && (
                 <label className="flex items-center gap-2 text-sm">
-                  <input type="checkbox" checked={form.available} onChange={e => setForm(p => ({ ...p, available: e.target.checked }))} className="accent-[#003478]" />
+                  <input type="checkbox" checked={form.available} onChange={e => setForm(p => ({ ...p, available: e.target.checked }))} className="accent-primary" />
                   대여 가능
                 </label>
               )}
               <div className="flex gap-2 justify-end pt-2">
                 <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 text-sm border border-gray-300 rounded-xl hover:bg-gray-50">취소</button>
-                <button type="submit" className="px-4 py-2 text-sm bg-[#003478] text-white rounded-xl font-semibold hover:bg-blue-900">저장</button>
+                <button type="submit" className="px-4 py-2 text-sm bg-primary text-white rounded-xl font-semibold hover:bg-primary/90">저장</button>
               </div>
             </form>
           </div>
@@ -535,14 +535,14 @@ export default function AdminSpacesPage() {
                 <label className="block text-xs font-semibold text-gray-700 mb-1">사유 *</label>
                 <input required value={blockForm.reason} onChange={e => setBlockForm(p => ({ ...p, reason: e.target.value }))}
                   placeholder="예: 주일 예배, 수요 예배, 청년부 모임"
-                  className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]" />
+                  className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
               </div>
               <div className="flex gap-2">
-                <label className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border text-sm font-medium cursor-pointer transition ${blockForm.recurring ? 'bg-[#003478] text-white border-[#003478]' : 'border-gray-300 text-gray-600'}`}>
+                <label className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border text-sm font-medium cursor-pointer transition ${blockForm.recurring ? 'bg-primary text-white border-primary' : 'border-gray-300 text-gray-600'}`}>
                   <input type="radio" className="hidden" checked={blockForm.recurring} onChange={() => setBlockForm(p => ({ ...p, recurring: true }))} />
                   매주 반복
                 </label>
-                <label className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border text-sm font-medium cursor-pointer transition ${!blockForm.recurring ? 'bg-[#003478] text-white border-[#003478]' : 'border-gray-300 text-gray-600'}`}>
+                <label className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border text-sm font-medium cursor-pointer transition ${!blockForm.recurring ? 'bg-primary text-white border-primary' : 'border-gray-300 text-gray-600'}`}>
                   <input type="radio" className="hidden" checked={!blockForm.recurring} onChange={() => setBlockForm(p => ({ ...p, recurring: false }))} />
                   특정 날짜
                 </label>
@@ -553,7 +553,7 @@ export default function AdminSpacesPage() {
                   <div className="flex gap-1">
                     {([1,2,3,4,5,6,7] as const).map(d => (
                       <button key={d} type="button" onClick={() => setBlockForm(p => ({ ...p, dayOfWeek: d }))}
-                        className={`flex-1 py-1.5 rounded-lg text-xs font-medium border transition ${blockForm.dayOfWeek === d ? 'bg-[#003478] text-white border-[#003478]' : 'border-gray-300 text-gray-600 hover:bg-gray-50'}`}>
+                        className={`flex-1 py-1.5 rounded-lg text-xs font-medium border transition ${blockForm.dayOfWeek === d ? 'bg-primary text-white border-primary' : 'border-gray-300 text-gray-600 hover:bg-gray-50'}`}>
                         {DAY_LABELS[d]}
                       </button>
                     ))}
@@ -564,7 +564,7 @@ export default function AdminSpacesPage() {
                   <label className="block text-xs font-semibold text-gray-700 mb-1">날짜 *</label>
                   <input required={!blockForm.recurring} type="date" value={blockForm.blockDate}
                     onChange={e => setBlockForm(p => ({ ...p, blockDate: e.target.value }))}
-                    className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]" />
+                    className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
                 </div>
               )}
               <div className="flex gap-2">
@@ -572,13 +572,13 @@ export default function AdminSpacesPage() {
                   <label className="block text-xs font-semibold text-gray-700 mb-1">시작 시간</label>
                   <input type="time" value={blockForm.startTime}
                     onChange={e => setBlockForm(p => ({ ...p, startTime: e.target.value }))}
-                    className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]" />
+                    className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
                 </div>
                 <div className="flex-1">
                   <label className="block text-xs font-semibold text-gray-700 mb-1">종료 시간</label>
                   <input type="time" value={blockForm.endTime}
                     onChange={e => setBlockForm(p => ({ ...p, endTime: e.target.value }))}
-                    className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]" />
+                    className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
                 </div>
               </div>
               <button type="submit" className="w-full py-2.5 bg-orange-500 text-white rounded-xl text-sm font-semibold hover:bg-orange-600 transition">

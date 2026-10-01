@@ -76,13 +76,13 @@ export default function AdminPostsPage() {
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             placeholder="제목 검색"
-            className="w-full border border-gray-300 bg-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478] pl-9"
+            className="w-full border border-gray-300 bg-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 pl-9"
           />
           <svg className="absolute left-3 top-3 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
         </div>
-        <button type="submit" className="bg-[#003478] text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-blue-900 transition">
+        <button type="submit" className="bg-primary text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-primary/90 transition">
           검색
         </button>
       </form>
@@ -118,7 +118,7 @@ export default function AdminPostsPage() {
                   <Link
                     href={`/posts/${post.id}`}
                     target="_blank"
-                    className="text-sm font-medium text-gray-900 hover:text-[#003478] truncate block"
+                    className="text-sm font-medium text-gray-900 hover:text-primary truncate block"
                   >
                     {post.title}
                     {post.commentCount > 0 && (
@@ -128,7 +128,7 @@ export default function AdminPostsPage() {
                 </div>
                 <div className="text-xs text-gray-500 text-center truncate">{post.authorNickname}</div>
                 <div className="text-center">
-                  <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">{post.categoryName}</span>
+                  <span className="text-xs bg-primary/5 text-primary px-2 py-0.5 rounded-full">{post.categoryName}</span>
                 </div>
                 <div className="text-xs text-gray-400 text-center">{post.viewCount}</div>
                 <div className="text-xs text-gray-400 text-center">
@@ -163,7 +163,7 @@ export default function AdminPostsPage() {
               <button
                 key={pageNum}
                 onClick={() => setPage(pageNum)}
-                className={`w-9 h-9 rounded-lg text-sm font-medium transition ${page === pageNum ? 'bg-[#003478] text-white' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'}`}
+                className={`w-9 h-9 rounded-lg text-sm font-medium transition ${page === pageNum ? 'bg-primary text-white' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'}`}
               >
                 {pageNum + 1}
               </button>

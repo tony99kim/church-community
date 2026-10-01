@@ -103,13 +103,13 @@ export default function AdminChurchesPage() {
     onImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   }) => (
     <>
-      <input required placeholder="교회명 *" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} className="col-span-2 px-3 py-2 border border-[#EDEFF1] rounded-lg text-sm" />
-      <input required placeholder="주소 *" value={form.address} onChange={e => setForm(p => ({ ...p, address: e.target.value }))} className="col-span-2 px-3 py-2 border border-[#EDEFF1] rounded-lg text-sm" />
-      <input placeholder="주일예배 시간" value={form.sundayServiceTime} onChange={e => setForm(p => ({ ...p, sundayServiceTime: e.target.value }))} className="px-3 py-2 border border-[#EDEFF1] rounded-lg text-sm" />
-      <input placeholder="연락처" value={form.contactInfo} onChange={e => setForm(p => ({ ...p, contactInfo: e.target.value }))} className="px-3 py-2 border border-[#EDEFF1] rounded-lg text-sm" />
-      <input placeholder="한 줄 소개" value={form.introduction} onChange={e => setForm(p => ({ ...p, introduction: e.target.value }))} className="col-span-2 px-3 py-2 border border-[#EDEFF1] rounded-lg text-sm" />
-      <input placeholder="홈페이지 URL" value={form.websiteUrl} onChange={e => setForm(p => ({ ...p, websiteUrl: e.target.value }))} className="px-3 py-2 border border-[#EDEFF1] rounded-lg text-sm" />
-      <input placeholder="인스타그램 URL" value={form.instagramUrl} onChange={e => setForm(p => ({ ...p, instagramUrl: e.target.value }))} className="px-3 py-2 border border-[#EDEFF1] rounded-lg text-sm" />
+      <input required placeholder="교회명 *" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} className="col-span-2 px-3 py-2 border border-border rounded-lg text-sm" />
+      <input required placeholder="주소 *" value={form.address} onChange={e => setForm(p => ({ ...p, address: e.target.value }))} className="col-span-2 px-3 py-2 border border-border rounded-lg text-sm" />
+      <input placeholder="주일예배 시간" value={form.sundayServiceTime} onChange={e => setForm(p => ({ ...p, sundayServiceTime: e.target.value }))} className="px-3 py-2 border border-border rounded-lg text-sm" />
+      <input placeholder="연락처" value={form.contactInfo} onChange={e => setForm(p => ({ ...p, contactInfo: e.target.value }))} className="px-3 py-2 border border-border rounded-lg text-sm" />
+      <input placeholder="한 줄 소개" value={form.introduction} onChange={e => setForm(p => ({ ...p, introduction: e.target.value }))} className="col-span-2 px-3 py-2 border border-border rounded-lg text-sm" />
+      <input placeholder="홈페이지 URL" value={form.websiteUrl} onChange={e => setForm(p => ({ ...p, websiteUrl: e.target.value }))} className="px-3 py-2 border border-border rounded-lg text-sm" />
+      <input placeholder="인스타그램 URL" value={form.instagramUrl} onChange={e => setForm(p => ({ ...p, instagramUrl: e.target.value }))} className="px-3 py-2 border border-border rounded-lg text-sm" />
       {/* 대표 이미지 업로드 */}
       <div className="col-span-2">
         <div className="flex items-center gap-3">
@@ -121,18 +121,18 @@ export default function AdminChurchesPage() {
                 className="absolute top-0.5 right-0.5 w-4 h-4 bg-black/50 text-white rounded-full text-[10px] flex items-center justify-center">×</button>
             </div>
           )}
-          <label className={`text-xs text-gray-500 border border-dashed border-gray-300 rounded-lg px-3 py-2 hover:border-[#003478] hover:text-[#003478] transition cursor-pointer ${thumbUploading ? 'opacity-50 pointer-events-none' : ''}`}>
+          <label className={`text-xs text-gray-500 border border-dashed border-gray-300 rounded-lg px-3 py-2 hover:border-primary hover:text-primary transition cursor-pointer ${thumbUploading ? 'opacity-50 pointer-events-none' : ''}`}>
             {thumbUploading ? '업로드 중...' : '+ 대표 이미지 선택'}
             <input type="file" accept="image/*" className="hidden" onChange={onImageChange} />
           </label>
         </div>
       </div>
       <label className="flex items-center gap-2 text-sm">
-        <input type="checkbox" checked={form.hasYouthGroup} onChange={e => setForm(p => ({ ...p, hasYouthGroup: e.target.checked }))} className="accent-[#003478]" />
+        <input type="checkbox" checked={form.hasYouthGroup} onChange={e => setForm(p => ({ ...p, hasYouthGroup: e.target.checked }))} className="accent-primary" />
         청년부 있음
       </label>
       <label className="flex items-center gap-2 text-sm">
-        <input type="checkbox" checked={form.visible} onChange={e => setForm(p => ({ ...p, visible: e.target.checked }))} className="accent-[#003478]" />
+        <input type="checkbox" checked={form.visible} onChange={e => setForm(p => ({ ...p, visible: e.target.checked }))} className="accent-primary" />
         공개
       </label>
     </>
@@ -143,10 +143,10 @@ export default function AdminChurchesPage() {
       <h1 className="text-xl font-bold mb-6">교회 관리</h1>
 
       {/* 등록 폼 */}
-      <form onSubmit={handleCreate} className="bg-white border border-[#EDEFF1] rounded-xl p-4 mb-6 grid grid-cols-2 gap-3">
+      <form onSubmit={handleCreate} className="bg-white border border-border rounded-xl p-4 mb-6 grid grid-cols-2 gap-3">
         <h2 className="col-span-2 text-sm font-semibold text-gray-700 mb-1">새 교회 등록</h2>
         <FormFields form={createForm} setForm={setCreateForm} onImageChange={makeThumbHandler(setCreateForm)} />
-        <button type="submit" disabled={saving} className="col-span-2 py-2 bg-[#003478] text-white rounded-lg text-sm font-medium disabled:opacity-50">
+        <button type="submit" disabled={saving} className="col-span-2 py-2 bg-primary text-white rounded-lg text-sm font-medium disabled:opacity-50">
           {saving ? '등록 중...' : '교회 추가'}
         </button>
       </form>
@@ -154,7 +154,7 @@ export default function AdminChurchesPage() {
       {/* 목록 */}
       <div className="space-y-2">
         {churches.map(c => (
-          <div key={c.id} className="flex items-center justify-between bg-white border border-[#EDEFF1] rounded-xl px-4 py-3">
+          <div key={c.id} className="flex items-center justify-between bg-white border border-border rounded-xl px-4 py-3">
             <div className="flex items-center gap-3 min-w-0">
               {c.imageUrl && (
                 <img src={c.imageUrl} alt={c.name} className="w-10 h-10 rounded-lg object-cover shrink-0" />
@@ -163,19 +163,19 @@ export default function AdminChurchesPage() {
                 <div className="font-medium text-sm flex items-center gap-1.5">
                   {c.name}
                   {!c.visible && <span className="text-[10px] bg-gray-100 text-gray-400 px-1.5 py-0.5 rounded">비공개</span>}
-                  {c.hasYouthGroup && <span className="text-[10px] bg-blue-50 text-[#003478] px-1.5 py-0.5 rounded">청년부</span>}
+                  {c.hasYouthGroup && <span className="text-[10px] bg-primary/5 text-primary px-1.5 py-0.5 rounded">청년부</span>}
                 </div>
                 <div className="text-xs text-gray-400 truncate">{c.address}</div>
               </div>
             </div>
             <div className="flex gap-2 shrink-0 ml-3">
-              <button onClick={() => openEdit(c)} className="text-xs text-[#003478] border border-blue-200 px-3 py-1.5 rounded-lg hover:bg-blue-50 transition">수정</button>
+              <button onClick={() => openEdit(c)} className="text-xs text-primary border border-primary/20 px-3 py-1.5 rounded-lg hover:bg-primary/5 transition">수정</button>
               <button onClick={() => handleDelete(c.id)} className="text-xs text-red-500 border border-red-200 px-3 py-1.5 rounded-lg hover:bg-red-50 transition">삭제</button>
             </div>
           </div>
         ))}
         {churches.length === 0 && (
-          <div className="bg-white border border-[#EDEFF1] rounded-xl py-12 text-center text-gray-400 text-sm">
+          <div className="bg-white border border-border rounded-xl py-12 text-center text-gray-400 text-sm">
             등록된 교회가 없습니다.
           </div>
         )}
@@ -190,7 +190,7 @@ export default function AdminChurchesPage() {
               <FormFields form={editForm} setForm={setEditForm} onImageChange={makeThumbHandler(setEditForm)} />
               <div className="col-span-2 flex gap-2 justify-end mt-2">
                 <button type="button" onClick={() => setEditTarget(null)} className="px-4 py-2 text-sm border border-gray-300 rounded-xl hover:bg-gray-50">취소</button>
-                <button type="submit" disabled={saving} className="px-4 py-2 text-sm bg-[#003478] text-white rounded-xl font-semibold hover:bg-blue-900 disabled:opacity-50">
+                <button type="submit" disabled={saving} className="px-4 py-2 text-sm bg-primary text-white rounded-xl font-semibold hover:bg-primary/90 disabled:opacity-50">
                   {saving ? '저장 중...' : '저장'}
                 </button>
               </div>

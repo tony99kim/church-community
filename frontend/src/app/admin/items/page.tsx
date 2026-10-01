@@ -138,7 +138,7 @@ export default function AdminItemsPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-xl font-bold">물품 관리</h1>
         {tab === 'items' && (
-          <button onClick={openCreate} className="bg-[#003478] text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-blue-900">
+          <button onClick={openCreate} className="bg-primary text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-primary/90">
             + 물품 추가
           </button>
         )}
@@ -148,7 +148,7 @@ export default function AdminItemsPage() {
       <div className="flex gap-1 mb-6 bg-gray-100 rounded-xl p-1 w-fit">
         {(['items', 'rentals'] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
-            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition ${tab === t ? 'bg-white text-[#003478] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
+            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition ${tab === t ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
             {t === 'items' ? `물품 목록 (${items.length})` : `신청 관리 (대기 ${rentals.filter(r => r.status === 'PENDING').length} · 대여중 ${rentals.filter(r => r.status === 'APPROVED').length})`}
           </button>
         ))}
@@ -158,15 +158,15 @@ export default function AdminItemsPage() {
       {tab === 'items' && (
         <div className="space-y-2">
           {items.length === 0 ? (
-            <div className="bg-white border border-[#EDEFF1] rounded-xl py-16 text-center text-gray-400 text-sm">
+            <div className="bg-white border border-border rounded-xl py-16 text-center text-gray-400 text-sm">
               등록된 물품이 없습니다. 물품을 추가해주세요.
             </div>
           ) : items.map(item => (
-            <div key={item.id} className="bg-white border border-[#EDEFF1] rounded-xl p-4 flex items-center justify-between">
+            <div key={item.id} className="bg-white border border-border rounded-xl p-4 flex items-center justify-between">
               <div>
                 <div className="flex items-center gap-2">
                   <span className="font-medium text-sm">{item.name}</span>
-                  <span className="text-xs px-2 py-0.5 bg-blue-50 text-[#003478] rounded-full">{CATEGORY_LABEL[item.category]}</span>
+                  <span className="text-xs px-2 py-0.5 bg-primary/5 text-primary rounded-full">{CATEGORY_LABEL[item.category]}</span>
                 </div>
                 <div className="text-xs text-gray-400 mt-0.5">
                   {item.churchName ?? '교회 미지정'} · 총 {item.totalQuantity}개 (대여가능 {item.availableQuantity}개)
@@ -174,7 +174,7 @@ export default function AdminItemsPage() {
                 {item.description && <div className="text-xs text-gray-500 mt-1">{item.description}</div>}
               </div>
               <div className="flex gap-2 shrink-0 ml-4">
-                <button onClick={() => openEdit(item)} className="text-xs text-[#003478] hover:underline">수정</button>
+                <button onClick={() => openEdit(item)} className="text-xs text-primary hover:underline">수정</button>
                 <button onClick={() => handleDelete(item.id)} className="text-xs text-red-500 hover:underline">삭제</button>
               </div>
             </div>
@@ -191,16 +191,16 @@ export default function AdminItemsPage() {
               { key: 'history', label: `완료 이력 (${rentals.filter(r => r.status === 'RETURNED' || r.status === 'REJECTED' || r.status === 'CANCELLED').length})` },
             ] as const).map(f => (
               <button key={f.key} onClick={() => setRentalFilter(f.key)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition ${rentalFilter === f.key ? 'bg-[#003478] text-white border-[#003478]' : 'bg-white text-gray-500 border-gray-200 hover:border-[#003478]'}`}>
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition ${rentalFilter === f.key ? 'bg-primary text-white border-primary' : 'bg-white text-gray-500 border-gray-200 hover:border-primary'}`}>
                 {f.label}
               </button>
             ))}
           </div>
         <div className="space-y-3">
           {rentals.filter(r => rentalFilter === 'active' ? (r.status === 'PENDING' || r.status === 'APPROVED') : (r.status === 'RETURNED' || r.status === 'REJECTED' || r.status === 'CANCELLED')).length === 0 ? (
-            <div className="bg-white border border-[#EDEFF1] rounded-xl py-16 text-center text-gray-400 text-sm">{rentalFilter === 'active' ? '진행 중인 신청이 없습니다.' : '완료된 이력이 없습니다.'}</div>
+            <div className="bg-white border border-border rounded-xl py-16 text-center text-gray-400 text-sm">{rentalFilter === 'active' ? '진행 중인 신청이 없습니다.' : '완료된 이력이 없습니다.'}</div>
           ) : rentals.filter(r => rentalFilter === 'active' ? (r.status === 'PENDING' || r.status === 'APPROVED') : (r.status === 'RETURNED' || r.status === 'REJECTED' || r.status === 'CANCELLED')).map(r => (
-            <div key={r.id} className="bg-white border border-[#EDEFF1] rounded-xl p-4">
+            <div key={r.id} className="bg-white border border-border rounded-xl p-4">
               <div className="flex items-start justify-between">
                 <div>
                   <div className="font-medium text-sm">{r.itemName} × {r.quantity}개</div>
@@ -210,20 +210,20 @@ export default function AdminItemsPage() {
                 <div className="flex items-center gap-2">
                   <span className={`text-xs font-medium ${STATUS_COLOR[r.status]}`}>{STATUS_LABEL[r.status]}</span>
                   <button onClick={() => openChat(r.id)}
-                    className={`text-xs px-2 py-1 rounded-lg border transition ${chatRentalId === r.id ? 'bg-[#003478] text-white border-[#003478]' : 'border-gray-200 text-gray-500 hover:border-[#003478]'}`}>
+                    className={`text-xs px-2 py-1 rounded-lg border transition ${chatRentalId === r.id ? 'bg-primary text-white border-primary' : 'border-gray-200 text-gray-500 hover:border-primary'}`}>
                     💬 채팅
                   </button>
                 </div>
               </div>
               {r.status === 'PENDING' && (
                 <div className="flex gap-2 mt-3">
-                  <button onClick={() => approve(r.id)} className="px-3 py-1.5 bg-[#003478] text-white rounded-lg text-xs font-medium hover:bg-blue-900">승인</button>
+                  <button onClick={() => approve(r.id)} className="px-3 py-1.5 bg-primary text-white rounded-lg text-xs font-medium hover:bg-primary/90">승인</button>
                   <button onClick={() => openReject(r.id)} className="px-3 py-1.5 border border-gray-300 text-gray-600 rounded-lg text-xs font-medium hover:bg-gray-50">거절</button>
                 </div>
               )}
               {r.status === 'APPROVED' && (
                 <div className="flex gap-2 mt-3">
-                  <button onClick={() => returnRental(r.id)} className="px-3 py-1.5 bg-blue-500 text-white rounded-lg text-xs font-medium hover:bg-blue-600">반납 완료</button>
+                  <button onClick={() => returnRental(r.id)} className="px-3 py-1.5 bg-primary/50 text-white rounded-lg text-xs font-medium hover:bg-blue-600">반납 완료</button>
                 </div>
               )}
               {chatRentalId === r.id && (
@@ -257,7 +257,7 @@ export default function AdminItemsPage() {
                   <select
                     value={form.churchId}
                     onChange={e => setForm(p => ({ ...p, churchId: e.target.value }))}
-                    className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]"
+                    className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                   >
                     <option value="">교회 선택 (선택사항)</option>
                     {churches.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -267,12 +267,12 @@ export default function AdminItemsPage() {
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">물품명 *</label>
                 <input required value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
-                  className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]" placeholder="예: 청소기" />
+                  className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" placeholder="예: 청소기" />
               </div>
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">카테고리 *</label>
                 <select required value={form.category} onChange={e => setForm(p => ({ ...p, category: e.target.value as ItemCategory }))}
-                  className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]">
+                  className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20">
                   <option value="MOVING">이사</option>
                   <option value="CLEANING">청소</option>
                   <option value="LIVING">생활</option>
@@ -282,17 +282,17 @@ export default function AdminItemsPage() {
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">설명</label>
                 <input value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
-                  className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]" placeholder="예: 무선 청소기, 충전식" />
+                  className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" placeholder="예: 무선 청소기, 충전식" />
               </div>
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">총 수량 *</label>
                 <input required type="number" min="1" value={form.totalQuantity}
                   onChange={e => setForm(p => ({ ...p, totalQuantity: e.target.value }))}
-                  className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]" />
+                  className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
               </div>
               <div className="flex gap-2 justify-end pt-2">
                 <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 text-sm border border-gray-300 rounded-xl hover:bg-gray-50">취소</button>
-                <button type="submit" className="px-4 py-2 text-sm bg-[#003478] text-white rounded-xl font-semibold hover:bg-blue-900">저장</button>
+                <button type="submit" className="px-4 py-2 text-sm bg-primary text-white rounded-xl font-semibold hover:bg-primary/90">저장</button>
               </div>
             </form>
           </div>

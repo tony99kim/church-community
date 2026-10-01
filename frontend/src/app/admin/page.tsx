@@ -25,7 +25,7 @@ export default function AdminDashboardPage() {
 
   const stats = data
     ? [
-        { label: '전체 회원', value: data.totalUsers, icon: '👥', color: 'bg-blue-50 text-blue-600', border: 'border-blue-100' },
+        { label: '전체 회원', value: data.totalUsers, icon: '👥', color: 'bg-primary/5 text-primary', border: 'border-blue-100' },
         { label: '전체 게시글', value: data.totalPosts, icon: '📝', color: 'bg-green-50 text-green-600', border: 'border-green-100' },
         { label: '오늘 신규 회원', value: data.newUsersToday, icon: '🆕', color: 'bg-purple-50 text-purple-600', border: 'border-purple-100' },
         { label: '오늘 게시글', value: data.newPostsToday, icon: '✍️', color: 'bg-orange-50 text-orange-600', border: 'border-orange-100' },
@@ -120,7 +120,7 @@ export default function AdminDashboardPage() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex flex-col p-4 bg-gray-50 rounded-xl hover:bg-blue-50 hover:border-blue-100 border border-transparent transition"
+                className="flex flex-col p-4 bg-gray-50 rounded-xl hover:bg-primary/5 hover:border-blue-100 border border-transparent transition"
               >
                 <span className="text-2xl mb-2">{item.icon}</span>
                 <span className="text-sm font-semibold text-gray-900">{item.label}</span>

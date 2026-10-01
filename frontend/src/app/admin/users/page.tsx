@@ -51,8 +51,8 @@ const ROLES_INFO = [
   {
     key: 'SUPER_ADMIN',
     label: '최고관리자',
-    color: 'text-blue-700 bg-blue-50 border-blue-200',
-    dot: 'bg-[#003478]',
+    color: 'text-blue-700 bg-primary/5 border-primary/20',
+    dot: 'bg-primary',
     desc: '전체 시스템 관리자',
     permissions: ['모든 권한', '회원 상태·역할 변경', '교회·카테고리·공간·물품 전체 관리', '웰컴키트 및 모든 신청 관리'],
   },
@@ -63,7 +63,7 @@ function RoleGuideTooltip() {
     <div className="group/guide relative inline-flex items-center">
       <button
         type="button"
-        className="w-5 h-5 rounded-full bg-gray-100 hover:bg-blue-100 text-gray-400 hover:text-[#003478] text-[11px] font-bold flex items-center justify-center transition-colors"
+        className="w-5 h-5 rounded-full bg-gray-100 hover:bg-blue-100 text-gray-400 hover:text-primary text-[11px] font-bold flex items-center justify-center transition-colors"
         tabIndex={-1}
       >
         ?
@@ -214,11 +214,11 @@ export default function AdminUsersPage() {
           value={searchInput}
           onChange={e => setSearchInput(e.target.value)}
           placeholder="닉네임 또는 이메일로 검색"
-          className="flex-1 border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]"
+          className="flex-1 border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
         />
         <button
           type="submit"
-          className="bg-[#003478] text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-blue-900 transition"
+          className="bg-primary text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-primary/90 transition"
         >
           검색
         </button>
@@ -282,7 +282,7 @@ export default function AdminUsersPage() {
                         <select
                           value={u.role}
                           onChange={(e) => handleRoleChange(u, e.target.value)}
-                          className="text-xs border border-gray-200 rounded-lg px-2 py-1 bg-white focus:outline-none focus:ring-1 focus:ring-[#003478]"
+                          className="text-xs border border-gray-200 rounded-lg px-2 py-1 bg-white focus:outline-none focus:ring-1 focus:ring-primary/20"
                         >
                           <option value="USER">일반</option>
                           <option value="CHURCH_MANAGER">교회관리자</option>
@@ -295,7 +295,7 @@ export default function AdminUsersPage() {
                       </>
                     ) : (
                       <div className="text-center">
-                        <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">
+                        <span className="text-xs bg-primary/5 text-primary px-2 py-0.5 rounded-full">
                           {ROLE_LABELS[u.role] ?? u.role}
                         </span>
                         {u.churchName && (
@@ -352,7 +352,7 @@ export default function AdminUsersPage() {
             <button
               key={i}
               onClick={() => setPage(i)}
-              className={`w-9 h-9 rounded-lg text-sm font-medium transition ${page === i ? 'bg-[#003478] text-white' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'}`}
+              className={`w-9 h-9 rounded-lg text-sm font-medium transition ${page === i ? 'bg-primary text-white' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'}`}
             >
               {i + 1}
             </button>
@@ -375,7 +375,7 @@ export default function AdminUsersPage() {
             <select
               value={selectedChurchId}
               onChange={e => setSelectedChurchId(e.target.value)}
-              className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478] mb-4"
+              className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 mb-4"
             >
               <option value="">교회 선택</option>
               {churches.map(c => (
@@ -384,7 +384,7 @@ export default function AdminUsersPage() {
             </select>
             <div className="flex gap-2 justify-end">
               <button type="button" onClick={() => setPendingRoleChange(null)} className="px-4 py-2 text-sm border border-gray-300 rounded-xl hover:bg-gray-50">취소</button>
-              <button type="button" onClick={confirmChurchManagerAssign} disabled={!selectedChurchId} className="px-4 py-2 text-sm bg-[#003478] text-white rounded-xl font-semibold hover:bg-blue-900 disabled:opacity-50">지정</button>
+              <button type="button" onClick={confirmChurchManagerAssign} disabled={!selectedChurchId} className="px-4 py-2 text-sm bg-primary text-white rounded-xl font-semibold hover:bg-primary/90 disabled:opacity-50">지정</button>
             </div>
           </div>
         </div>

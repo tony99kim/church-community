@@ -17,7 +17,7 @@ const STATUS_LABEL: Record<string, string> = {
 const STATUS_COLOR: Record<string, string> = {
   DRAFT: 'bg-gray-100 text-gray-500',
   UPCOMING: 'bg-green-50 text-green-600',
-  ONGOING: 'bg-blue-50 text-blue-600',
+  ONGOING: 'bg-primary/5 text-primary',
   ENDED: 'bg-gray-100 text-gray-400',
   CANCELLED: 'bg-red-50 text-red-400',
 };
@@ -187,7 +187,7 @@ export default function AdminServicePage() {
           <p className="text-sm text-gray-500 mt-1">지역섬김 봉사 활동을 등록하고 모집을 관리합니다</p>
         </div>
         {tab === 'services' && (
-          <button onClick={openCreate} className="bg-[#003478] text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-blue-900 transition">
+          <button onClick={openCreate} className="bg-primary text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-primary/90 transition">
             + 봉사 등록
           </button>
         )}
@@ -203,7 +203,7 @@ export default function AdminServicePage() {
       <div className="flex gap-1 mb-6 bg-gray-100 rounded-xl p-1 w-fit">
         {(['services', 'participants'] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
-            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition ${tab === t ? 'bg-white text-[#003478] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
+            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition ${tab === t ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
             {t === 'services' ? `봉사 목록 (${events.length})` : `참여자`}
           </button>
         ))}
@@ -228,7 +228,7 @@ export default function AdminServicePage() {
                     type={type}
                     value={form[key]}
                     onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-                    className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]"
+                    className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                     required={required}
                   />
                 </div>
@@ -246,7 +246,7 @@ export default function AdminServicePage() {
                     </div>
                   )}
                   <button type="button" onClick={() => thumbRef.current?.click()} disabled={thumbUploading}
-                    className="text-xs text-gray-500 border border-dashed border-gray-300 rounded-lg px-3 py-2 hover:border-[#003478] hover:text-[#003478] transition disabled:opacity-50">
+                    className="text-xs text-gray-500 border border-dashed border-gray-300 rounded-lg px-3 py-2 hover:border-primary hover:text-primary transition disabled:opacity-50">
                     {thumbUploading ? '업로드 중...' : '+ 이미지 선택'}
                   </button>
                   <input ref={thumbRef} type="file" accept="image/*" className="hidden" onChange={handleThumb} />
@@ -257,7 +257,7 @@ export default function AdminServicePage() {
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-1">교회 (선택)</label>
                   <select value={form.churchId} onChange={(e) => setForm((f) => ({ ...f, churchId: e.target.value }))}
-                    className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]">
+                    className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20">
                     <option value="">교회 선택 안함</option>
                     {churches.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                   </select>
@@ -267,7 +267,7 @@ export default function AdminServicePage() {
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">모집 상태</label>
                 <select value={form.status} onChange={(e) => setForm((f) => ({ ...f, status: e.target.value }))}
-                  className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]">
+                  className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20">
                   <option value="DRAFT">임시저장 (비공개)</option>
                   <option value="UPCOMING">모집 중 (공개)</option>
                   <option value="ONGOING">진행 중</option>
@@ -285,7 +285,7 @@ export default function AdminServicePage() {
 
               <div className="flex gap-2 justify-end pt-2">
                 <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 text-sm border border-gray-300 rounded-xl hover:bg-gray-50">취소</button>
-                <button type="submit" disabled={saving} className="px-4 py-2 text-sm bg-[#003478] text-white rounded-xl font-semibold hover:bg-blue-900 disabled:opacity-50">
+                <button type="submit" disabled={saving} className="px-4 py-2 text-sm bg-primary text-white rounded-xl font-semibold hover:bg-primary/90 disabled:opacity-50">
                   {saving ? '저장 중...' : '저장'}
                 </button>
               </div>
@@ -332,7 +332,7 @@ export default function AdminServicePage() {
                         {e.status === 'DRAFT' && (
                           <button onClick={() => handlePublish(e.id)} className="text-xs text-green-600 hover:underline font-semibold">공개</button>
                         )}
-                        <button onClick={() => openEdit(e)} className="text-xs text-[#003478] hover:underline">수정</button>
+                        <button onClick={() => openEdit(e)} className="text-xs text-primary hover:underline">수정</button>
                         <button onClick={() => handleDelete(e.id)} className="text-xs text-red-500 hover:underline">삭제</button>
                       </div>
                     </td>
@@ -354,7 +354,7 @@ export default function AdminServicePage() {
           <>
             <div className="mb-4">
               <select value={selectedEvent} onChange={(e) => setSelectedEvent(e.target.value)}
-                className="border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]">
+                className="border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20">
                 <option value="all">전체 봉사 ({participants.length}명)</option>
                 {events.map((e) => {
                   const count = participants.filter(p => p.eventId === e.id).length;

@@ -125,11 +125,11 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
   };
 
   const SidebarContent = (
-    <aside className="w-60 bg-[#003478] text-white flex flex-col h-full">
-      <div className="px-5 py-6 border-b border-blue-900">
+    <aside className="w-60 bg-primary text-white flex flex-col h-full">
+      <div className="px-5 py-6 border-b border-primary/40">
         <Link href="/" className="flex items-center gap-2">
           <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
-            <span className="text-[#003478] text-sm font-bold">C</span>
+            <span className="text-primary text-sm font-bold">C</span>
           </div>
           <div>
             <div className="text-sm font-bold leading-tight">ChurchHub</div>
@@ -140,7 +140,7 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
 
       <SidebarNav />
 
-      <div className="px-5 py-4 border-t border-blue-900 shrink-0">
+      <div className="px-5 py-4 border-t border-primary/40 shrink-0">
         <div className="text-xs text-blue-300 mb-0.5">{user?.nickname}</div>
         <div className="text-xs text-blue-400 mb-3">{roleLabel[user?.role ?? ''] ?? user?.role}</div>
         <div className="flex gap-2">
@@ -174,7 +174,7 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
 
       <div className="flex-1 flex flex-col min-w-0 overflow-auto">
         {/* 모바일 상단 바 */}
-        <div className="md:hidden flex items-center gap-3 px-4 py-3 bg-[#003478] text-white shrink-0">
+        <div className="md:hidden flex items-center gap-3 px-4 py-3 bg-primary text-white shrink-0">
           <button onClick={() => setSidebarOpen(true)} className="p-1">
             <div className="space-y-1">
               <div className="w-5 h-0.5 bg-white" />

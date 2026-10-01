@@ -96,7 +96,7 @@ export default function AdminCategoriesPage() {
           <h1 className="text-2xl font-bold text-gray-900">카테고리 관리</h1>
           <p className="text-sm text-gray-500 mt-1">게시판 카테고리를 추가, 수정, 삭제할 수 있습니다</p>
         </div>
-        <button onClick={openCreate} className="bg-[#003478] text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-blue-900 transition">
+        <button onClick={openCreate} className="bg-primary text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-primary/90 transition">
           + 카테고리 추가
         </button>
       </div>
@@ -113,12 +113,12 @@ export default function AdminCategoriesPage() {
                 <div className="flex items-center gap-2">
                   <button onClick={() => handleToggleVisible(cat)} className={`w-2 h-2 rounded-full shrink-0 ${cat.visible ? 'bg-green-400' : 'bg-gray-300'}`} title={cat.visible ? '표시 중' : '숨김'} />
                   <span className="font-medium text-sm text-gray-900">{cat.name}</span>
-                  <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">{TYPE_LABEL[cat.type] ?? cat.type}</span>
+                  <span className="text-xs bg-primary/5 text-primary px-2 py-0.5 rounded-full">{TYPE_LABEL[cat.type] ?? cat.type}</span>
                   {!cat.visible && <span className="text-xs bg-gray-100 text-gray-400 px-1.5 py-0.5 rounded">숨김</span>}
                 </div>
                 <span className="text-xs text-gray-400 text-center">순서 {cat.sortOrder}</span>
                 <div className="flex gap-2 justify-end">
-                  <button onClick={() => openEdit(cat)} className="text-xs text-gray-500 hover:text-[#003478] border border-gray-200 px-2.5 py-1 rounded-lg hover:border-blue-200">수정</button>
+                  <button onClick={() => openEdit(cat)} className="text-xs text-gray-500 hover:text-primary border border-gray-200 px-2.5 py-1 rounded-lg hover:border-primary/20">수정</button>
                   <button onClick={() => handleDelete(cat)} className="text-xs text-gray-500 hover:text-red-500 border border-gray-200 px-2.5 py-1 rounded-lg hover:border-red-200">삭제</button>
                 </div>
               </li>
@@ -144,7 +144,7 @@ export default function AdminCategoriesPage() {
                 </div>
                 <span className="text-xs text-gray-400 text-center">순서 {cat.sortOrder}</span>
                 <div className="flex gap-2 justify-end">
-                  <button onClick={() => openEdit(cat)} className="text-xs text-gray-500 hover:text-[#003478] border border-gray-200 px-2.5 py-1 rounded-lg hover:border-blue-200">수정</button>
+                  <button onClick={() => openEdit(cat)} className="text-xs text-gray-500 hover:text-primary border border-gray-200 px-2.5 py-1 rounded-lg hover:border-primary/20">수정</button>
                   <button onClick={() => handleDelete(cat)} className="text-xs text-gray-500 hover:text-red-500 border border-gray-200 px-2.5 py-1 rounded-lg hover:border-red-200">삭제</button>
                 </div>
               </li>
@@ -166,26 +166,26 @@ export default function AdminCategoriesPage() {
             <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1.5">이름 <span className="text-red-500">*</span></label>
-                <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="카테고리 이름" className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]" required />
+                <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="카테고리 이름" className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" required />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1.5">타입 <span className="text-red-500">*</span></label>
-                <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478] bg-white">
+                <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white">
                   {TYPE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
                 </select>
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1.5">설명</label>
-                <input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="설명 (선택)" className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]" />
+                <input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="설명 (선택)" className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1.5">정렬 순서</label>
-                <input type="number" value={form.sortOrder} onChange={(e) => setForm({ ...form, sortOrder: Number(e.target.value) })} className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]" />
+                <input type="number" value={form.sortOrder} onChange={(e) => setForm({ ...form, sortOrder: Number(e.target.value) })} className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
               </div>
               {error && <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl">{error}</div>}
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={() => setShowModal(false)} className="flex-1 border border-gray-300 text-gray-600 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-50">취소</button>
-                <button type="submit" disabled={submitting} className="flex-1 bg-[#003478] text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-blue-900 disabled:opacity-50">
+                <button type="submit" disabled={submitting} className="flex-1 bg-primary text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-primary/90 disabled:opacity-50">
                   {submitting ? '저장 중...' : '저장'}
                 </button>
               </div>

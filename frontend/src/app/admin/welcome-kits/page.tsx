@@ -67,7 +67,7 @@ export default function AdminWelcomeKitsPage() {
       <div className="mb-8">
         <h2 className="text-sm font-semibold text-amber-600 mb-3">미처리 ({pending.length})</h2>
         {pending.length === 0 ? (
-          <div className="bg-white border border-[#EDEFF1] rounded-xl py-8 text-center text-gray-400 text-sm">
+          <div className="bg-white border border-border rounded-xl py-8 text-center text-gray-400 text-sm">
             미처리 신청이 없습니다.
           </div>
         ) : (
@@ -81,8 +81,8 @@ export default function AdminWelcomeKitsPage() {
                     {kit.message && <div className="text-xs text-gray-500 mt-1 italic">"{kit.message}"</div>}
                     <div className="text-xs text-gray-400 mt-1">{new Date(kit.createdAt).toLocaleDateString('ko-KR')} 신청</div>
                     {kit.adminMessage && (
-                      <div className="mt-2 bg-blue-50 rounded-lg px-3 py-2">
-                        <div className="text-xs text-[#003478] font-medium mb-0.5">보낸 메시지</div>
+                      <div className="mt-2 bg-primary/5 rounded-lg px-3 py-2">
+                        <div className="text-xs text-primary font-medium mb-0.5">보낸 메시지</div>
                         <p className="text-xs text-gray-700">{kit.adminMessage}</p>
                       </div>
                     )}
@@ -91,7 +91,7 @@ export default function AdminWelcomeKitsPage() {
                     {kit.userId ? (
                       <button
                         onClick={() => setExpandedId(expandedId === kit.id ? null : kit.id)}
-                        className="text-xs text-[#003478] border border-blue-200 px-3 py-1.5 rounded-lg hover:bg-blue-50"
+                        className="text-xs text-primary border border-primary/20 px-3 py-1.5 rounded-lg hover:bg-primary/5"
                       >
                         💬 {expandedId === kit.id ? '닫기' : '채팅 시작'}
                       </button>
@@ -113,7 +113,7 @@ export default function AdminWelcomeKitsPage() {
                   </div>
                 </div>
                 {expandedId === kit.id && kit.userId && (
-                  <div className="mt-3 border-t border-[#EDEFF1] pt-3">
+                  <div className="mt-3 border-t border-border pt-3">
                     <p className="text-xs text-gray-500 mb-2">
                       <span className="font-medium text-gray-700">{kit.name}</span>님께 첫 메시지를 보내면 채팅방이 열립니다.
                     </p>
@@ -123,13 +123,13 @@ export default function AdminWelcomeKitsPage() {
                       value={chatInputs[kit.id] ?? ''}
                       onChange={e => setChatInputs(prev => ({ ...prev, [kit.id]: e.target.value }))}
                       placeholder={`안녕하세요 ${kit.name}님! 웰컴 키트 신청 감사합니다. 전달 일정을 안내드릴게요.`}
-                      className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478] resize-none mb-2"
+                      className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none mb-2"
                     />
                     <div className="flex justify-end">
                       <button
                         onClick={() => startChat(kit)}
                         disabled={!chatInputs[kit.id]?.trim() || startingChat === kit.id}
-                        className="px-4 py-2 text-sm bg-[#003478] text-white rounded-xl font-semibold hover:bg-blue-900 disabled:opacity-50"
+                        className="px-4 py-2 text-sm bg-primary text-white rounded-xl font-semibold hover:bg-primary/90 disabled:opacity-50"
                       >
                         {startingChat === kit.id ? '채팅 여는 중...' : '채팅방 열기 →'}
                       </button>
@@ -148,15 +148,15 @@ export default function AdminWelcomeKitsPage() {
           <h2 className="text-sm font-semibold text-gray-400 mb-3">처리 완료 ({done.length})</h2>
           <div className="space-y-2">
             {done.map(kit => (
-              <div key={kit.id} className="bg-white border border-[#EDEFF1] rounded-xl p-4 opacity-70">
+              <div key={kit.id} className="bg-white border border-border rounded-xl p-4 opacity-70">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <div className="font-medium text-sm">{kit.name} · {kit.phone}</div>
                     {kit.address && <div className="text-xs text-gray-400 mt-0.5">📍 {kit.address}</div>}
                     {kit.message && <div className="text-xs text-gray-500 mt-1 italic">"{kit.message}"</div>}
                     {kit.adminMessage && (
-                      <div className="mt-2 bg-blue-50 rounded-lg px-3 py-2">
-                        <div className="text-xs text-[#003478] font-medium mb-0.5">보낸 메시지</div>
+                      <div className="mt-2 bg-primary/5 rounded-lg px-3 py-2">
+                        <div className="text-xs text-primary font-medium mb-0.5">보낸 메시지</div>
                         <p className="text-xs text-gray-700">{kit.adminMessage}</p>
                       </div>
                     )}

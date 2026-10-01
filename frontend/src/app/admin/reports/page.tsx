@@ -76,8 +76,8 @@ export default function AdminReportsPage() {
               onClick={() => setFilter(s)}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition ${
                 filter === s
-                  ? 'bg-[#003478] text-white border-[#003478]'
-                  : 'bg-white text-gray-500 border-gray-200 hover:border-[#003478]'
+                  ? 'bg-primary text-white border-primary'
+                  : 'bg-white text-gray-500 border-gray-200 hover:border-primary'
               }`}
             >
               {s === '' ? '전체' : STATUS_LABEL[s as ReportStatus]}
@@ -98,7 +98,7 @@ export default function AdminReportsPage() {
               onChange={(e) => setNote(e.target.value)}
               placeholder="관리자 메모 (선택)"
               rows={3}
-              className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478] resize-none mb-4"
+              className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none mb-4"
             />
             <div className="flex gap-2 justify-end">
               <button onClick={() => setActionId(null)} className="px-4 py-2 text-sm border border-gray-300 rounded-xl hover:bg-gray-50">
