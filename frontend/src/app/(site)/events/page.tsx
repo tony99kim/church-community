@@ -6,6 +6,8 @@ import api from '@/lib/api';
 import type { Event, PageResponse } from '@/types';
 import Pagination from '@/components/Pagination';
 import { useAuthStore } from '@/store/authStore';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 const STATUS_LABEL: Record<string, string> = {
   UPCOMING: '예정',
@@ -14,9 +16,9 @@ const STATUS_LABEL: Record<string, string> = {
   CANCELLED: '취소',
 };
 
-const STATUS_COLOR: Record<string, string> = {
-  UPCOMING: 'bg-blue-50 text-blue-600 border-blue-100',
-  ONGOING: 'bg-green-50 text-green-600 border-green-100',
+const STATUS_VARIANT: Record<string, string> = {
+  UPCOMING: 'bg-blue-50 text-blue-600 border-blue-200',
+  ONGOING: 'bg-green-50 text-green-600 border-green-200',
   ENDED: 'bg-gray-100 text-gray-400 border-gray-200',
   CANCELLED: 'bg-red-50 text-red-400 border-red-100',
 };
@@ -53,79 +55,90 @@ export default function EventsPage() {
   }, [category, page]);
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6">
-      <div className="mb-6">
-        <h1 className="text-xl font-bold text-gray-900">행사 안내</h1>
-        <p className="text-sm text-gray-500 mt-1">염리동 청년 커뮤니티 행사를 확인하고 참여 신청하세요</p>
+    <div className="max-w-4xl mx-auto px-4 py-10">
+      <div className="mb-8">
+        <h1 className="text-2xl font-extrabold text-gray-900">행사 안내 📅</h1>
+        <p className="text-sm text-muted-foreground mt-1">염리동 청년 커뮤니티 행사를 확인하고 참여 신청하세요</p>
       </div>
 
       {/* 카테고리 필터 */}
-      <div className="flex flex-wrap gap-2 mb-6">
+      <div className="flex flex-wrap gap-2 mb-8">
         {EVENT_CATEGORIES.map(cat => (
           <button key={cat.value} onClick={() => setCategory(cat.value)}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${category === cat.value ? 'bg-[#003478] text-white' : 'bg-white border border-[#EDEFF1] text-gray-600 hover:border-[#003478]'}`}>
+            className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${
+              category === cat.value
+                ? 'bg-primary text-white shadow-md shadow-primary/20'
+                : 'bg-white border border-border text-gray-600 hover:border-primary hover:text-primary'
+            }`}>
             {cat.label}
           </button>
         ))}
       </div>
 
       {loading ? (
-        <div className="space-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="bg-white border border-[#EDEFF1] rounded-xl p-5 animate-pulse">
-              <div className="h-5 bg-gray-100 rounded w-2/3 mb-2" />
-              <div className="h-4 bg-gray-50 rounded w-1/3" />
-            </div>
+            <Card key={i} className="animate-pulse">
+              <div className="h-44 bg-muted rounded-t-xl" />
+              <CardContent className="p-4">
+                <div className="h-4 bg-muted rounded w-2/3 mb-2" />
+                <div className="h-3 bg-muted rounded w-1/2" />
+              </CardContent>
+            </Card>
           ))}
         </div>
       ) : events.length === 0 ? (
-        <div className="bg-white border border-[#EDEFF1] rounded-xl py-16 text-center">
-          <div className="text-3xl mb-2">📅</div>
-          <p className="text-gray-400 text-sm">예정된 행사가 없습니다.</p>
-        </div>
+        <Card className="py-20 text-center">
+          <div className="text-4xl mb-3">📅</div>
+          <p className="text-muted-foreground text-sm">예정된 행사가 없습니다.</p>
+        </Card>
       ) : (
-        <div className="space-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {events.map((event) => (
-            <Link
-              key={event.id}
-              href={`/events/${event.id}`}
-              className="block bg-white border border-[#EDEFF1] rounded-xl overflow-hidden hover:border-[#003478] hover:shadow-sm transition"
-            >
-              {event.thumbnailUrl && (
-                <div className="w-full h-36 overflow-hidden">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={event.thumbnailUrl} alt={event.title} className="w-full h-full object-cover" />
-                </div>
-              )}
-              <div className="p-5">
-                <div className="flex items-center gap-2 mb-2 flex-wrap">
-                  <span className={`text-xs px-2 py-0.5 rounded border font-medium ${STATUS_COLOR[event.status]}`}>
-                    {STATUS_LABEL[event.status]}
-                  </span>
-                  {isLoggedIn && event.joined && (
-                    <span className="text-xs px-2 py-0.5 rounded border font-medium bg-green-50 text-green-700 border-green-200">✓ 신청함</span>
+            <Link key={event.id} href={`/events/${event.id}`}>
+              <Card className="overflow-hidden hover:shadow-lg transition-all duration-200 hover:-translate-y-1 cursor-pointer h-full">
+                <div className="relative w-full h-44 bg-gradient-to-br from-primary/10 to-primary/5 overflow-hidden">
+                  {event.thumbnailUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={event.thumbnailUrl} alt={event.title} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-5xl">📅</div>
                   )}
-                  <h2 className="text-sm font-bold text-gray-900 truncate">{event.title}</h2>
-                </div>
-                <div className="flex items-center gap-3 text-xs text-gray-400 flex-wrap">
-                  <span>📍 {event.location}</span>
-                  <span>·</span>
-                  <span>📅 {new Date(event.startDate).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' })}</span>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                  <div className="absolute top-3 left-3 flex gap-1.5">
+                    <span className={`text-xs px-2 py-1 rounded-full border font-semibold backdrop-blur-sm bg-white/90 ${STATUS_VARIANT[event.status]}`}>
+                      {STATUS_LABEL[event.status]}
+                    </span>
+                    {isLoggedIn && event.joined && (
+                      <span className="text-xs px-2 py-1 rounded-full font-semibold bg-green-500/90 text-white backdrop-blur-sm border-0">
+                        ✓ 신청함
+                      </span>
+                    )}
+                  </div>
                   {event.maxParticipants !== null && (
-                    <>
-                      <span>·</span>
-                      <span>👥 {event.currentParticipants}/{event.maxParticipants}명</span>
-                    </>
+                    <div className="absolute bottom-3 right-3">
+                      <span className="text-xs px-2 py-1 rounded-full bg-black/40 text-white backdrop-blur-sm font-medium">
+                        👥 {event.currentParticipants}/{event.maxParticipants}명
+                      </span>
+                    </div>
                   )}
                 </div>
-              </div>
+                <CardContent className="p-4">
+                  <h2 className="font-bold text-sm text-gray-900 mb-2 line-clamp-2">{event.title}</h2>
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
+                    <span className="flex items-center gap-1">📍 {event.location}</span>
+                    <span>·</span>
+                    <span>{new Date(event.startDate).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' })}</span>
+                  </div>
+                </CardContent>
+              </Card>
             </Link>
           ))}
         </div>
       )}
 
       {totalPages > 1 && (
-        <div className="mt-6">
+        <div className="mt-8">
           <Pagination page={page} totalPages={totalPages} onChange={(p) => { setPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />
         </div>
       )}

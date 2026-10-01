@@ -1,9 +1,16 @@
+export { cn } from "cn";
+
 export function formatDate(dateStr: string): string {
-  // 타임존 없는 LocalDateTime은 UTC로 명시 처리
-  const d = new Date(dateStr.includes('Z') || dateStr.includes('+') ? dateStr : dateStr + 'Z');
-  const diff = Date.now() - d.getTime();
-  if (diff < 60000) return '방금 전';
-  if (diff < 3600000) return `${Math.floor(diff / 60000)}분 전`;
-  if (diff < 86400000) return `${Math.floor(diff / 3600000)}시간 전`;
-  return d.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' });
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMin = Math.floor(diffMs / 60000);
+  const diffHour = Math.floor(diffMin / 60);
+  const diffDay = Math.floor(diffHour / 24);
+
+  if (diffMin < 1) return '방금 전';
+  if (diffMin < 60) return `${diffMin}분 전`;
+  if (diffHour < 24) return `${diffHour}시간 전`;
+  if (diffDay < 7) return `${diffDay}일 전`;
+  return date.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' });
 }
