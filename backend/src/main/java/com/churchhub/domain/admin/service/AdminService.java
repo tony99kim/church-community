@@ -61,7 +61,10 @@ public class AdminService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
         user.changeRole(request.getRole());
-        if (request.getRole() == UserRole.CHURCH_MANAGER) {
+        boolean needsChurch = request.getRole() == UserRole.CHURCH_MANAGER
+                || request.getRole() == UserRole.PASTOR
+                || request.getRole() == UserRole.EVANGELIST;
+        if (needsChurch) {
             if (request.getChurchId() == null) {
                 throw new BusinessException(ErrorCode.CHURCH_NOT_FOUND);
             }

@@ -118,7 +118,7 @@ export default function AdminUsersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [churches, setChurches] = useState<{ id: number; name: string }[]>([]);
-  const [pendingRoleChange, setPendingRoleChange] = useState<{ userId: number } | null>(null);
+  const [pendingRoleChange, setPendingRoleChange] = useState<{ userId: number; role: string } | null>(null);
   const [selectedChurchId, setSelectedChurchId] = useState('');
 
   // 검색/필터
@@ -181,8 +181,8 @@ export default function AdminUsersPage() {
   };
 
   const handleRoleChange = async (u: User, newRole: string) => {
-    if (newRole === 'CHURCH_MANAGER') {
-      setPendingRoleChange({ userId: u.id });
+    if (newRole === 'CHURCH_MANAGER' || newRole === 'PASTOR' || newRole === 'EVANGELIST') {
+      setPendingRoleChange({ userId: u.id, role: newRole });
       setSelectedChurchId('');
       return;
     }
@@ -197,7 +197,7 @@ export default function AdminUsersPage() {
   const confirmChurchManagerAssign = async () => {
     if (!pendingRoleChange || !selectedChurchId) return;
     try {
-      await api.put(`/admin/users/${pendingRoleChange.userId}/role`, { role: 'CHURCH_MANAGER', churchId: Number(selectedChurchId) });
+      await api.put(`/admin/users/${pendingRoleChange.userId}/role`, { role: pendingRoleChange.role, churchId: Number(selectedChurchId) });
       setPendingRoleChange(null);
       fetchUsers(page);
       toast('권한이 변경되었습니다');
@@ -380,8 +380,8 @@ export default function AdminUsersPage() {
       {pendingRoleChange && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl w-full max-w-sm p-6 shadow-xl">
-            <h2 className="font-bold text-gray-900 mb-1">교회관리자 교회 지정</h2>
-            <p className="text-sm text-gray-500 mb-4">이 회원이 관리할 교회를 선택해주세요.</p>
+            <h2 className="font-bold text-gray-900 mb-1">소속 교회 지정</h2>
+            <p className="text-sm text-gray-500 mb-4">{ROLE_LABELS[pendingRoleChange?.role ?? ''] ?? ''}으로 지정할 소속 교회를 선택해주세요.</p>
             <select
               value={selectedChurchId}
               onChange={e => setSelectedChurchId(e.target.value)}
