@@ -43,7 +43,7 @@ export default function ReportModal({
             <select
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              className="w-full border border-[#EDEFF1] rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478]"
+              className="w-full border border-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
             >
               {REASONS.map((r) => <option key={r}>{r}</option>)}
             </select>
@@ -52,7 +52,7 @@ export default function ReportModal({
             <button
               type="button"
               onClick={onClose}
-              className="text-sm border border-[#EDEFF1] px-4 py-2 rounded-xl text-gray-500 hover:bg-gray-50 transition"
+              className="text-sm border border-border px-4 py-2 rounded-xl text-gray-500 hover:bg-gray-50 transition"
             >
               취소
             </button>

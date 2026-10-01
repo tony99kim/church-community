@@ -65,7 +65,7 @@ function PostsContent() {
           <select
             value={categoryId ?? ''}
             onChange={(e) => router.push(e.target.value ? `/posts?categoryId=${e.target.value}` : '/posts')}
-            className="w-full border border-[#EDEFF1] rounded-xl px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#003478]"
+            className="w-full border border-border rounded-xl px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/20"
           >
             <option value="">전체 게시판</option>
             {categories.map((cat) => (
@@ -94,7 +94,7 @@ function PostsContent() {
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               placeholder="제목 또는 내용 검색"
-              className="w-full bg-white border border-[#EDEFF1] rounded-full px-4 py-2 pl-9 pr-9 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478] focus:border-transparent"
+              className="w-full bg-white border border-border rounded-full px-4 py-2 pl-9 pr-9 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-transparent"
             />
             {searchInput && (
               <button
@@ -106,7 +106,7 @@ function PostsContent() {
               </button>
             )}
           </div>
-          <button type="submit" className="bg-[#003478] text-white px-5 py-2 rounded-full text-sm font-bold hover:bg-[#002560] transition">
+          <button type="submit" className="bg-primary text-white px-5 py-2 rounded-full text-sm font-bold hover:bg-primary/90 transition">
             검색
           </button>
         </form>
@@ -114,15 +114,15 @@ function PostsContent() {
         {keyword && (
           <div className="flex items-center gap-2 mb-3 text-sm text-gray-500">
             <span>검색:</span>
-            <span className="bg-blue-50 text-[#003478] border border-blue-100 px-2.5 py-0.5 rounded-full text-xs font-medium flex items-center gap-1.5">
+            <span className="bg-blue-50 text-primary border border-blue-100 px-2.5 py-0.5 rounded-full text-xs font-medium flex items-center gap-1.5">
               {keyword}
               <button onClick={() => { setKeyword(''); setSearchInput(''); setPage(0); }} className="text-gray-400 hover:text-gray-600">✕</button>
             </span>
           </div>
         )}
 
-        <div className="bg-white border border-[#EDEFF1] rounded-xl overflow-hidden mb-4">
-          <div className="hidden md:grid grid-cols-[1fr_auto] gap-4 px-4 py-2.5 border-b border-[#EDEFF1] bg-gray-50">
+        <div className="bg-white border border-border rounded-xl overflow-hidden mb-4">
+          <div className="hidden md:grid grid-cols-[1fr_auto] gap-4 px-4 py-2.5 border-b border-border bg-gray-50">
             <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">제목</span>
             <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">정보</span>
           </div>
@@ -150,14 +150,14 @@ function PostsContent() {
                   <Link href={`/posts/${post.id}`} className="flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition group">
                     <div className="flex-1 min-w-0 mr-3">
                       <div className="flex items-center gap-1.5 mb-1">
-                        <span className="shrink-0 text-xs bg-blue-50 text-[#003478] border border-blue-100 px-2 py-0.5 rounded font-medium">
+                        <span className="shrink-0 text-xs bg-blue-50 text-primary border border-blue-100 px-2 py-0.5 rounded font-medium">
                           {post.categoryName}
                         </span>
-                        <span className="text-sm font-medium text-gray-900 truncate group-hover:text-[#003478] transition">
+                        <span className="text-sm font-medium text-gray-900 truncate group-hover:text-primary transition">
                           {post.title}
                         </span>
                         {post.commentCount > 0 && (
-                          <span className="shrink-0 text-xs text-[#003478] font-bold">[{post.commentCount}]</span>
+                          <span className="shrink-0 text-xs text-primary font-bold">[{post.commentCount}]</span>
                         )}
                       </div>
                       <div className="flex items-center gap-2 text-xs text-gray-400">

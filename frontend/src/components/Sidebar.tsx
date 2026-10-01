@@ -49,21 +49,21 @@ export default function Sidebar({ activeCategoryId }: { activeCategoryId?: strin
     <aside className="w-64 shrink-0 hidden lg:block">
       <div className="sticky top-14 space-y-3">
         <div className="bg-white border border-[#EDEFF1] rounded-xl overflow-hidden">
-          <div className="bg-gradient-to-r from-[#003478] to-[#0056b3] h-10" />
+          <div className="bg-gradient-to-r from-primary to-primary/70 h-10" />
           <div className="px-4 pt-3 pb-4">
             <div className="font-bold text-gray-900 text-sm">ChurchHub</div>
             <div className="text-xs text-gray-500 mt-0.5 mb-3">지역 청년 커뮤니티</div>
             {isLoggedIn ? (
               <Link
                 href="/posts/write"
-                className="block w-full text-center bg-[#003478] text-white text-sm font-bold py-2 rounded-full hover:bg-[#002560] transition"
+                className="block w-full text-center bg-primary text-white text-sm font-bold py-2 rounded-full hover:bg-primary/90 transition"
               >
                 글쓰기
               </Link>
             ) : (
               <Link
                 href="/login"
-                className="block w-full text-center border-2 border-[#003478] text-[#003478] text-sm font-bold py-2 rounded-full hover:bg-blue-50 transition"
+                className="block w-full text-center border-2 border-primary text-primary text-sm font-bold py-2 rounded-full hover:bg-primary/5 transition"
               >
                 로그인 / 가입
               </Link>
@@ -80,7 +80,7 @@ export default function Sidebar({ activeCategoryId }: { activeCategoryId?: strin
               <Link
                 href="/posts"
                 className={`flex items-center gap-2.5 px-4 py-2 text-sm font-medium transition ${
-                  !activeCategoryId ? 'text-[#003478] bg-blue-50' : 'text-gray-700 hover:bg-gray-50'
+                  !activeCategoryId ? 'text-primary bg-primary/5' : 'text-gray-700 hover:bg-accent'
                 }`}
               >
                 <span>🏠</span>
@@ -92,7 +92,7 @@ export default function Sidebar({ activeCategoryId }: { activeCategoryId?: strin
                 <Link
                   href={`/posts?categoryId=${cat.id}`}
                   className={`flex items-center gap-2.5 px-4 py-2 text-sm font-medium transition ${
-                    activeCategoryId === String(cat.id) ? 'text-[#003478] bg-blue-50' : 'text-gray-700 hover:bg-gray-50'
+                    activeCategoryId === String(cat.id) ? 'text-primary bg-primary/5' : 'text-gray-700 hover:bg-accent'
                   }`}
                 >
                   <span>{TYPE_ICON[cat.type] ?? '📌'}</span>
@@ -121,7 +121,7 @@ export default function Sidebar({ activeCategoryId }: { activeCategoryId?: strin
                       <Link
                         href={`/posts?categoryId=${region.id}`}
                         className={`flex-1 flex items-center gap-2 px-4 py-2 text-sm font-medium transition ${
-                          isRegionActive ? 'text-[#003478] bg-blue-50' : 'text-gray-700 hover:bg-gray-50'
+                          isRegionActive ? 'text-primary bg-primary/5' : 'text-gray-700 hover:bg-accent'
                         }`}
                       >
                         <span>📍</span>
@@ -146,7 +146,7 @@ export default function Sidebar({ activeCategoryId }: { activeCategoryId?: strin
                               href={`/posts?categoryId=${child.id}`}
                               className={`flex items-center gap-2 pl-10 pr-4 py-1.5 text-xs font-medium transition ${
                                 activeCategoryId === String(child.id)
-                                  ? 'text-[#003478] bg-blue-50'
+                                  ? 'text-primary bg-primary/5'
                                   : 'text-gray-600 hover:bg-gray-100'
                               }`}
                             >

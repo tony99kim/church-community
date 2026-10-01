@@ -205,7 +205,7 @@ export default function Header() {
           </div>
         ) : (
           <div className="flex items-center gap-2">
-            <Link href="/login" className="text-sm text-primary font-bold border-2 border-[#003478] px-4 py-1 rounded-full hover:bg-blue-50 transition">
+            <Link href="/login" className="text-sm text-primary font-bold border-2 border-primary px-4 py-1 rounded-full hover:bg-primary/5 transition">
               로그인
             </Link>
             <Link href="/register" className="hidden sm:block text-sm text-white bg-primary font-bold px-4 py-1 rounded-full hover:bg-primary/90 transition">

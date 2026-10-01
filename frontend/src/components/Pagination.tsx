@@ -18,10 +18,10 @@ export default function Pagination({
       disabled={disabled}
       className={`w-9 h-9 rounded-full text-sm font-medium transition flex items-center justify-center
         ${active
-          ? 'bg-[#003478] text-white'
+          ? 'bg-primary text-white'
           : disabled
             ? 'border border-[#EDEFF1] text-gray-300 cursor-not-allowed'
-            : 'border border-[#EDEFF1] bg-white text-gray-600 hover:bg-gray-50'
+            : 'border border-[#EDEFF1] bg-white text-gray-600 hover:bg-accent'
         }`}
     >
       {label}

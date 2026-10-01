@@ -20,7 +20,7 @@ export function RejectModal({ onConfirm, onClose, title = '거절 사유' }: Rej
           value={reason}
           onChange={e => setReason(e.target.value)}
           placeholder="거절 사유를 입력하세요"
-          className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003478] resize-none mb-4"
+          className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none mb-4"
         />
         <div className="flex gap-2 justify-end">
           <button onClick={onClose} className="px-4 py-2 text-sm border border-gray-300 rounded-xl hover:bg-gray-50">

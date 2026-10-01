@@ -89,13 +89,13 @@ a {
   --popover: oklch(0.993 0.006 75);
   --popover-foreground: oklch(0.18 0.025 60);
 
-  /* 네이비 그대로 유지 */
-  --primary: oklch(0.285 0.105 255);
+  /* 따뜻한 인디고 슬레이트 #2b3d6b */
+  --primary: oklch(0.38 0.075 285);
   --primary-foreground: oklch(0.985 0 0);
 
   /* 세컨더리: 따뜻한 크림 */
   --secondary: oklch(0.955 0.018 75);
-  --secondary-foreground: oklch(0.285 0.105 255);
+  --secondary-foreground: oklch(0.38 0.075 285);
 
   /* muted: 따뜻한 회베이지 */
   --muted: oklch(0.950 0.018 75);
@@ -110,9 +110,9 @@ a {
   /* 테두리: 베이지톤 */
   --border: oklch(0.875 0.022 75);
   --input: oklch(0.875 0.022 75);
-  --ring: oklch(0.285 0.105 255);
+  --ring: oklch(0.38 0.075 285);
 
-  --chart-1: oklch(0.285 0.105 255);
+  --chart-1: oklch(0.38 0.075 285);
   --chart-2: oklch(0.65 0.13 75);
   --chart-3: oklch(0.7 0.12 255);
   --chart-4: oklch(0.55 0.12 50);
@@ -122,12 +122,12 @@ a {
 
   --sidebar: oklch(0.985 0.006 75);
   --sidebar-foreground: oklch(0.18 0.025 60);
-  --sidebar-primary: oklch(0.285 0.105 255);
+  --sidebar-primary: oklch(0.38 0.075 285);
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.93 0.040 75);
   --sidebar-accent-foreground: oklch(0.38 0.06 60);
   --sidebar-border: oklch(0.875 0.022 75);
-  --sidebar-ring: oklch(0.285 0.105 255);
+  --sidebar-ring: oklch(0.38 0.075 285);
 }
 
 @layer base {

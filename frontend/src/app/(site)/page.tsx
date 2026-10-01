@@ -29,7 +29,7 @@ export default function HomePage() {
     <main className="min-h-screen bg-background">
 
       {/* 히어로 */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#003478] via-[#00409a] to-[#0055cc] text-white py-24 px-4">
+      <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary/85 to-primary/70 text-white py-24 px-4">
         {/* 배경 패턴 */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-8 left-1/4 w-64 h-64 rounded-full bg-white blur-3xl" />
@@ -45,12 +45,12 @@ export default function HomePage() {
           <h1 className="serif text-4xl md:text-6xl font-extrabold mb-4 leading-tight">
             염리동 청년<br className="md:hidden" /> 커뮤니티
           </h1>
-          <p className="text-lg md:text-xl text-blue-200 mb-10 max-w-xl mx-auto leading-relaxed">
+          <p className="text-lg md:text-xl text-white/75 mb-10 max-w-xl mx-auto leading-relaxed">
             염리동 12개 교회 청년들이 함께 만들어가는<br className="hidden md:block" /> 따뜻한 동네 공동체
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link href="/welcome"
-              className="px-7 py-3 bg-white text-[#003478] font-bold rounded-full hover:bg-blue-50 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 text-sm">
+              className="px-7 py-3 bg-white text-primary font-bold rounded-full hover:bg-accent transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 text-sm">
               처음 오셨나요? →
             </Link>
             <Link href="/events"
