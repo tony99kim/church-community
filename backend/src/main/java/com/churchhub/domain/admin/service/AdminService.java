@@ -8,17 +8,22 @@ import com.churchhub.domain.church.repository.ChurchRepository;
 import com.churchhub.domain.user.dto.UserDto;
 import com.churchhub.domain.user.entity.User;
 import com.churchhub.domain.user.entity.UserRole;
+import com.churchhub.domain.user.entity.UserStatus;
 import com.churchhub.domain.user.repository.UserRepository;
 import com.churchhub.exception.BusinessException;
 import com.churchhub.exception.ErrorCode;
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -40,9 +45,19 @@ public class AdminService {
     }
 
     public Page<UserDto.Response> getUsers(Pageable pageable, String keyword, UserRole role, Long churchId) {
-        String kw = (keyword != null && !keyword.isBlank()) ? keyword.trim() : null;
-        String roleStr = role != null ? role.name() : null;
-        return userRepository.findWithFilters(roleStr, churchId, kw, pageable).map(UserDto.Response::from);
+        String kw = (keyword != null && !keyword.isBlank()) ? keyword.trim().toLowerCase() : null;
+        Specification<User> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.notEqual(root.get("status"), UserStatus.DELETED));
+            if (role != null) predicates.add(cb.equal(root.get("role"), role));
+            if (churchId != null) predicates.add(cb.equal(root.get("church").get("id"), churchId));
+            if (kw != null) predicates.add(cb.or(
+                cb.like(cb.lower(root.get("nickname")), "%" + kw + "%"),
+                cb.like(cb.lower(root.get("email")), "%" + kw + "%")
+            ));
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+        return userRepository.findAll(spec, pageable).map(UserDto.Response::from);
     }
 
     @Transactional

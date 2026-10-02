@@ -6,6 +6,7 @@ import com.churchhub.domain.user.entity.UserStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -13,7 +14,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
     Optional<User> findByEmail(String email);
     boolean existsByEmail(String email);
     boolean existsByNickname(String nickname);
@@ -24,16 +25,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Page<User> searchByKeyword(@Param("keyword") String keyword, @Param("status") UserStatus status, Pageable pageable);
 
     List<User> findByRoleInAndStatus(List<UserRole> roles, UserStatus status);
-
-    @Query(value = "SELECT u FROM User u LEFT JOIN u.church c WHERE u.status != 'DELETED' " +
-                   "AND (:role IS NULL OR CAST(u.role AS string) = :role) " +
-                   "AND (:churchId IS NULL OR c.id = :churchId) " +
-                   "AND (:keyword IS NULL OR LOWER(u.nickname) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%')))",
-           countQuery = "SELECT COUNT(u) FROM User u LEFT JOIN u.church c WHERE u.status != 'DELETED' " +
-                        "AND (:role IS NULL OR CAST(u.role AS string) = :role) " +
-                        "AND (:churchId IS NULL OR c.id = :churchId) " +
-                        "AND (:keyword IS NULL OR LOWER(u.nickname) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%')))")
-    Page<User> findWithFilters(@Param("role") String role, @Param("churchId") Long churchId, @Param("keyword") String keyword, Pageable pageable);
 
     @Query("SELECT u FROM User u WHERE u.status = 'ACTIVE' AND u.id != :excludeId AND LOWER(u.nickname) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<User> searchActiveByNickname(@Param("keyword") String keyword, @Param("excludeId") Long excludeId, Pageable pageable);
