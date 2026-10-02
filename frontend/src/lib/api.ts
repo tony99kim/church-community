@@ -15,6 +15,11 @@ api.interceptors.response.use(
 
     if (error.response?.status === 401 && !original._retry) {
       original._retry = true;
+      // /users/me는 초기 인증 확인용이므로 실패해도 리다이렉트 안 함 (Providers.tsx가 clearAuth 처리)
+      const isAuthCheck = original.url?.includes('/users/me');
+      const alreadyOnAuth = typeof window !== 'undefined' &&
+        ['/login', '/register'].some(p => window.location.pathname.startsWith(p));
+      if (isAuthCheck || alreadyOnAuth) return Promise.reject(error);
       try {
         await axios.post(`${BASE_URL}/auth/refresh`, {}, { withCredentials: true });
         return api(original);
