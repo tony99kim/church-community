@@ -144,11 +144,9 @@ export default function AdminUsersPage() {
   };
 
   useEffect(() => {
-    fetchUsers(0);
-    api.get('/admin/churches').then(r => setChurches(r.data.data ?? []));
-  }, []);
-
-  useEffect(() => { fetchUsers(page, activeSearch); }, [page]);
+    fetchUsers(page, activeSearch);
+    if (page === 0) api.get('/admin/churches').then(r => setChurches(r.data.data ?? []));
+  }, [page]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();

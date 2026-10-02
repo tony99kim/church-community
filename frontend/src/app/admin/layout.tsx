@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useAuthStore } from '@/store/authStore';
-import api from '@/lib/api';
 import { PendingCountsProvider, usePendingCounts } from '@/context/PendingCountsContext';
 import { ToastContainer } from '@/components/Toast';
 
@@ -96,20 +95,18 @@ function SidebarNav() {
 function AdminLayoutInner({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, isLoggedIn, setUser, logout } = useAuthStore();
+  const { user, isLoggedIn, hydrated, logout } = useAuthStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => { setSidebarOpen(false); }, [pathname]);
 
   useEffect(() => {
-    api.get('/users/me')
-      .then((res) => {
-        const u = res.data.data;
-        setUser(u);
-        if (!['SUPER_ADMIN', 'CHURCH_MANAGER', 'PASTOR', 'EVANGELIST'].includes(u.role)) router.push('/');
-      })
-      .catch(() => router.push('/login'));
-  }, [pathname]);
+    if (!hydrated) return;
+    if (!isLoggedIn) { router.push('/login'); return; }
+    if (!['SUPER_ADMIN', 'CHURCH_MANAGER', 'PASTOR', 'EVANGELIST'].includes(user?.role ?? '')) {
+      router.push('/');
+    }
+  }, [hydrated, isLoggedIn, user?.role]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleLogout = () => {
     logout();
