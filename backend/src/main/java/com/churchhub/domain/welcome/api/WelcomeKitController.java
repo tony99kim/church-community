@@ -34,19 +34,19 @@ public class WelcomeKitController {
     }
 
     @GetMapping("/admin/welcome/kits")
-    @PreAuthorize("hasAnyRole('PASTOR', 'CHURCH_MANAGER', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('PASTOR', 'EVANGELIST', 'CHURCH_MANAGER', 'SUPER_ADMIN')")
     public ApiResponse<List<WelcomeKitDto.Response>> getAll() {
         return ApiResponse.success(welcomeKitService.getAll());
     }
 
     @PutMapping("/admin/welcome/kits/{id}/process")
-    @PreAuthorize("hasAnyRole('PASTOR', 'CHURCH_MANAGER', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('PASTOR', 'EVANGELIST', 'CHURCH_MANAGER', 'SUPER_ADMIN')")
     public ApiResponse<WelcomeKitDto.Response> markProcessed(@PathVariable Long id) {
         return ApiResponse.success(welcomeKitService.markProcessed(id));
     }
 
     @PutMapping("/admin/welcome/kits/{id}/message")
-    @PreAuthorize("hasAnyRole('PASTOR', 'CHURCH_MANAGER', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('PASTOR', 'EVANGELIST', 'CHURCH_MANAGER', 'SUPER_ADMIN')")
     public ApiResponse<WelcomeKitDto.Response> sendMessage(
             @PathVariable Long id,
             @Valid @RequestBody WelcomeKitDto.AdminMessageRequest req) {
@@ -54,7 +54,7 @@ public class WelcomeKitController {
     }
 
     @DeleteMapping("/admin/welcome/kits/{id}")
-    @PreAuthorize("hasAnyRole('PASTOR', 'CHURCH_MANAGER', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('PASTOR', 'EVANGELIST', 'CHURCH_MANAGER', 'SUPER_ADMIN')")
     public ApiResponse<Void> delete(@PathVariable Long id) {
         welcomeKitService.delete(id);
         return ApiResponse.success(null);

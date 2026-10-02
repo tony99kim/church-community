@@ -161,7 +161,8 @@ public class ItemService {
         User caller = getCallerUser(callerId);
         boolean isAdmin = caller.getRole() == UserRole.SUPER_ADMIN
                 || caller.getRole() == UserRole.CHURCH_MANAGER
-                || caller.getRole() == UserRole.PASTOR;
+                || caller.getRole() == UserRole.PASTOR
+                || caller.getRole() == UserRole.EVANGELIST;
         if (!isAdmin && !rental.getApplicant().getId().equals(callerId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN);
         }
@@ -176,7 +177,8 @@ public class ItemService {
         User caller = getCallerUser(callerId);
         boolean isAdmin = caller.getRole() == UserRole.SUPER_ADMIN
                 || caller.getRole() == UserRole.CHURCH_MANAGER
-                || caller.getRole() == UserRole.PASTOR;
+                || caller.getRole() == UserRole.PASTOR
+                || caller.getRole() == UserRole.EVANGELIST;
         if (!isAdmin && !rental.getApplicant().getId().equals(callerId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN);
         }
