@@ -160,7 +160,7 @@ function MessagesContent() {
 
   useEffect(() => {
     const convId = searchParams.get('convId');
-    if (convId && conversations.length > 0 && !selectedId) {
+    if (convId && conversations.length > 0 && selectedId !== Number(convId)) {
       openConversation(Number(convId));
     }
   }, [conversations, searchParams]);

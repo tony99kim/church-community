@@ -199,6 +199,20 @@ public class ItemService {
         return resolveChurch(requestedChurchId);
     }
 
+    @Transactional
+    public ItemDto.RentalResponse cancelRental(Long rentalId, Long callerId) {
+        ItemRental rental = itemRentalRepository.findById(rentalId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ITEM_RENTAL_NOT_FOUND));
+        if (!rental.getApplicant().getId().equals(callerId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
+        if (rental.getStatus() != com.churchhub.domain.space.entity.RentalStatus.PENDING) {
+            throw new BusinessException(ErrorCode.SPACE_RENTAL_NOT_CANCELLABLE);
+        }
+        rental.cancel();
+        return ItemDto.RentalResponse.from(rental);
+    }
+
     private void verifyItemOwnership(Item item, User caller) {
         if (caller.getRole() != UserRole.CHURCH_MANAGER) return;
         Church callerChurch = caller.getChurch();

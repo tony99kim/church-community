@@ -69,6 +69,7 @@ public class ItemRental {
         this.termsAgreed = termsAgreed;
     }
 
+    public void cancel() { this.status = RentalStatus.CANCELLED; }
     public void approve() { this.status = RentalStatus.APPROVED; }
     public void reject(String reason) {
         this.status = RentalStatus.REJECTED;

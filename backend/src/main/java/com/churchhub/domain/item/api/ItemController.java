@@ -38,6 +38,13 @@ public class ItemController {
         return ApiResponse.success(itemService.getMyRentals(userDetails.getUserId()));
     }
 
+    @PutMapping("/items/rentals/{rentalId}/cancel")
+    public ApiResponse<ItemDto.RentalResponse> cancelRental(
+            @PathVariable Long rentalId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ApiResponse.success(itemService.cancelRental(rentalId, userDetails.getUserId()));
+    }
+
     @GetMapping("/admin/items")
     @PreAuthorize("hasAnyRole('PASTOR', 'CHURCH_MANAGER', 'SUPER_ADMIN')")
     public ApiResponse<List<ItemDto.Response>> getAdminItems(

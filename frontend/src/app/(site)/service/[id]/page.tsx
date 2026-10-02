@@ -26,7 +26,7 @@ const STATUS_COLOR: Record<string, string> = {
 export default function ServiceDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const { isLoggedIn } = useAuthStore();
+  const { isLoggedIn, hydrated } = useAuthStore();
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -42,6 +42,7 @@ export default function ServiceDetailPage() {
   useEffect(() => { fetchEvent(); }, [id]);
 
   const handleJoin = async () => {
+    if (!hydrated) return;
     if (!isLoggedIn) { router.push('/login'); return; }
     setActionLoading(true);
     try {

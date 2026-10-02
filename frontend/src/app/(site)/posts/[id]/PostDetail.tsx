@@ -129,7 +129,7 @@ export default function PostDetailClient() {
   const [reportingPost, setReportingPost] = useState(false);
   const [liking, setLiking] = useState(false);
 
-  const isAdmin = ['SUPER_ADMIN', 'CHURCH_MANAGER', 'PASTOR'].includes(user?.role ?? '');
+  const isAdmin = ['SUPER_ADMIN', 'CHURCH_MANAGER', 'PASTOR', 'EVANGELIST'].includes(user?.role ?? '');
 
   const fetchComments = async () => {
     const res = await api.get(`/posts/${id}/comments`);

@@ -172,6 +172,7 @@ export default function MyPage() {
 
   const handlePassword = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (pwForm.newPassword.length < 8) { setPwMsg('새 비밀번호는 8자 이상이어야 합니다.'); return; }
     if (pwForm.newPassword !== pwForm.confirmPassword) { setPwMsg('새 비밀번호가 일치하지 않습니다.'); return; }
     setPwLoading(true); setPwMsg('');
     try {
@@ -389,6 +390,17 @@ export default function MyPage() {
                           className={`text-xs px-2 py-1 rounded-lg border transition ${itemChatId === r.id ? 'bg-primary text-white border-primary' : 'border-border text-muted-foreground hover:border-primary'}`}>
                           💬 {itemChatId === r.id ? '닫기' : '채팅'}
                         </button>
+                        {r.status === 'PENDING' && (
+                          <button onClick={async () => {
+                            if (!confirm('신청을 취소하시겠어요?')) return;
+                            try {
+                              await api.put(`/items/rentals/${r.id}/cancel`);
+                              setItemRentals(prev => prev.map(x => x.id === r.id ? { ...x, status: 'CANCELLED' } : x));
+                            } catch { alert('취소에 실패했습니다.'); }
+                          }} className="text-xs px-2 py-1 rounded-lg border border-red-200 text-red-500 hover:bg-red-50 transition">
+                            취소
+                          </button>
+                        )}
                       </div>
                     </div>
                     {itemChatId === r.id && (
