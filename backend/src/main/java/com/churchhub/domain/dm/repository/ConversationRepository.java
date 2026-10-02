@@ -12,6 +12,7 @@ public interface ConversationRepository extends JpaRepository<Conversation, Long
     List<Conversation> findByUserIdOrderByLastMessageAtDesc(Long userId);
     List<Conversation> findByPastorIdOrderByLastMessageAtDesc(Long pastorId);
     Optional<Conversation> findByUserIdAndPastorIdAndFaithQuestionIsNull(Long userId, Long pastorId);
+    Optional<Conversation> findByUserIdAndPastorIdAndFaithQuestionId(Long userId, Long pastorId, Long faithQuestionId);
 
     @Query("SELECT c FROM Conversation c WHERE (c.user.id = :userId OR c.pastor.id = :userId) ORDER BY CASE WHEN c.lastMessageAt IS NULL THEN 0 ELSE 1 END DESC, c.lastMessageAt DESC")
     List<Conversation> findAllByParticipant(@Param("userId") Long userId);

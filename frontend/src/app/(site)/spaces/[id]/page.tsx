@@ -76,6 +76,7 @@ export default function SpaceDetailPage() {
 
   const handleSlotClick = (slot: SlotInfo) => {
     if (slot.status === 'MY_PENDING' && slot.rentalId) { setCancelSlot(slot); return; }
+    if (slot.status === 'MY_APPROVED') { alert('승인된 예약은 직접 취소할 수 없습니다. 교회 담당자에게 문의해주세요.'); return; }
     if (slot.status !== 'AVAILABLE') return;
     if (!isLoggedIn) { router.push('/login'); return; }
     setPendingSlot(slot);

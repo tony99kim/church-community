@@ -60,8 +60,10 @@ public class DmService {
         if (req.getFaithQuestionId() != null) {
             FaithQuestion question = faithQuestionRepository.findById(req.getFaithQuestionId())
                     .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
-            conv = conversationRepository.save(
-                    Conversation.builder().user(caller).pastor(recipient).faithQuestion(question).build());
+            conv = conversationRepository
+                    .findByUserIdAndPastorIdAndFaithQuestionId(callerId, req.getRecipientId(), req.getFaithQuestionId())
+                    .orElseGet(() -> conversationRepository.save(
+                            Conversation.builder().user(caller).pastor(recipient).faithQuestion(question).build()));
         } else {
             conv = conversationRepository
                     .findDirectConversation(callerId, req.getRecipientId())

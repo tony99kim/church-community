@@ -78,7 +78,7 @@ export default function WritePostPage() {
     }
   };
 
-  const isAdmin = ['SUPER_ADMIN', 'CHURCH_MANAGER', 'PASTOR'].includes(user?.role ?? '');
+  const isAdmin = ['SUPER_ADMIN', 'CHURCH_MANAGER', 'PASTOR', 'EVANGELIST'].includes(user?.role ?? '');
   const rootCategories = categories.filter((c) => !c.parentId && (isAdmin || c.type !== 'NOTICE'));
 
   return (

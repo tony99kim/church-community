@@ -147,7 +147,7 @@ public class FaithService {
         if (!isAdmin && !question.getAuthor().getId().equals(callerId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN);
         }
-        String role = isAdmin ? "PASTOR" : "USER";
+        String role = isAdmin ? caller.getRole().name() : "USER";
         FaithQuestionMessage msg = FaithQuestionMessage.builder()
                 .question(question).sender(caller).senderRole(role).content(content).build();
         return FaithDto.MessageResponse.from(messageRepository.save(msg));

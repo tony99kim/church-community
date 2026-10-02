@@ -60,6 +60,7 @@ public class FaithController {
     }
 
     @PostMapping("/prayers/{id}/pray")
+    @PreAuthorize("isAuthenticated()")
     public ApiResponse<FaithDto.PrayerResponse> pray(
             @PathVariable Long id) {
         return ApiResponse.success(faithService.pray(id));

@@ -73,9 +73,17 @@ export default function FaithPage() {
     }
   };
 
+  const [prayingIds, setPrayingIds] = useState<Set<number>>(new Set());
   const pray = async (id: number) => {
-    await api.post(`/faith/prayers/${id}/pray`);
-    setPrayers(prev => prev.map(p => p.id === id ? { ...p, prayerCount: p.prayerCount + 1 } : p));
+    if (!isLoggedIn) { alert('로그인 후 이용할 수 있습니다.'); return; }
+    if (prayingIds.has(id)) return;
+    setPrayingIds(prev => new Set(prev).add(id));
+    try {
+      await api.post(`/faith/prayers/${id}/pray`);
+      setPrayers(prev => prev.map(p => p.id === id ? { ...p, prayerCount: p.prayerCount + 1 } : p));
+    } finally {
+      setPrayingIds(prev => { const s = new Set(prev); s.delete(id); return s; });
+    }
   };
 
   if (loading) return (
@@ -341,8 +349,8 @@ export default function FaithPage() {
                     <span className="text-xs text-muted-foreground">· {new Date(p.createdAt).toLocaleDateString()}</span>
                   </div>
                   <p className="text-sm text-gray-800 leading-relaxed mb-4">{p.content}</p>
-                  <button onClick={() => pray(p.id)}
-                    className="flex items-center gap-1.5 text-xs px-4 py-2 border border-border rounded-full text-gray-600 hover:border-primary hover:text-primary hover:bg-primary/5 transition-all font-medium">
+                  <button onClick={() => pray(p.id)} disabled={prayingIds.has(p.id)}
+                    className="flex items-center gap-1.5 text-xs px-4 py-2 border border-border rounded-full text-gray-600 hover:border-primary hover:text-primary hover:bg-primary/5 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed">
                     🙏 함께 기도할게요 {p.prayerCount > 0 && <span className="font-bold text-primary">({p.prayerCount})</span>}
                   </button>
                 </CardContent>

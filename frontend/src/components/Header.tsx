@@ -25,7 +25,7 @@ export default function Header() {
   const [dmUnreadCount, setDmUnreadCount] = useState(0);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const notiRef = useRef<HTMLDivElement>(null);
-  const isAdmin = user?.role === 'SUPER_ADMIN' || user?.role === 'CHURCH_MANAGER' || user?.role === 'PASTOR';
+  const isAdmin = ['SUPER_ADMIN', 'CHURCH_MANAGER', 'PASTOR', 'EVANGELIST'].includes(user?.role ?? '');
 
   const fetchUnread = useCallback(() => {
     if (!isLoggedIn) return;
