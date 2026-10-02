@@ -104,9 +104,7 @@ export default function Header() {
         <div className="flex-1" />
 
         {/* 우측 액션 */}
-        {!hydrated ? (
-          <div className="w-24 h-8" />
-        ) : isLoggedIn ? (
+        {hydrated && isLoggedIn ? (
           <div className="flex items-center gap-2">
             <Link
               href="/posts/write"
@@ -239,7 +237,7 @@ export default function Header() {
           <Link href="/items" className="block py-2 text-sm font-medium text-gray-700 hover:text-primary" onClick={() => setMenuOpen(false)}>물품 대여</Link>
           <Link href="/faith" className="block py-2 text-sm font-medium text-gray-700 hover:text-primary" onClick={() => setMenuOpen(false)}>신앙 Q&A</Link>
           <Link href="/service" className="block py-2 text-sm font-medium text-gray-700 hover:text-primary" onClick={() => setMenuOpen(false)}>지역 섬김</Link>
-          {!hydrated ? null : isLoggedIn ? (
+          {hydrated && isLoggedIn ? (
             <>
               <Link href="/posts/write" className="block py-2 text-sm font-medium text-primary" onClick={() => setMenuOpen(false)}>+ 글쓰기</Link>
               <Link href="/messages" className="flex items-center gap-1.5 py-2 text-sm font-medium text-gray-700 hover:text-primary" onClick={() => setMenuOpen(false)}>
