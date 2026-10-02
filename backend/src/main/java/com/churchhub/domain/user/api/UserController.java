@@ -6,14 +6,18 @@ import com.churchhub.domain.board.service.PostService;
 import com.churchhub.domain.user.dto.UserDto;
 import com.churchhub.domain.user.service.UserService;
 import com.churchhub.security.CustomUserDetails;
+import com.churchhub.util.CookieUtil;
+import java.util.Map;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -62,6 +66,19 @@ public class UserController {
     @GetMapping("/pastors")
     public ApiResponse<java.util.List<UserDto.PastorInfo>> getPastors() {
         return ApiResponse.success(userService.getPastors());
+    }
+
+    @Operation(summary = "회원 탈퇴")
+    @DeleteMapping("/me")
+    public ResponseEntity<ApiResponse<Void>> withdraw(
+            @RequestBody(required = false) Map<String, String> body,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpServletResponse response) {
+        String password = body != null ? body.get("password") : null;
+        userService.withdraw(userDetails.getUserId(), password);
+        response.addHeader(HttpHeaders.SET_COOKIE, CookieUtil.delete("access_token").toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, CookieUtil.delete("refresh_token").toString());
+        return ResponseEntity.ok(ApiResponse.success("회원 탈퇴가 완료되었습니다.", null));
     }
 
     @Operation(summary = "유저 닉네임 검색 (DM 대상 찾기)")

@@ -1,5 +1,6 @@
 package com.churchhub.domain.user.service;
 
+import com.churchhub.domain.auth.repository.RefreshTokenRepository;
 import com.churchhub.domain.user.dto.UserDto;
 import com.churchhub.domain.user.entity.User;
 import com.churchhub.domain.user.entity.UserRole;
@@ -19,6 +20,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     public UserDto.Response getMyProfile(Long userId) {
         return UserDto.Response.from(getUser(userId));
@@ -63,6 +65,18 @@ public class UserService {
         return userRepository.searchActiveByNickname(keyword, callerId,
                         org.springframework.data.domain.PageRequest.of(0, 10))
                 .stream().map(UserDto.BasicInfo::from).toList();
+    }
+
+    @Transactional
+    public void withdraw(Long userId, String password) {
+        User user = getUser(userId);
+        if ("LOCAL".equals(user.getProvider())) {
+            if (password == null || !passwordEncoder.matches(password, user.getPassword())) {
+                throw new BusinessException(ErrorCode.WRONG_PASSWORD);
+            }
+        }
+        refreshTokenRepository.deleteAllByUserId(userId);
+        user.anonymize();
     }
 
     private User getUser(Long userId) {

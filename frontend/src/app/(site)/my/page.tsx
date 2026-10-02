@@ -42,7 +42,7 @@ const STATUS_BADGE: Record<string, string> = {
 
 export default function MyPage() {
   const router = useRouter();
-  const { user, isLoggedIn, hydrated, setUser } = useAuthStore();
+  const { user, isLoggedIn, hydrated, setUser, clearAuth } = useAuthStore();
   const [resolvedProvider, setResolvedProvider] = useState<string | undefined>(user?.provider);
   const [tab, setTab] = useState<Tab>('info');
   const [posts, setPosts] = useState<Post[]>([]);
@@ -100,6 +100,11 @@ export default function MyPage() {
   const [pwForm, setPwForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
   const [pwMsg, setPwMsg] = useState('');
   const [pwLoading, setPwLoading] = useState(false);
+
+  const [withdrawPassword, setWithdrawPassword] = useState('');
+  const [withdrawMsg, setWithdrawMsg] = useState('');
+  const [withdrawLoading, setWithdrawLoading] = useState(false);
+  const [showWithdraw, setShowWithdraw] = useState(false);
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -205,6 +210,21 @@ export default function MyPage() {
       const e = err as { response?: { data?: { message?: string } } };
       setPwMsg(e.response?.data?.message || '비밀번호 변경에 실패했습니다.');
     } finally { setPwLoading(false); }
+  };
+
+  const handleWithdraw = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!confirm('정말로 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) return;
+    setWithdrawLoading(true); setWithdrawMsg('');
+    try {
+      const body = isLocalUser ? { password: withdrawPassword } : {};
+      await api.delete('/users/me', { data: body });
+      clearAuth();
+      router.replace('/');
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { message?: string } } };
+      setWithdrawMsg(e.response?.data?.message || '탈퇴에 실패했습니다.');
+    } finally { setWithdrawLoading(false); }
   };
 
   const tabCount: Partial<Record<Tab, number>> = {
@@ -313,6 +333,28 @@ export default function MyPage() {
                   {nicknameLoading ? '저장 중...' : '저장'}
                 </button>
               </form>
+
+              <div className="mt-8 pt-6 border-t border-border">
+                <button type="button" onClick={() => setShowWithdraw(v => !v)}
+                  className="text-sm text-muted-foreground hover:text-red-500 transition underline underline-offset-2">
+                  회원 탈퇴
+                </button>
+                {showWithdraw && (
+                  <form onSubmit={handleWithdraw} className="mt-4 space-y-3">
+                    <p className="text-sm text-red-500 font-medium">탈퇴 시 모든 개인정보가 삭제되며 복구할 수 없습니다.</p>
+                    {isLocalUser && (
+                      <input type="password" value={withdrawPassword} onChange={e => setWithdrawPassword(e.target.value)}
+                        placeholder="현재 비밀번호 입력" required
+                        className="w-full border border-red-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-400 transition" />
+                    )}
+                    {withdrawMsg && <p className="text-sm text-red-500">{withdrawMsg}</p>}
+                    <button type="submit" disabled={withdrawLoading}
+                      className="w-full bg-red-500 text-white py-3 rounded-xl text-sm font-bold hover:bg-red-600 disabled:opacity-50 transition">
+                      {withdrawLoading ? '처리 중...' : '탈퇴하기'}
+                    </button>
+                  </form>
+                )}
+              </div>
             </CardContent>
           </Card>
         )}
