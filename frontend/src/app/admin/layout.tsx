@@ -108,7 +108,7 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
       .then((res) => {
         const u = res.data.data;
         setUser(u);
-        if (u.role !== 'SUPER_ADMIN' && u.role !== 'CHURCH_MANAGER' && u.role !== 'PASTOR') router.push('/');
+        if (!['SUPER_ADMIN', 'CHURCH_MANAGER', 'PASTOR', 'EVANGELIST'].includes(u.role)) router.push('/');
       })
       .catch(() => router.push('/login'));
   }, [pathname]);
@@ -121,7 +121,8 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
   const roleLabel: Record<string, string> = {
     SUPER_ADMIN: '최고관리자',
     CHURCH_MANAGER: '교회관리자',
-    PASTOR: '목사/전도사',
+    PASTOR: '목사',
+    EVANGELIST: '전도사',
   };
 
   const SidebarContent = (
