@@ -5,14 +5,14 @@ import api from '@/lib/api';
 import { FaithQuestion, PrayerRequest, ChatMessage } from '@/types';
 import { toast } from '@/components/Toast';
 import { ChatBox } from '@/components/ChatBox';
-import { useAuth } from '@/store/authStore';
+import { useAuthStore } from '@/store/authStore';
 
 type Tab = 'questions' | 'prayers';
 type QFilter = 'all' | 'unanswered' | 'answered';
 type PFilter = 'all' | 'unprayed' | 'prayed';
 
 export default function AdminFaithPage() {
-  const { user } = useAuth();
+  const { user } = useAuthStore();
   const [tab, setTab] = useState<Tab>('questions');
   const [qFilter, setQFilter] = useState<QFilter>('all');
   const [pFilter, setPFilter] = useState<PFilter>('all');
