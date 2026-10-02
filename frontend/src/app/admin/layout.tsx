@@ -102,8 +102,6 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
   useEffect(() => { setSidebarOpen(false); }, [pathname]);
 
   useEffect(() => {
-    const token = localStorage.getItem('accessToken') ?? sessionStorage.getItem('accessToken');
-    if (!token) { router.push('/login'); return; }
     api.get('/users/me')
       .then((res) => {
         const u = res.data.data;
