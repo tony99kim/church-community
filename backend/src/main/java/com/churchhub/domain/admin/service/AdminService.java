@@ -41,7 +41,8 @@ public class AdminService {
 
     public Page<UserDto.Response> getUsers(Pageable pageable, String keyword, UserRole role, Long churchId) {
         String kw = (keyword != null && !keyword.isBlank()) ? keyword.trim() : null;
-        return userRepository.findWithFilters(role, churchId, kw, pageable).map(UserDto.Response::from);
+        String roleStr = role != null ? role.name() : null;
+        return userRepository.findWithFilters(roleStr, churchId, kw, pageable).map(UserDto.Response::from);
     }
 
     @Transactional
