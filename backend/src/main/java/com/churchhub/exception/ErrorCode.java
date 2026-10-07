@@ -60,6 +60,8 @@ public enum ErrorCode {
     SPACE_SLOT_TAKEN(HttpStatus.CONFLICT, "이미 예약된 시간대입니다."),
     SPACE_RENTAL_ALREADY_APPROVED(HttpStatus.BAD_REQUEST, "승인된 예약은 취소할 수 없습니다."),
     SPACE_RENTAL_NOT_CANCELLABLE(HttpStatus.BAD_REQUEST, "이미 처리된 예약입니다."),
+    SPACE_RENTAL_INVALID_TIME(HttpStatus.BAD_REQUEST, "예약 시간이 올바르지 않습니다."),
+    SPACE_SLOT_BLOCKED(HttpStatus.CONFLICT, "관리자가 막아 둔 시간대입니다."),
 
     // Event
     EVENT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 행사입니다."),
@@ -70,6 +72,9 @@ public enum ErrorCode {
 
     // WelcomeKit
     WELCOME_KIT_ALREADY_APPLIED(HttpStatus.CONFLICT, "이미 웰컴 키트를 신청하셨습니다."),
+
+    // Upload
+    INVALID_FILE_TYPE(HttpStatus.BAD_REQUEST, "이미지 파일(jpg, png, webp, gif)만 업로드할 수 있습니다."),
 
     // Common
     INVALID_INPUT(HttpStatus.BAD_REQUEST, "잘못된 입력값입니다."),

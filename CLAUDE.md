@@ -17,7 +17,7 @@
 - **백엔드 빌드**: `JAVA_HOME="/c/Users/taeyeop/.jdks/graalvm-jdk-21.0.7" ./gradlew compileJava` (backend 디렉토리)
 - **백엔드 배포**: `fly deploy --app churchhub-backend` (backend 디렉토리)
 - **프론트 배포**: `npx vercel --prod` (루트 디렉토리)
-- **Flyway 다음 버전**: 현재 V5까지 존재 → 다음은 V6
+- **Flyway 다음 버전**: 현재 V13까지 존재 → 다음은 V14
 
 ## 코딩 규칙
 

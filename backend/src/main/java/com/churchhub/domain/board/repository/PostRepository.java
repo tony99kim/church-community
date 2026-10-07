@@ -50,4 +50,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     long countByStatus(PostStatus status);
 
     long countByStatusAndCreatedAtAfter(PostStatus status, LocalDateTime dateTime);
+
+    @Modifying
+    @Query("UPDATE Post p SET p.viewCount = p.viewCount + 1 WHERE p.id = :postId")
+    void incrementViewCount(@Param("postId") Long postId);
 }

@@ -8,6 +8,8 @@ import { useAuthStore } from '@/store/authStore';
 import { SpaceRental, ItemRental, FaithQuestion, PrayerRequest, WelcomeKit, ChatMessage } from '@/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { ROLE_LABEL } from '@/lib/roles';
+import { parseServerTime } from '@/lib/date';
 
 interface Post {
   id: number; title: string; categoryName: string; viewCount: number; commentCount: number; createdAt: string;
@@ -15,9 +17,6 @@ interface Post {
 
 type Tab = 'info' | 'posts' | 'password' | 'spaceRentals' | 'itemRentals' | 'faithQuestions' | 'prayers' | 'welcomeKits';
 
-const ROLE_LABEL: Record<string, string> = {
-  SUPER_ADMIN: '최고관리자', CHURCH_MANAGER: '교회관리자', PASTOR: '목사', EVANGELIST: '전도사', USER: '일반회원',
-};
 
 function EyeIcon({ open }: { open: boolean }) {
   return open ? (
@@ -387,7 +386,7 @@ export default function MyPage() {
                           )}
                         </div>
                         <div className="text-xs text-muted-foreground">
-                          {new Date(post.createdAt).toLocaleDateString('ko-KR')} · 조회 {post.viewCount}
+                          {parseServerTime(post.createdAt).toLocaleDateString('ko-KR')} · 조회 {post.viewCount}
                         </div>
                       </div>
                     </Link>
@@ -428,7 +427,7 @@ export default function MyPage() {
                         <div className="text-xs text-muted-foreground mt-0.5">목적: {r.purpose}</div>
                         {r.rejectReason && <div className="text-xs text-red-400 mt-0.5">거절 사유: {r.rejectReason}</div>}
                       </div>
-                      <div className="text-xs text-muted-foreground shrink-0">{new Date(r.createdAt).toLocaleDateString('ko-KR')}</div>
+                      <div className="text-xs text-muted-foreground shrink-0">{parseServerTime(r.createdAt).toLocaleDateString('ko-KR')}</div>
                     </div>
                   </li>
                 ))}
@@ -466,7 +465,7 @@ export default function MyPage() {
                         {r.rejectReason && <div className="text-xs text-red-400 mt-0.5">거절 사유: {r.rejectReason}</div>}
                       </div>
                       <div className="flex flex-col items-end gap-1 shrink-0">
-                        <div className="text-xs text-muted-foreground">{new Date(r.createdAt).toLocaleDateString('ko-KR')}</div>
+                        <div className="text-xs text-muted-foreground">{parseServerTime(r.createdAt).toLocaleDateString('ko-KR')}</div>
                         <button onClick={() => openItemChat(r.id)}
                           className={`text-xs px-2 py-1 rounded-lg border transition ${itemChatId === r.id ? 'bg-primary text-white border-primary' : 'border-border text-muted-foreground hover:border-primary'}`}>
                           💬 {itemChatId === r.id ? '닫기' : '채팅'}
@@ -495,7 +494,7 @@ export default function MyPage() {
                                 {m.senderRole !== 'USER' && <div className="text-[10px] text-muted-foreground mb-0.5">{m.senderNickname}</div>}
                                 <p>{m.content}</p>
                                 <div className={`text-[10px] mt-0.5 ${m.senderRole === 'USER' ? 'text-blue-200' : 'text-muted-foreground'}`}>
-                                  {new Date(m.createdAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                                  {parseServerTime(m.createdAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
                                 </div>
                               </div>
                             </div>
@@ -543,7 +542,7 @@ export default function MyPage() {
                       <Badge className={`border text-xs ${kit.processed ? 'bg-green-50 text-green-600 border-green-200' : 'bg-amber-50 text-amber-600 border-amber-200'}`}>
                         {kit.processed ? '처리 완료' : '처리 중'}
                       </Badge>
-                      <span className="text-xs text-muted-foreground">{new Date(kit.createdAt).toLocaleDateString('ko-KR')}</span>
+                      <span className="text-xs text-muted-foreground">{parseServerTime(kit.createdAt).toLocaleDateString('ko-KR')}</span>
                     </div>
                     {kit.address && <div className="text-xs text-muted-foreground">📍 {kit.address}</div>}
                     {kit.message && <div className="text-xs text-muted-foreground mt-0.5 italic">"{kit.message}"</div>}
@@ -586,7 +585,7 @@ export default function MyPage() {
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <span>{q.anonymous ? '익명' : '실명'}</span>
                         <span>·</span>
-                        <span>{new Date(q.createdAt).toLocaleDateString('ko-KR')}</span>
+                        <span>{parseServerTime(q.createdAt).toLocaleDateString('ko-KR')}</span>
                         {q.answers.length > 0 && (
                           <Badge className="bg-primary/10 text-primary border-0 text-[10px]">답변 {q.answers.length}개</Badge>
                         )}
@@ -615,7 +614,7 @@ export default function MyPage() {
                                 {m.senderRole !== 'USER' && <div className="text-[10px] text-muted-foreground mb-0.5">{m.senderNickname}</div>}
                                 <p>{m.content}</p>
                                 <div className={`text-[10px] mt-0.5 ${m.senderRole === 'USER' ? 'text-blue-200' : 'text-muted-foreground'}`}>
-                                  {new Date(m.createdAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                                  {parseServerTime(m.createdAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
                                 </div>
                               </div>
                             </div>
@@ -664,7 +663,7 @@ export default function MyPage() {
                         <div className="flex items-center gap-2 mb-1 text-xs text-muted-foreground">
                           <span>{p.publicVisible ? '공개' : '나만 보기'}</span>
                           <span>·</span>
-                          <span>{new Date(p.createdAt).toLocaleDateString('ko-KR')}</span>
+                          <span>{parseServerTime(p.createdAt).toLocaleDateString('ko-KR')}</span>
                         </div>
                         <p className="text-sm text-gray-800">{p.content}</p>
                       </div>

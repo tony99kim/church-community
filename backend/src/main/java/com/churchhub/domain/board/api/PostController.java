@@ -13,6 +13,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import com.churchhub.util.ClientIpUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -38,9 +40,10 @@ public class PostController {
     @GetMapping("/{postId}")
     public ResponseEntity<ApiResponse<PostDto.Response>> getPost(
             @PathVariable Long postId,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpServletRequest request) {
         Long userId = userDetails != null ? userDetails.getUserId() : null;
-        return ResponseEntity.ok(ApiResponse.success(postService.getPost(postId, userId)));
+        return ResponseEntity.ok(ApiResponse.success(postService.getPost(postId, userId, ClientIpUtil.resolve(request))));
     }
 
     @Operation(summary = "게시글 작성")

@@ -10,7 +10,6 @@ import com.churchhub.domain.faith.repository.FaithQuestionMessageRepository;
 import com.churchhub.domain.faith.repository.FaithQuestionRepository;
 import com.churchhub.domain.faith.repository.PrayerRequestRepository;
 import com.churchhub.domain.user.entity.User;
-import com.churchhub.domain.user.entity.UserRole;
 import com.churchhub.domain.user.repository.UserRepository;
 import com.churchhub.exception.BusinessException;
 import com.churchhub.exception.ErrorCode;
@@ -123,10 +122,7 @@ public class FaithService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
         User caller = userRepository.findById(callerId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-        boolean isAdmin = caller.getRole() == UserRole.SUPER_ADMIN
-                || caller.getRole() == UserRole.PASTOR
-                || caller.getRole() == UserRole.EVANGELIST
-                || caller.getRole() == UserRole.CHURCH_MANAGER;
+        boolean isAdmin = caller.getRole().isFaithMinistry();
         if (!isAdmin && !question.getAuthor().getId().equals(callerId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN);
         }
@@ -140,10 +136,7 @@ public class FaithService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
         User caller = userRepository.findById(callerId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-        boolean isAdmin = caller.getRole() == UserRole.SUPER_ADMIN
-                || caller.getRole() == UserRole.PASTOR
-                || caller.getRole() == UserRole.EVANGELIST
-                || caller.getRole() == UserRole.CHURCH_MANAGER;
+        boolean isAdmin = caller.getRole().isFaithMinistry();
         if (!isAdmin && !question.getAuthor().getId().equals(callerId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN);
         }

@@ -114,8 +114,7 @@ public class User {
     }
 
     public boolean isAdmin() {
-        return this.role == UserRole.PASTOR || this.role == UserRole.EVANGELIST
-                || this.role == UserRole.CHURCH_MANAGER || this.role == UserRole.SUPER_ADMIN;
+        return this.role.isAdmin();
     }
 
     public void assignChurch(Church church) {

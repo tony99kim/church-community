@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 public class AuthDto {
 
@@ -63,5 +64,11 @@ public class AuthDto {
     public static class RefreshRequest {
         @NotBlank
         private String refreshToken;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    public static class OAuthExchangeRequest {
+        private String code;
     }
 }

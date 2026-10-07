@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import api from '@/lib/api';
-import { uploadImage } from '@/lib/supabase';
+import { uploadImage } from '@/lib/upload';
 import { Church } from '@/types';
 import { toast } from '@/components/Toast';
 

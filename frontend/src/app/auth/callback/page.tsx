@@ -1,16 +1,21 @@
 'use client';
 
 import { useEffect, Suspense } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
 
 function OAuthCallback() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { setUser } = useAuthStore();
 
   useEffect(() => {
-    api.get('/users/me')
+    // 백엔드가 넘긴 일회용 코드를 같은 도메인 API로 교환해 인증 쿠키를 받음
+    const code = searchParams.get('code');
+    const exchange = code ? api.post('/auth/oauth/exchange', { code }) : Promise.reject(new Error('no code'));
+    exchange
+      .then(() => api.get('/users/me'))
       .then(res => {
         const { id, email, nickname, role, profileImageUrl, provider } = res.data.data;
         setUser({ id, email, nickname, role, profileImageUrl, provider });

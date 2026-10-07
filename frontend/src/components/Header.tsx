@@ -7,6 +7,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import api from '@/lib/api';
 import type { Notification } from '@/types';
 import { formatDate } from '@/lib/utils';
+import { isAdminRole } from '@/lib/roles';
 
 const RELATED_PATH: Record<string, (id: number) => string> = {
   POST: (id) => `/posts/${id}`,
@@ -25,7 +26,7 @@ export default function Header() {
   const [dmUnreadCount, setDmUnreadCount] = useState(0);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const notiRef = useRef<HTMLDivElement>(null);
-  const isAdmin = ['SUPER_ADMIN', 'CHURCH_MANAGER', 'PASTOR', 'EVANGELIST'].includes(user?.role ?? '');
+  const isAdmin = isAdminRole(user?.role);
 
   const fetchUnread = useCallback(() => {
     if (!isLoggedIn) return;

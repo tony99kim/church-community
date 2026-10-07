@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import api from '@/lib/api';
-import { uploadImage } from '@/lib/supabase';
+import { uploadImage } from '@/lib/upload';
 import { Space, SpaceRental, Church, SpaceBlock } from '@/types';
 import { useAuthStore } from '@/store/authStore';
 import { toast } from '@/components/Toast';

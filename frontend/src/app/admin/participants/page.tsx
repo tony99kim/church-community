@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import type { Event } from '@/types';
+import { parseServerTime } from '@/lib/date';
 
 interface Participant {
   userId: number;
@@ -20,7 +21,7 @@ function downloadCSV(data: Participant[]) {
     p.email,
     p.nickname,
     p.phone ?? '-',
-    new Date(p.registeredAt).toLocaleString('ko-KR'),
+    parseServerTime(p.registeredAt).toLocaleString('ko-KR'),
     p.eventTitle,
   ]);
   const csv = [headers, ...rows]
@@ -113,7 +114,7 @@ export default function AdminParticipantsPage() {
                   <td className="px-4 py-3 text-gray-500">{p.email}</td>
                   <td className="px-4 py-3 text-gray-500">{p.phone ?? '-'}</td>
                   <td className="px-4 py-3 text-gray-400 text-xs">
-                    {new Date(p.registeredAt).toLocaleString('ko-KR')}
+                    {parseServerTime(p.registeredAt).toLocaleString('ko-KR')}
                   </td>
                   <td className="px-4 py-3 text-gray-600">{p.eventTitle}</td>
                 </tr>

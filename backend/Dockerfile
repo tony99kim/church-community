@@ -14,5 +14,4 @@ ENTRYPOINT ["java", \
   "-XX:MaxRAMPercentage=75.0", \
   "-XX:+UseContainerSupport", \
   "-XX:+OptimizeStringConcat", \
-  "-Dspring.profiles.active=prod", \
   "-jar", "app.jar"]

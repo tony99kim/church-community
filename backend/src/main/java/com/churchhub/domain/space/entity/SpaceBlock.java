@@ -1,6 +1,8 @@
 package com.churchhub.domain.space.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -31,6 +33,7 @@ public class SpaceBlock {
     private boolean recurring;
 
     // 반복 차단: 1=월 ~ 7=일 (ISO DayOfWeek)
+    @JdbcTypeCode(SqlTypes.SMALLINT)
     private Integer dayOfWeek;
 
     // 일회성 차단 날짜

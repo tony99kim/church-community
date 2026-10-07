@@ -32,4 +32,7 @@ public interface SpaceRentalRepository extends JpaRepository<SpaceRental, Long> 
     List<SpaceRental> findActiveBySpaceAndDate(@Param("spaceId") Long spaceId,
                                                @Param("dayStart") LocalDateTime dayStart,
                                                @Param("dayEnd") LocalDateTime dayEnd);
+
+    long countByStatus(com.churchhub.domain.space.entity.RentalStatus status);
+    long countBySpace_ChurchIdAndStatus(Long churchId, com.churchhub.domain.space.entity.RentalStatus status);
 }

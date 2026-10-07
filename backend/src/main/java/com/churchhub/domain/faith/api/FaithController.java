@@ -1,5 +1,6 @@
 package com.churchhub.domain.faith.api;
 
+import com.churchhub.security.access.FaithMinistry;
 import com.churchhub.common.response.ApiResponse;
 import com.churchhub.domain.faith.dto.FaithDto;
 import com.churchhub.domain.faith.service.FaithService;
@@ -39,7 +40,7 @@ public class FaithController {
     }
 
     @PostMapping("/questions/{id}/answers")
-    @PreAuthorize("hasAnyRole('PASTOR', 'EVANGELIST', 'SUPER_ADMIN')")
+    @FaithMinistry
     public ApiResponse<FaithDto.AnswerResponse> createAnswer(
             @PathVariable Long id,
             @Valid @RequestBody FaithDto.AnswerRequest req,
@@ -67,36 +68,39 @@ public class FaithController {
     }
 
     @GetMapping("/questions/my")
+    @PreAuthorize("isAuthenticated()")
     public ApiResponse<List<FaithDto.QuestionResponse>> getMyQuestions(
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         return ApiResponse.success(faithService.getMyQuestions(userDetails.getUserId()));
     }
 
     @GetMapping("/prayers/my")
+    @PreAuthorize("isAuthenticated()")
     public ApiResponse<List<FaithDto.PrayerResponse>> getMyPrayers(
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         return ApiResponse.success(faithService.getMyPrayers(userDetails.getUserId()));
     }
 
     @GetMapping("/admin/questions")
-    @PreAuthorize("hasAnyRole('PASTOR', 'EVANGELIST', 'SUPER_ADMIN')")
+    @FaithMinistry
     public ApiResponse<List<FaithDto.QuestionResponse>> getAllQuestionsForAdmin() {
         return ApiResponse.success(faithService.getAllQuestionsForAdmin());
     }
 
     @GetMapping("/admin/prayers")
-    @PreAuthorize("hasAnyRole('PASTOR', 'EVANGELIST', 'SUPER_ADMIN')")
+    @FaithMinistry
     public ApiResponse<List<FaithDto.PrayerResponse>> getAllPrayersForAdmin() {
         return ApiResponse.success(faithService.getAllPrayersForAdmin());
     }
 
     @PutMapping("/admin/prayers/{id}/prayed")
-    @PreAuthorize("hasAnyRole('PASTOR', 'EVANGELIST', 'SUPER_ADMIN')")
+    @FaithMinistry
     public ApiResponse<FaithDto.PrayerResponse> toggleAdminPrayed(@PathVariable Long id) {
         return ApiResponse.success(faithService.toggleAdminPrayed(id));
     }
 
     @GetMapping("/questions/{id}/messages")
+    @PreAuthorize("isAuthenticated()")
     public ApiResponse<List<FaithDto.MessageResponse>> getQuestionMessages(
             @PathVariable Long id,
             @AuthenticationPrincipal CustomUserDetails userDetails) {

@@ -19,15 +19,9 @@ export function PendingCountsProvider({ children }: { children: React.ReactNode 
   const [counts, setCounts] = useState<PendingCounts>(ZERO);
 
   const refresh = useCallback(() => {
-    Promise.all([
-      api.get('/admin/spaces/rentals').then(r => (r.data.data ?? []).filter((x: { status: string }) => x.status === 'PENDING').length).catch(() => 0),
-      api.get('/admin/items/rentals').then(r => (r.data.data ?? []).filter((x: { status: string }) => x.status === 'PENDING').length).catch(() => 0),
-      api.get('/admin/welcome/kits').then(r => (r.data.data ?? []).filter((x: { processed: boolean }) => !x.processed).length).catch(() => 0),
-      api.get('/faith/admin/questions').then(r => (r.data.data ?? []).filter((x: { answers: unknown[] }) => x.answers.length === 0).length).catch(() => 0),
-      api.get('/admin/reports', { params: { status: 'PENDING', size: 1 } }).then(r => r.data.data?.totalElements ?? 0).catch(() => 0),
-    ]).then(([spaceRentals, itemRentals, welcomeKits, faithQuestions, reports]) => {
-      setCounts({ spaceRentals, itemRentals, welcomeKits, faithQuestions, reports });
-    });
+    api.get('/admin/pending-counts')
+      .then((r) => setCounts({ ...ZERO, ...r.data.data }))
+      .catch(() => {});
   }, []);
 
   useEffect(() => { refresh(); }, [refresh]);

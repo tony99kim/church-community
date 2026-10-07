@@ -39,7 +39,7 @@ npm run dev
 # http://localhost:3000
 ```
 
-> **로컬 DB 불필요**: DB는 Supabase, Redis는 Upstash 클라우드를 그대로 사용합니다.  
+> **DB·Redis**: 개발용 Supabase/Upstash 를 그대로 쓰거나, `docker compose up postgres redis` 로 로컬에 띄울 수 있습니다.  
 > `backend/.env.example`을 참고해 환경변수를 설정해주세요.
 
 ## 접속 주소 (로컬)

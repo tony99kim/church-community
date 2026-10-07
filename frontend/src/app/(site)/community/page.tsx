@@ -8,6 +8,7 @@ import { useAuthStore } from '@/store/authStore';
 import Pagination from '@/components/Pagination';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { parseServerTime } from '@/lib/date';
 
 export default function CommunityPage() {
   const { isLoggedIn, hydrated } = useAuthStore();
@@ -130,7 +131,7 @@ export default function CommunityPage() {
                     )}
                   </div>
                   <div className="text-xs text-muted-foreground mt-0.5">
-                    {post.authorNickname} · {new Date(post.createdAt).toLocaleDateString()} · 👁 {post.viewCount}
+                    {post.authorNickname} · {parseServerTime(post.createdAt).toLocaleDateString()} · 👁 {post.viewCount}
                   </div>
                 </div>
                 {post.likeCount > 0 && (

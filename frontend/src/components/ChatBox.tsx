@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { parseServerTime } from '@/lib/date';
 
 interface ChatMessage {
   id: number;
@@ -48,7 +49,7 @@ export function ChatBox({ messages, onSend, sending, adminRole, placeholder = 'ë
               )}
               <p>{m.content}</p>
               <div className={`text-[10px] mt-0.5 ${m.senderRole === adminRole ? 'text-blue-200' : 'text-gray-400'}`}>
-                {new Date(m.createdAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                {parseServerTime(m.createdAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
               </div>
             </div>
           </div>

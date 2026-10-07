@@ -6,8 +6,9 @@ import Link from 'next/link';
 import { useAuthStore } from '@/store/authStore';
 import { PendingCountsProvider, usePendingCounts } from '@/context/PendingCountsContext';
 import { ToastContainer } from '@/components/Toast';
+import { isAdminRole, ROLE_LABEL, isFaithMinistryRole } from '@/lib/roles';
 
-type NavLeaf = { href: string; label: string; icon: string; exact?: boolean; countKey?: string };
+type NavLeaf = { href: string; label: string; icon: string; exact?: boolean; countKey?: string; faithOnly?: boolean };
 type NavGroup = { group: string; icon: string; basePath: string; children: NavLeaf[] };
 type NavEntry = NavLeaf | NavGroup;
 
@@ -26,7 +27,7 @@ const navEntries: NavEntry[] = [
   { href: '/admin/spaces', label: '공간 대여 관리', icon: '🏠', countKey: 'spaceRentals' },
   { href: '/admin/items', label: '물품 대여 관리', icon: '📦', countKey: 'itemRentals' },
   { href: '/admin/welcome-kits', label: '웰컴 키트 신청', icon: '🎁', countKey: 'welcomeKits' },
-  { href: '/admin/faith', label: '신앙 Q&A', icon: '✝️', countKey: 'faithQuestions' },
+  { href: '/admin/faith', label: '신앙 Q&A', icon: '✝️', countKey: 'faithQuestions', faithOnly: true },
   { href: '/admin/service', label: '지역섬김 관리', icon: '🤝' },
   { href: '/admin/reports', label: '신고 관리', icon: '🚨', countKey: 'reports' },
 ];
@@ -81,9 +82,12 @@ function NavGroupItem({ entry }: { entry: NavGroup }) {
 }
 
 function SidebarNav() {
+  const role = useAuthStore((s) => s.user?.role);
+  // 신앙 Q&A 관리는 목회자 역할만 (교회관리자는 API가 403)
+  const visible = navEntries.filter((e) => !('faithOnly' in e && e.faithOnly) || isFaithMinistryRole(role));
   return (
     <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-      {navEntries.map((entry) =>
+      {visible.map((entry) =>
         'group' in entry
           ? <NavGroupItem key={entry.group} entry={entry} />
           : <NavLink key={entry.href} item={entry} />
@@ -103,7 +107,7 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!hydrated) return;
     if (!isLoggedIn) { router.push('/login'); return; }
-    if (!['SUPER_ADMIN', 'CHURCH_MANAGER', 'PASTOR', 'EVANGELIST'].includes(user?.role ?? '')) {
+    if (!isAdminRole(user?.role)) {
       router.push('/');
     }
   }, [hydrated, isLoggedIn, user?.role]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -111,13 +115,6 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
   const handleLogout = () => {
     logout();
     router.push('/login');
-  };
-
-  const roleLabel: Record<string, string> = {
-    SUPER_ADMIN: '최고관리자',
-    CHURCH_MANAGER: '교회관리자',
-    PASTOR: '목사',
-    EVANGELIST: '전도사',
   };
 
   const SidebarContent = (
@@ -138,7 +135,7 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
 
       <div className="px-5 py-4 border-t border-primary/40 shrink-0">
         <div className="text-xs text-blue-300 mb-0.5">{user?.nickname}</div>
-        <div className="text-xs text-blue-400 mb-3">{roleLabel[user?.role ?? ''] ?? user?.role}</div>
+        <div className="text-xs text-blue-400 mb-3">{ROLE_LABEL[user?.role ?? ''] ?? user?.role}</div>
         <div className="flex gap-2">
           <Link href="/" className="flex-1 text-center text-xs text-blue-300 hover:text-white border border-blue-700 rounded-lg py-1.5 transition">
             사이트

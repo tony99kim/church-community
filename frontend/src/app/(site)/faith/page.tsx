@@ -9,6 +9,7 @@ import { useAuthStore } from '@/store/authStore';
 import { toast } from '@/components/Toast';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { parseServerTime } from '@/lib/date';
 
 type Tab = 'questions' | 'prayers' | 'consult';
 
@@ -168,7 +169,7 @@ export default function FaithPage() {
                     </div>
                     <span className="text-xs font-medium text-gray-600">{q.anonymous ? '익명' : q.authorNickname}</span>
                     <span className="text-xs text-muted-foreground">·</span>
-                    <span className="text-xs text-muted-foreground">{new Date(q.createdAt).toLocaleDateString()}</span>
+                    <span className="text-xs text-muted-foreground">{parseServerTime(q.createdAt).toLocaleDateString()}</span>
                     <div className="ml-auto">
                       {q.answers.length === 0 ? (
                         <Badge className="bg-amber-50 text-amber-600 border-amber-200 text-[10px]">미답변</Badge>
@@ -346,7 +347,7 @@ export default function FaithPage() {
                       {p.authorNickname?.[0] ?? '?'}
                     </div>
                     <span className="text-xs font-medium text-gray-600">{p.authorNickname}</span>
-                    <span className="text-xs text-muted-foreground">· {new Date(p.createdAt).toLocaleDateString()}</span>
+                    <span className="text-xs text-muted-foreground">· {parseServerTime(p.createdAt).toLocaleDateString()}</span>
                   </div>
                   <p className="text-sm text-gray-800 leading-relaxed mb-4">{p.content}</p>
                   <button onClick={() => pray(p.id)} disabled={prayingIds.has(p.id)}

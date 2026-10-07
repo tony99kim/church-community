@@ -5,10 +5,11 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
 import type { Conversation, DmMessage, UserBasicInfo } from '@/types';
+import { parseServerTime } from '@/lib/date';
 
 function formatConvTime(dateStr: string | null): string {
   if (!dateStr) return '';
-  const d = new Date(dateStr);
+  const d = parseServerTime(dateStr);
   const now = new Date();
   if (d.toDateString() === now.toDateString())
     return d.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
@@ -361,7 +362,7 @@ function MessagesContent() {
                             {m.content}
                           </div>
                           <span className={`text-[10px] shrink-0 ${isMine ? 'text-gray-400' : 'text-gray-400'}`}>
-                            {new Date(m.createdAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                            {parseServerTime(m.createdAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
                           </span>
                         </div>
                       </div>

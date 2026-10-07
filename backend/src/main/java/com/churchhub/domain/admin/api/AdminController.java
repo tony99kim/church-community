@@ -1,5 +1,6 @@
 package com.churchhub.domain.admin.api;
 
+import com.churchhub.security.access.SuperAdminOnly;
 import com.churchhub.common.response.ApiResponse;
 import com.churchhub.domain.admin.dto.AdminDto;
 import com.churchhub.domain.admin.service.AdminService;
@@ -22,7 +23,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,6 +45,13 @@ public class AdminController {
         return ResponseEntity.ok(ApiResponse.success(adminService.getDashboard()));
     }
 
+    @Operation(summary = "처리 대기 건수 (사이드바 배지)")
+    @GetMapping("/pending-counts")
+    public ResponseEntity<ApiResponse<AdminDto.PendingCountsResponse>> getPendingCounts(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(ApiResponse.success(adminService.getPendingCounts(userDetails.getUserId())));
+    }
+
     @Operation(summary = "회원 목록 조회")
     @GetMapping("/users")
     public ResponseEntity<ApiResponse<Page<UserDto.Response>>> getUsers(
@@ -65,7 +72,7 @@ public class AdminController {
 
     @Operation(summary = "회원 삭제 (개인정보 익명화)")
     @DeleteMapping("/users/{userId}")
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @SuperAdminOnly
     public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable Long userId) {
         adminService.deleteUser(userId);
         return ResponseEntity.ok(ApiResponse.success("회원이 삭제되었습니다.", null));
@@ -73,7 +80,7 @@ public class AdminController {
 
     @Operation(summary = "회원 권한 변경")
     @PutMapping("/users/{userId}/role")
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @SuperAdminOnly
     public ResponseEntity<ApiResponse<UserDto.Response>> updateUserRole(
             @PathVariable Long userId,
             @RequestBody AdminDto.UpdateUserRoleRequest request) {
