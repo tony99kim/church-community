@@ -1,5 +1,9 @@
 # 페이지별 개선 계획
 
+> **2026-10-07 점검 메모**: 아래는 2026-08-08 시점의 계획 기록이며 현재 상태가 아님.
+> - 코드 검색으로 반영이 확인된 항목: `/messages` `convId` 처리, `/community` 검색·공지·조회수, `/welcome` 중복 신청 확인, 홈 스켈레톤·웰컴 테이블 연동·"오늘의" 문구 제거, `/churches` 검색·청년부 필터, `/churches/[id]` 목록 링크, `/spaces` 이미지 placeholder, `/items` 재고 0 흐림, `/service` 모집 중 필터, `/faith` 미답변 뱃지, `/login`·`/register`의 `alert()` 제거. 나머지 항목은 개별 확인 필요
+> - 사실과 다른 부분: 웰컴 키트 내 신청 API는 `/welcome/kit/my`가 아니라 `/welcome/kits/my`. `/bible` 페이지(18번)는 현재 존재하지 않음
+
 > 작성일: 2026-08-08  
 > Phase 1 (채팅 메시지), Phase 2 (DM 시스템) 완료 후 다음 단계로 진행할 프론트엔드 개선 목록.
 
