@@ -6,6 +6,13 @@ import api from '@/lib/api';
 import { toast } from '@/components/Toast';
 import { parseServerTime } from '@/lib/date';
 
+interface Category {
+  id: number;
+  name: string;
+  sortOrder: number;
+  parentId: number | null;
+}
+
 interface Post {
   id: number;
   title: string;
@@ -26,12 +33,26 @@ export default function AdminPostsPage() {
   const [searchInput, setSearchInput] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [categoryId, setCategoryId] = useState<number | null>(null);
 
-  const fetchPosts = (p = 0, kw = keyword) => {
+  // 상위 분류 다음에 하위 분류가 오도록 정렬 (상위를 고르면 하위 글도 함께 조회됨)
+  const byOrder = (a: Category, b: Category) => a.sortOrder - b.sortOrder || a.id - b.id;
+  const categoryOptions = categories.filter(c => c.parentId == null).sort(byOrder).flatMap(parent => [
+    { id: parent.id, label: parent.name },
+    ...categories.filter(c => c.parentId === parent.id).sort(byOrder).map(c => ({ id: c.id, label: `${parent.name} · ${c.name}` })),
+  ]);
+
+  useEffect(() => {
+    api.get('/admin/categories').then(r => setCategories(r.data.data ?? [])).catch(() => {});
+  }, []);
+
+  const fetchPosts = (p = 0, kw = keyword, cat = categoryId) => {
     setLoading(true);
     setError(null);
     const params: Record<string, unknown> = { page: p, size: 15, sort: 'createdAt,desc' };
     if (kw) params.keyword = kw;
+    if (cat != null) params.categoryId = cat;
     api.get('/posts', { params })
       .then((res) => {
         setPosts(res.data.data.content);
@@ -43,6 +64,12 @@ export default function AdminPostsPage() {
   };
 
   useEffect(() => { fetchPosts(page); }, [page]);
+
+  const handleCategory = (id: number | null) => {
+    setCategoryId(id);
+    setPage(0);
+    fetchPosts(0, keyword, id);
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,6 +114,19 @@ export default function AdminPostsPage() {
           검색
         </button>
       </form>
+
+      {categoryOptions.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-5">
+          {[{ id: null as number | null, label: '전체' }, ...categoryOptions].map(opt => (
+            <button key={opt.id ?? 'all'} type="button" onClick={() => handleCategory(opt.id)}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium border transition ${
+                categoryId === opt.id ? 'bg-primary text-white border-primary' : 'bg-white text-gray-600 border-gray-200 hover:border-primary hover:text-primary'
+              }`}>
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
         <div className="grid grid-cols-[1fr_100px_80px_80px_80px_80px] gap-3 px-6 py-3 bg-gray-50 border-b border-gray-100 text-xs font-semibold text-gray-500 uppercase tracking-wide">
