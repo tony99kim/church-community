@@ -12,6 +12,7 @@ import type { Post, Comment } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { isAdminRole } from '@/lib/roles';
 import { parseServerTime } from '@/lib/date';
+import UserAvatar from '@/components/UserAvatar';
 
 function formatDate(dateStr: string) {
   return parseServerTime(dateStr).toLocaleDateString('ko-KR', {
@@ -55,9 +56,7 @@ function CommentItem({
         <>
           <div className="flex items-start justify-between gap-2 mb-2">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 bg-primary rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0">
-                {comment.authorNickname?.[0] ?? '?'}
-              </div>
+              <UserAvatar src={comment.authorProfileImage} name={comment.authorNickname} />
               <span className="text-sm font-bold text-gray-900">{comment.authorNickname}</span>
               {onDm && currentUserId && currentUserId !== comment.authorId && comment.authorId && (
                 <button onClick={() => onDm(comment.authorId!)}
@@ -262,9 +261,7 @@ export default function PostDetailClient() {
             </div>
             <div className="flex items-center justify-between flex-wrap gap-3">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white text-sm font-bold">
-                  {post.authorNickname?.[0]}
-                </div>
+                <UserAvatar src={post.authorProfileImage} name={post.authorNickname} className="w-8 h-8 text-sm" />
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-bold text-gray-900">{post.authorNickname}</span>

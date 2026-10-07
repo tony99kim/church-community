@@ -10,6 +10,7 @@ import { toast } from '@/components/Toast';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { parseServerTime } from '@/lib/date';
+import UserAvatar from '@/components/UserAvatar';
 
 type Tab = 'questions' | 'prayers' | 'consult';
 
@@ -164,9 +165,8 @@ export default function FaithPage() {
               <Card key={q.id} className="overflow-hidden hover:shadow-md transition-shadow">
                 <CardContent className="p-5">
                   <div className="flex items-center gap-2 mb-3">
-                    <div className="w-7 h-7 bg-primary/10 rounded-full flex items-center justify-center text-xs font-bold text-primary">
-                      {q.anonymous ? '익' : (q.authorNickname?.[0] ?? '?')}
-                    </div>
+                    <UserAvatar src={q.anonymous ? null : q.authorProfileImage} name={q.anonymous ? '익' : q.authorNickname}
+                      className="bg-primary/10 text-primary" />
                     <span className="text-xs font-medium text-gray-600">{q.anonymous ? '익명' : q.authorNickname}</span>
                     <span className="text-xs text-muted-foreground">·</span>
                     <span className="text-xs text-muted-foreground">{parseServerTime(q.createdAt).toLocaleDateString()}</span>
@@ -343,9 +343,7 @@ export default function FaithPage() {
               <Card key={p.id} className="hover:shadow-md transition-shadow">
                 <CardContent className="p-5">
                   <div className="flex items-center gap-2 mb-3">
-                    <div className="w-7 h-7 bg-purple-100 rounded-full flex items-center justify-center text-xs font-bold text-purple-600">
-                      {p.authorNickname?.[0] ?? '?'}
-                    </div>
+                    <UserAvatar src={p.authorProfileImage} name={p.authorNickname} className="bg-purple-100 text-purple-600" />
                     <span className="text-xs font-medium text-gray-600">{p.authorNickname}</span>
                     <span className="text-xs text-muted-foreground">· {parseServerTime(p.createdAt).toLocaleDateString()}</span>
                   </div>

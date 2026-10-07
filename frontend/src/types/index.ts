@@ -4,6 +4,7 @@ export interface Post {
   content?: string;
   authorId?: number;
   authorNickname: string;
+  authorProfileImage?: string | null;
   categoryId?: number;
   categoryName: string;
   viewCount: number;
@@ -19,6 +20,7 @@ export interface Comment {
   id: number;
   content: string;
   authorNickname: string | null;
+  authorProfileImage?: string | null;
   authorId: number | null;
   parentId: number | null;
   deleted: boolean;
@@ -180,6 +182,7 @@ export interface FaithAnswer {
 export interface FaithQuestion {
   id: number;
   authorNickname: string | null;
+  authorProfileImage?: string | null;
   anonymous: boolean;
   content: string;
   publicVisible: boolean;
@@ -190,6 +193,7 @@ export interface FaithQuestion {
 export interface PrayerRequest {
   id: number;
   authorNickname: string;
+  authorProfileImage?: string | null;
   content: string;
   publicVisible: boolean;
   prayerCount: number;
