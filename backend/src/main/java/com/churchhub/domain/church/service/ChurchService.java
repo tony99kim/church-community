@@ -3,6 +3,9 @@ package com.churchhub.domain.church.service;
 import com.churchhub.domain.church.dto.ChurchDto;
 import com.churchhub.domain.church.entity.Church;
 import com.churchhub.domain.church.repository.ChurchRepository;
+import com.churchhub.domain.user.entity.User;
+import com.churchhub.domain.user.entity.UserRole;
+import com.churchhub.domain.user.repository.UserRepository;
 import com.churchhub.exception.BusinessException;
 import com.churchhub.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +20,7 @@ import java.util.List;
 public class ChurchService {
 
     private final ChurchRepository churchRepository;
+    private final UserRepository userRepository;
 
     public List<ChurchDto.Response> getChurches() {
         return churchRepository.findAllByVisibleTrueOrderByNameAsc()
@@ -53,9 +57,16 @@ public class ChurchService {
     }
 
     @Transactional
-    public ChurchDto.Response updateChurch(Long id, ChurchDto.UpdateRequest req) {
+    public ChurchDto.Response updateChurch(Long id, ChurchDto.UpdateRequest req, Long callerId) {
         Church church = churchRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.CHURCH_NOT_FOUND));
+        // 최고 관리자 외에는 자기 소속 교회만 수정
+        User caller = userRepository.findById(callerId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        if (caller.getRole() != UserRole.SUPER_ADMIN
+                && (caller.getChurch() == null || !caller.getChurch().getId().equals(id))) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
         church.update(req.getName(), req.getAddress(), req.getSundayServiceTime(),
                 req.isHasYouthGroup(), req.getContactInfo(), req.getIntroduction(),
                 req.getWebsiteUrl(), req.getInstagramUrl(), req.getImageUrl(), req.isVisible());
