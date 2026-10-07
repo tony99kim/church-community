@@ -47,6 +47,7 @@ public class FaithDto {
     public static class QuestionResponse {
         private Long id;
         private String authorNickname;  // null if anonymous
+        private String authorProfileImage;  // null if anonymous
         private boolean anonymous;
         private String content;
         private boolean publicVisible;
@@ -60,9 +61,12 @@ public class FaithDto {
         public static QuestionResponse from(FaithQuestion q, List<FaithAnswer> answers, boolean showRealAuthor) {
             String authorNickname = (q.isAnonymous() && !showRealAuthor)
                     ? null : q.getAuthor().getNickname();
+            String authorProfileImage = (q.isAnonymous() && !showRealAuthor)
+                    ? null : q.getAuthor().getProfileImageUrl();
             return QuestionResponse.builder()
                     .id(q.getId())
                     .authorNickname(authorNickname)
+                    .authorProfileImage(authorProfileImage)
                     .anonymous(q.isAnonymous())
                     .content(q.getContent())
                     .publicVisible(q.isPublicVisible())
@@ -106,6 +110,7 @@ public class FaithDto {
     public static class PrayerResponse {
         private Long id;
         private String authorNickname;
+        private String authorProfileImage;
         private String content;
         private boolean publicVisible;
         private int prayerCount;
@@ -116,6 +121,7 @@ public class FaithDto {
             return PrayerResponse.builder()
                     .id(p.getId())
                     .authorNickname(p.getAuthor().getNickname())
+                    .authorProfileImage(p.getAuthor().getProfileImageUrl())
                     .content(p.getContent())
                     .publicVisible(p.isPublicVisible())
                     .prayerCount(p.getPrayerCount())

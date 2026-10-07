@@ -8,6 +8,7 @@ import api from '@/lib/api';
 import type { Notification } from '@/types';
 import { formatDate } from '@/lib/utils';
 import { isAdminRole } from '@/lib/roles';
+import UserAvatar from '@/components/UserAvatar';
 
 const RELATED_PATH: Record<string, (id: number) => string> = {
   POST: (id) => `/posts/${id}`,
@@ -174,9 +175,7 @@ export default function Header() {
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
                 className="flex items-center gap-1.5"
               >
-                <div className="w-7 h-7 bg-primary rounded-full flex items-center justify-center text-white text-xs font-bold">
-                  {user?.nickname?.[0]}
-                </div>
+                <UserAvatar src={user?.profileImageUrl} name={user?.nickname} />
               </button>
               {userMenuOpen && (
                 <div className="absolute right-0 top-9 bg-white border border-border rounded-xl shadow-lg py-1 w-40 z-50">
