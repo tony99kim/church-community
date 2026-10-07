@@ -30,7 +30,6 @@ public class CommentDto {
         private Long authorId;
         private String authorNickname;
         private String authorProfileImage;
-        private String authorProfileImage;
         private String content;
         private boolean deleted;
         private int likeCount;
@@ -44,7 +43,6 @@ public class CommentDto {
                     .id(comment.getId())
                     .authorId(deleted ? null : comment.getAuthor().getId())
                     .authorNickname(deleted ? null : comment.getAuthor().getNickname())
-                    .authorProfileImage(deleted ? null : comment.getAuthor().getProfileImageUrl())
                     .authorProfileImage(deleted ? null : comment.getAuthor().getProfileImageUrl())
                     .content(deleted ? "삭제된 댓글입니다." : comment.getContent())
                     .deleted(deleted)
