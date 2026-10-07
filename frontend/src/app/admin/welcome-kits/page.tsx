@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import { WelcomeKit } from '@/types';
 import { toast } from '@/components/Toast';
+import { parseServerTime } from '@/lib/date';
 
 export default function AdminWelcomeKitsPage() {
   const router = useRouter();
@@ -79,7 +80,7 @@ export default function AdminWelcomeKitsPage() {
                     <div className="font-medium text-sm">{kit.name} · {kit.phone}</div>
                     {kit.address && <div className="text-xs text-gray-400 mt-0.5">📍 {kit.address}</div>}
                     {kit.message && <div className="text-xs text-gray-500 mt-1 italic">"{kit.message}"</div>}
-                    <div className="text-xs text-gray-400 mt-1">{new Date(kit.createdAt).toLocaleDateString('ko-KR')} 신청</div>
+                    <div className="text-xs text-gray-400 mt-1">{parseServerTime(kit.createdAt).toLocaleDateString('ko-KR')} 신청</div>
                     {kit.adminMessage && (
                       <div className="mt-2 bg-primary/5 rounded-lg px-3 py-2">
                         <div className="text-xs text-primary font-medium mb-0.5">보낸 메시지</div>
@@ -160,7 +161,7 @@ export default function AdminWelcomeKitsPage() {
                         <p className="text-xs text-gray-700">{kit.adminMessage}</p>
                       </div>
                     )}
-                    <div className="text-xs text-gray-400 mt-1">{new Date(kit.createdAt).toLocaleDateString('ko-KR')} 신청</div>
+                    <div className="text-xs text-gray-400 mt-1">{parseServerTime(kit.createdAt).toLocaleDateString('ko-KR')} 신청</div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <span className="text-xs font-medium text-green-600">처리 완료</span>

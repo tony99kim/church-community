@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import api from '@/lib/api';
 import { toast } from '@/components/Toast';
+import { parseServerTime } from '@/lib/date';
 
 interface Post {
   id: number;
@@ -132,7 +133,7 @@ export default function AdminPostsPage() {
                 </div>
                 <div className="text-xs text-gray-400 text-center">{post.viewCount}</div>
                 <div className="text-xs text-gray-400 text-center">
-                  {new Date(post.createdAt).toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' })}
+                  {parseServerTime(post.createdAt).toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' })}
                 </div>
                 <div className="flex justify-center">
                   <button

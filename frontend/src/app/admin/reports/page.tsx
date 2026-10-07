@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import { toast } from '@/components/Toast';
+import { parseServerTime } from '@/lib/date';
 
 type ReportStatus = 'PENDING' | 'RESOLVED' | 'REJECTED';
 type ReportType = 'POST' | 'COMMENT' | 'USER';
@@ -152,7 +153,7 @@ export default function AdminReportsPage() {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-gray-400 text-xs">
-                    {new Date(r.createdAt).toLocaleDateString('ko-KR')}
+                    {parseServerTime(r.createdAt).toLocaleDateString('ko-KR')}
                   </td>
                   <td className="px-4 py-3">
                     {r.status === 'PENDING' && (

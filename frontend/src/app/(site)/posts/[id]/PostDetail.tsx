@@ -10,10 +10,11 @@ import Sidebar from '@/components/Sidebar';
 import ReportModal from '@/components/ReportModal';
 import type { Post, Comment } from '@/types';
 import { Badge } from '@/components/ui/badge';
+import { isAdminRole } from '@/lib/roles';
+import { parseServerTime } from '@/lib/date';
 
 function formatDate(dateStr: string) {
-  const d = new Date(dateStr.includes('Z') || dateStr.includes('+') ? dateStr : dateStr + 'Z');
-  return d.toLocaleDateString('ko-KR', {
+  return parseServerTime(dateStr).toLocaleDateString('ko-KR', {
     year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit',
   });
 }
@@ -64,7 +65,7 @@ function CommentItem({
                   DM
                 </button>
               )}
-              <span className="text-xs text-muted-foreground">{new Date(comment.createdAt).toLocaleDateString('ko-KR')}</span>
+              <span className="text-xs text-muted-foreground">{parseServerTime(comment.createdAt).toLocaleDateString('ko-KR')}</span>
             </div>
             <div className="flex items-center gap-2 text-xs">
               {canModify && !editing && (
@@ -129,7 +130,7 @@ export default function PostDetailClient() {
   const [reportingPost, setReportingPost] = useState(false);
   const [liking, setLiking] = useState(false);
 
-  const isAdmin = ['SUPER_ADMIN', 'CHURCH_MANAGER', 'PASTOR', 'EVANGELIST'].includes(user?.role ?? '');
+  const isAdmin = isAdminRole(user?.role);
 
   const fetchComments = async () => {
     const res = await api.get(`/posts/${id}/comments`);

@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
 import { toast } from '@/components/Toast';
+import { needsChurch } from '@/lib/roles';
+import { parseServerTime } from '@/lib/date';
 
 interface User {
   id: number;
@@ -197,7 +199,7 @@ export default function AdminUsersPage() {
   };
 
   const handleRoleChange = async (u: User, newRole: string) => {
-    if (newRole === 'CHURCH_MANAGER' || newRole === 'PASTOR' || newRole === 'EVANGELIST') {
+    if (needsChurch(newRole)) {
       setPendingRoleChange({ userId: u.id, role: newRole });
       setSelectedChurchId('');
       return;
@@ -320,7 +322,7 @@ export default function AdminUsersPage() {
                     {u.name && u.name !== u.nickname && (
                       <div className="text-xs text-gray-500 mt-0.5">실명: {u.name}</div>
                     )}
-                    <div className="text-xs text-gray-400 mt-0.5">{new Date(u.createdAt).toLocaleDateString('ko-KR')} 가입</div>
+                    <div className="text-xs text-gray-400 mt-0.5">{parseServerTime(u.createdAt).toLocaleDateString('ko-KR')} 가입</div>
                   </div>
                   <div className="text-sm text-gray-600 truncate">{u.email}</div>
                   <div className="text-center">

@@ -6,8 +6,9 @@ import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
-import { uploadImage } from '@/lib/supabase';
+import { uploadImage } from '@/lib/upload';
 import type { Category } from '@/types';
+import { isAdminRole } from '@/lib/roles';
 
 const RichEditor = dynamic(() => import('@/components/RichEditor'), { ssr: false });
 
@@ -88,7 +89,7 @@ export default function EditPostPage() {
     }
   };
 
-  const isAdmin = ['SUPER_ADMIN', 'CHURCH_MANAGER', 'PASTOR', 'EVANGELIST'].includes(user?.role ?? '');
+  const isAdmin = isAdminRole(user?.role);
   const rootCategories = categories.filter((c) => !c.parentId && (isAdmin || c.type !== 'NOTICE'));
 
   if (loading) return (

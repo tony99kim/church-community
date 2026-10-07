@@ -4,7 +4,7 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import { useRef } from 'react';
-import { uploadImage } from '@/lib/supabase';
+import { uploadImage } from '@/lib/upload';
 
 interface Props {
   content: string;

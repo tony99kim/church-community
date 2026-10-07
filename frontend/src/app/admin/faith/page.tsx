@@ -6,6 +6,7 @@ import { FaithQuestion, PrayerRequest, ChatMessage } from '@/types';
 import { toast } from '@/components/Toast';
 import { ChatBox } from '@/components/ChatBox';
 import { useAuthStore } from '@/store/authStore';
+import { parseServerTime } from '@/lib/date';
 
 type Tab = 'questions' | 'prayers';
 type QFilter = 'all' | 'unanswered' | 'answered';
@@ -158,7 +159,7 @@ export default function AdminFaithPage() {
                         <span className="bg-gray-100 text-gray-400 px-1.5 py-0.5 rounded text-[10px]">익명</span>
                       )}
                       <span>·</span>
-                      <span>{new Date(q.createdAt).toLocaleDateString('ko-KR')}</span>
+                      <span>{parseServerTime(q.createdAt).toLocaleDateString('ko-KR')}</span>
                       {!q.publicVisible && (
                         <span className="bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded text-[10px]">비공개</span>
                       )}
@@ -260,7 +261,7 @@ export default function AdminFaithPage() {
                       <div className="flex items-center gap-2 mb-1 text-xs text-gray-400">
                         <span>{p.authorNickname}</span>
                         <span>·</span>
-                        <span>{new Date(p.createdAt).toLocaleDateString('ko-KR')}</span>
+                        <span>{parseServerTime(p.createdAt).toLocaleDateString('ko-KR')}</span>
                         {!p.publicVisible && (
                           <span className="bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded text-[10px]">비공개</span>
                         )}

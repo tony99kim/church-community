@@ -4,9 +4,10 @@ import { useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import api from '@/lib/api';
 import type { Event } from '@/types';
-import { uploadImage } from '@/lib/supabase';
+import { uploadImage } from '@/lib/upload';
 import { useAuthStore } from '@/store/authStore';
 import { toast } from '@/components/Toast';
+import { parseServerTime } from '@/lib/date';
 
 const RichEditor = dynamic(() => import('@/components/RichEditor'), { ssr: false });
 
@@ -22,7 +23,7 @@ interface Participant {
 
 function downloadCSV(data: Participant[]) {
   const headers = ['이메일', '닉네임', '전화번호', '신청일시', '신청행사'];
-  const rows = data.map((p) => [p.email, p.nickname, p.phone ?? '-', new Date(p.registeredAt).toLocaleString('ko-KR'), p.eventTitle]);
+  const rows = data.map((p) => [p.email, p.nickname, p.phone ?? '-', parseServerTime(p.registeredAt).toLocaleString('ko-KR'), p.eventTitle]);
   const csv = [headers, ...rows].map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
   const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
@@ -390,7 +391,7 @@ export default function AdminEventsPage() {
                       <td className="px-4 py-3 font-medium text-gray-900">{p.nickname}</td>
                       <td className="px-4 py-3 text-gray-500">{p.email}</td>
                       <td className="px-4 py-3 text-gray-500">{p.phone ?? '-'}</td>
-                      <td className="px-4 py-3 text-gray-400 text-xs">{new Date(p.registeredAt).toLocaleString('ko-KR')}</td>
+                      <td className="px-4 py-3 text-gray-400 text-xs">{parseServerTime(p.registeredAt).toLocaleString('ko-KR')}</td>
                       <td className="px-4 py-3 text-gray-600">{p.eventTitle}</td>
                     </tr>
                   ))}

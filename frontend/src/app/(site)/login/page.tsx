@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/api';
+import { BACKEND_ORIGIN } from '@/lib/config';
 import { useAuthStore } from '@/store/authStore';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -107,7 +108,7 @@ function LoginForm() {
                 <div className="flex-grow border-t border-border" />
               </div>
               <div className="mt-4 flex flex-col gap-3">
-                <a href={`${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '')}/oauth2/authorization/google`}
+                <a href={`${BACKEND_ORIGIN}/oauth2/authorization/google`}
                   className="w-full flex items-center justify-center gap-3 border border-border rounded-xl py-3 text-sm font-medium text-gray-700 hover:bg-accent transition">
                   <svg className="w-5 h-5" viewBox="0 0 24 24">
                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -117,7 +118,7 @@ function LoginForm() {
                   </svg>
                   Google로 로그인
                 </a>
-                <a href={`${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '')}/oauth2/authorization/kakao`}
+                <a href={`${BACKEND_ORIGIN}/oauth2/authorization/kakao`}
                   className="w-full flex items-center justify-center gap-3 rounded-xl py-3 text-sm font-medium text-gray-800 hover:opacity-90 transition"
                   style={{ backgroundColor: '#FEE500' }}>
                   <svg className="w-5 h-5" viewBox="0 0 24 24" fill="#3C1E1E">

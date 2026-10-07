@@ -1,14 +1,13 @@
 import type { Metadata } from 'next';
 import PostDetailClient from './PostDetail';
-
-const API = process.env.NEXT_PUBLIC_API_URL ?? '';
+import { API_BASE } from '@/lib/config';
 
 export async function generateMetadata(
   { params }: { params: Promise<{ id: string }> }
 ): Promise<Metadata> {
   const { id } = await params;
   try {
-    const res = await fetch(`${API}/posts/${id}`, { next: { revalidate: 60 } });
+    const res = await fetch(`${API_BASE}/posts/${id}`, { next: { revalidate: 60 } });
     if (!res.ok) return {};
     const { data } = await res.json();
     const description = (data.content as string)
