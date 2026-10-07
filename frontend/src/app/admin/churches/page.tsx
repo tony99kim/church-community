@@ -12,6 +12,11 @@ const EMPTY_FORM = {
 };
 
 export default function AdminChurchesPage() {
+  // 로그인 응답에는 소속 교회가 없어 /users/me로 확인
+  const [me, setMe] = useState<{ role: string; churchId: number | null } | null>(null);
+  const isSuperAdmin = me?.role === 'SUPER_ADMIN';
+  // 교회 추가·삭제는 최고 관리자만, 수정은 자기 소속 교회만 (최고 관리자는 전체)
+  const canEdit = (c: Church) => isSuperAdmin || (me?.churchId != null && me.churchId === c.id);
   const [churches, setChurches] = useState<Church[]>([]);
   const [createForm, setCreateForm] = useState({ ...EMPTY_FORM });
   const [editTarget, setEditTarget] = useState<Church | null>(null);
@@ -23,7 +28,10 @@ export default function AdminChurchesPage() {
     api.get('/admin/churches').then(r => setChurches(r.data.data ?? [])).catch(() => toast('교회 목록을 불러오지 못했습니다', 'error'));
   };
 
-  useEffect(() => { fetchChurches(); }, []);
+  useEffect(() => {
+    fetchChurches();
+    api.get('/users/me').then(r => setMe(r.data.data)).catch(() => {});
+  }, []);
 
   const makeThumbHandler = (setForm: React.Dispatch<React.SetStateAction<typeof EMPTY_FORM>>) =>
     async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -143,6 +151,7 @@ export default function AdminChurchesPage() {
       <h1 className="text-xl font-bold mb-6">교회 관리</h1>
 
       {/* 등록 폼 */}
+      {isSuperAdmin && (
       <form onSubmit={handleCreate} className="bg-white border border-border rounded-xl p-4 mb-6 grid grid-cols-2 gap-3">
         <h2 className="col-span-2 text-sm font-semibold text-gray-700 mb-1">새 교회 등록</h2>
         <FormFields form={createForm} setForm={setCreateForm} onImageChange={makeThumbHandler(setCreateForm)} />
@@ -150,6 +159,7 @@ export default function AdminChurchesPage() {
           {saving ? '등록 중...' : '교회 추가'}
         </button>
       </form>
+      )}
 
       {/* 목록 */}
       <div className="space-y-2">
@@ -169,8 +179,12 @@ export default function AdminChurchesPage() {
               </div>
             </div>
             <div className="flex gap-2 shrink-0 ml-3">
-              <button onClick={() => openEdit(c)} className="text-xs text-primary border border-primary/20 px-3 py-1.5 rounded-lg hover:bg-primary/5 transition">수정</button>
-              <button onClick={() => handleDelete(c.id)} className="text-xs text-red-500 border border-red-200 px-3 py-1.5 rounded-lg hover:bg-red-50 transition">삭제</button>
+              {canEdit(c) && (
+                <button onClick={() => openEdit(c)} className="text-xs text-primary border border-primary/20 px-3 py-1.5 rounded-lg hover:bg-primary/5 transition">수정</button>
+              )}
+              {isSuperAdmin && (
+                <button onClick={() => handleDelete(c.id)} className="text-xs text-red-500 border border-red-200 px-3 py-1.5 rounded-lg hover:bg-red-50 transition">삭제</button>
+              )}
             </div>
           </div>
         ))}

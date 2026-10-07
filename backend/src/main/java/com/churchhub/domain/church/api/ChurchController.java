@@ -1,12 +1,14 @@
 package com.churchhub.domain.church.api;
 
-import com.churchhub.security.access.ChurchManagerOrSuperAdmin;
+import com.churchhub.security.CustomUserDetails;
+import com.churchhub.security.access.AdminOnly;
 import com.churchhub.security.access.SuperAdminOnly;
 import com.churchhub.common.response.ApiResponse;
 import com.churchhub.domain.church.dto.ChurchDto;
 import com.churchhub.domain.church.service.ChurchService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,7 +26,7 @@ public class ChurchController {
     }
 
     @GetMapping("/admin/churches")
-    @ChurchManagerOrSuperAdmin
+    @AdminOnly
     public ApiResponse<List<ChurchDto.Response>> getAllChurches() {
         return ApiResponse.success(churchService.getAllChurches());
     }
@@ -41,10 +43,11 @@ public class ChurchController {
     }
 
     @PutMapping("/admin/churches/{id}")
-    @ChurchManagerOrSuperAdmin
+    @AdminOnly
     public ApiResponse<ChurchDto.Response> updateChurch(@PathVariable Long id,
-                                                         @Valid @RequestBody ChurchDto.UpdateRequest req) {
-        return ApiResponse.success(churchService.updateChurch(id, req));
+                                                         @Valid @RequestBody ChurchDto.UpdateRequest req,
+                                                         @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ApiResponse.success(churchService.updateChurch(id, req, userDetails.getUserId()));
     }
 
     @DeleteMapping("/admin/churches/{id}")
