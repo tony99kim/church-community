@@ -25,6 +25,7 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
     private final StringRedisTemplate redisTemplate;
+    private final OAuthCodeStore oAuthCodeStore;
 
     @Transactional
     public void register(AuthDto.RegisterRequest request) {
@@ -58,6 +59,20 @@ public class AuthService {
             throw new BusinessException(ErrorCode.ACCOUNT_SUSPENDED);
         }
 
+        return issueTokens(user);
+    }
+
+    @Transactional
+    public AuthDto.TokenResponse exchangeOAuthCode(String code) {
+        Long userId = oAuthCodeStore.consume(code);
+        if (userId == null) throw new BusinessException(ErrorCode.INVALID_TOKEN);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        if (!user.isActive()) throw new BusinessException(ErrorCode.ACCOUNT_SUSPENDED);
+        return issueTokens(user);
+    }
+
+    private AuthDto.TokenResponse issueTokens(User user) {
         String accessToken = jwtTokenProvider.createAccessToken(user.getId(), user.getRole().name());
         String refreshToken = jwtTokenProvider.createRefreshToken(user.getId());
 
@@ -88,7 +103,8 @@ public class AuthService {
         }
     }
 
-    @Transactional
+    // 만료·정지 시 토큰 삭제가 예외와 함께 롤백되지 않도록
+    @Transactional(noRollbackFor = BusinessException.class)
     public AuthDto.TokenResponse refresh(String refreshTokenValue) {
         if (!jwtTokenProvider.validateToken(refreshTokenValue)) {
             throw new BusinessException(ErrorCode.INVALID_TOKEN);
@@ -107,6 +123,10 @@ public class AuthService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         refreshTokenRepository.delete(savedToken);
+        if (!user.isActive()) {
+            refreshTokenRepository.deleteAllByUserId(userId);
+            throw new BusinessException(ErrorCode.ACCOUNT_SUSPENDED);
+        }
 
         String newAccessToken = jwtTokenProvider.createAccessToken(userId, user.getRole().name());
         String newRefreshToken = jwtTokenProvider.createRefreshToken(userId);

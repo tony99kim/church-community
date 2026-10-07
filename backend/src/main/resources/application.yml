@@ -3,11 +3,14 @@ spring:
     active: ${SPRING_PROFILES_ACTIVE:dev}
   jpa:
     hibernate:
-      ddl-auto: ${DDL_AUTO:update}
+      # 스키마는 Flyway가 관리. Hibernate는 엔티티와 맞는지 확인만 함
+      ddl-auto: ${DDL_AUTO:validate}
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
+        # 목록 조회 시 작성자·카테고리 등 LAZY 연관을 IN 쿼리로 묶어 N+1 방지
+        default_batch_fetch_size: 100
     show-sql: false
     open-in-view: false
   data:

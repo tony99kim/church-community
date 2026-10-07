@@ -27,11 +27,13 @@ public class CookieUtil {
         return null;
     }
 
+    // 프론트가 Vercel rewrites로 API를 같은 도메인에서 부르므로 Lax로 충분하고,
+    // 다른 사이트에서 보낸 POST에는 쿠키가 실리지 않아 CSRF가 막힘
     private static ResponseCookie build(String name, String value, long maxAge) {
         return ResponseCookie.from(name, value)
                 .httpOnly(true)
                 .secure(true)
-                .sameSite("None")
+                .sameSite("Lax")
                 .path("/")
                 .maxAge(maxAge)
                 .build();

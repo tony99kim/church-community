@@ -18,9 +18,11 @@ import com.churchhub.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.util.Optional;
 
 @Service
@@ -33,6 +35,7 @@ public class PostService {
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
+    private final StringRedisTemplate redisTemplate;
 
     public Page<PostDto.Summary> getPosts(Long categoryId, String keyword, Pageable pageable) {
         boolean hasKeyword = keyword != null && !keyword.isBlank();
@@ -59,13 +62,26 @@ public class PostService {
         return posts.map(PostDto.Summary::from);
     }
 
+    // 조회수는 같은 사용자(비로그인은 IP)당 24시간에 한 번만 올림. 증가는 UPDATE 쿼리로 해서 동시 요청에도 유실되지 않음
     @Transactional
-    public PostDto.Response getPost(Long postId, Long currentUserId) {
+    public PostDto.Response getPost(Long postId, Long currentUserId, String clientIp) {
+        String viewer = currentUserId != null ? "u" + currentUserId : "ip" + clientIp;
+        if (isFirstViewToday(postId, viewer)) {
+            postRepository.incrementViewCount(postId);
+        }
         Post post = getActivePost(postId);
-        post.incrementViewCount();
 
         boolean liked = currentUserId != null && postLikeRepository.existsByPostIdAndUserId(postId, currentUserId);
         return PostDto.Response.from(post, liked);
+    }
+
+    private boolean isFirstViewToday(Long postId, String viewer) {
+        try {
+            return Boolean.TRUE.equals(redisTemplate.opsForValue()
+                    .setIfAbsent("pv:" + postId + ":" + viewer, "1", Duration.ofHours(24)));
+        } catch (Exception e) {
+            return true; // Redis 장애 시에는 중복 방지 없이 집계
+        }
     }
 
     @Transactional

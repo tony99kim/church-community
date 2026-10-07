@@ -70,6 +70,16 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
+    @Operation(summary = "소셜 로그인 일회용 코드 교환")
+    @PostMapping("/oauth/exchange")
+    public ResponseEntity<ApiResponse<Void>> exchangeOAuthCode(
+            @RequestBody AuthDto.OAuthExchangeRequest request,
+            HttpServletResponse response) {
+        AuthDto.TokenResponse tokens = authService.exchangeOAuthCode(request.getCode());
+        setCookies(response, tokens.getAccessToken(), tokens.getRefreshToken());
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
     @Operation(summary = "이메일 중복 확인")
     @GetMapping("/check-email")
     public ResponseEntity<ApiResponse<Boolean>> checkEmail(@RequestParam String email) {

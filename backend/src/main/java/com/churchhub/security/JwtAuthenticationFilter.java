@@ -35,9 +35,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             Long userId = jwtTokenProvider.getUserId(token);
             UserDetails userDetails = userDetailsService.loadUserById(userId);
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            // 정지·탈퇴 회원은 토큰이 남아 있어도 인증하지 않음
+            if (userDetails.isEnabled()) {
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
         }
 
         filterChain.doFilter(request, response);

@@ -1,5 +1,6 @@
 package com.churchhub.domain.welcome.api;
 
+import com.churchhub.security.access.AdminOnly;
 import com.churchhub.common.response.ApiResponse;
 import com.churchhub.domain.welcome.dto.WelcomeKitDto;
 import com.churchhub.domain.welcome.service.WelcomeKitService;
@@ -34,19 +35,19 @@ public class WelcomeKitController {
     }
 
     @GetMapping("/admin/welcome/kits")
-    @PreAuthorize("hasAnyRole('PASTOR', 'EVANGELIST', 'CHURCH_MANAGER', 'SUPER_ADMIN')")
+    @AdminOnly
     public ApiResponse<List<WelcomeKitDto.Response>> getAll() {
         return ApiResponse.success(welcomeKitService.getAll());
     }
 
     @PutMapping("/admin/welcome/kits/{id}/process")
-    @PreAuthorize("hasAnyRole('PASTOR', 'EVANGELIST', 'CHURCH_MANAGER', 'SUPER_ADMIN')")
+    @AdminOnly
     public ApiResponse<WelcomeKitDto.Response> markProcessed(@PathVariable Long id) {
         return ApiResponse.success(welcomeKitService.markProcessed(id));
     }
 
     @PutMapping("/admin/welcome/kits/{id}/message")
-    @PreAuthorize("hasAnyRole('PASTOR', 'EVANGELIST', 'CHURCH_MANAGER', 'SUPER_ADMIN')")
+    @AdminOnly
     public ApiResponse<WelcomeKitDto.Response> sendMessage(
             @PathVariable Long id,
             @Valid @RequestBody WelcomeKitDto.AdminMessageRequest req) {
@@ -54,7 +55,7 @@ public class WelcomeKitController {
     }
 
     @DeleteMapping("/admin/welcome/kits/{id}")
-    @PreAuthorize("hasAnyRole('PASTOR', 'EVANGELIST', 'CHURCH_MANAGER', 'SUPER_ADMIN')")
+    @AdminOnly
     public ApiResponse<Void> delete(@PathVariable Long id) {
         welcomeKitService.delete(id);
         return ApiResponse.success(null);

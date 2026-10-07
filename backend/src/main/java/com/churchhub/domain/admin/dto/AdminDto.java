@@ -58,4 +58,15 @@ public class AdminDto {
                     .build();
         }
     }
+
+    // 관리자 사이드바 배지용 대기 건수. 볼 권한이 없는 항목은 0
+    @Getter
+    @Builder
+    public static class PendingCountsResponse {
+        private long spaceRentals;
+        private long itemRentals;
+        private long welcomeKits;
+        private long faithQuestions;
+        private long reports;
+    }
 }

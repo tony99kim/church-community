@@ -147,9 +147,17 @@ public class SpaceService {
 
     @Transactional
     public SpaceDto.RentalResponse applyRental(Long spaceId, Long userId, SpaceDto.RentalRequest req) {
-        Space space = spaceRepository.findById(spaceId)
+        Space space = spaceRepository.findByIdForUpdate(spaceId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.SPACE_NOT_FOUND));
         if (!space.isAvailable()) throw new BusinessException(ErrorCode.SPACE_NOT_AVAILABLE);
+        LocalDateTime start = req.getStartDateTime();
+        LocalDateTime end = req.getEndDateTime();
+        if (!start.isBefore(end) || start.isBefore(LocalDateTime.now(java.time.ZoneId.of("Asia/Seoul")))) {
+            throw new BusinessException(ErrorCode.SPACE_RENTAL_INVALID_TIME);
+        }
+        for (SpaceBlock b : spaceBlockRepository.findAllBySpaceId(spaceId)) {
+            if (isBlocked(b, start, end)) throw new BusinessException(ErrorCode.SPACE_SLOT_BLOCKED);
+        }
         List<SpaceRental> conflicts = spaceRentalRepository.findConflicting(
                 spaceId, req.getStartDateTime(), req.getEndDateTime());
         if (!conflicts.isEmpty()) throw new BusinessException(ErrorCode.SPACE_SLOT_TAKEN);
@@ -179,6 +187,18 @@ public class SpaceService {
         }
         rental.cancel();
         return SpaceDto.RentalResponse.from(rental);
+    }
+
+    static boolean isBlocked(SpaceBlock b, LocalDateTime start, LocalDateTime end) {
+        for (LocalDate d = start.toLocalDate(); !d.isAfter(end.minusNanos(1).toLocalDate()); d = d.plusDays(1)) {
+            boolean applies = b.isRecurring()
+                    ? b.getDayOfWeek() != null && b.getDayOfWeek() == d.getDayOfWeek().getValue()
+                    : d.equals(b.getBlockDate());
+            if (applies && d.atTime(b.getStartTime()).isBefore(end) && d.atTime(b.getEndTime()).isAfter(start)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Transactional(readOnly = true)
