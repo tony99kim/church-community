@@ -32,3 +32,6 @@ Thumbs.db
 
 # Personal notes (not for repo)
 DEV_NOTES.md
+
+# Android 앱 (Capacitor): Gradle wrapper jar는 저장소에 포함
+!mobile/android/gradle/wrapper/gradle-wrapper.jar

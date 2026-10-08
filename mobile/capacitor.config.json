@@ -1,0 +1,12 @@
+{
+  "appId": "com.churchhub.app",
+  "appName": "ChurchHub",
+  "webDir": "www",
+  "server": {
+    "url": "https://church-community-zeta.vercel.app",
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": false
+  }
+}
